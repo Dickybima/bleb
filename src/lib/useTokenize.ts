@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { usePublicClient, useWalletClient } from "wagmi";
 import type { Address, Hash } from "viem";
 import { robinhoodChain } from "./chains";
+import { rememberLaunchTx } from "./explore";
 import { launchOnPons, uploadLogo, type Socials } from "./pons";
 
 export type TokenizeStep = "idle" | "upload" | "sign" | "confirm" | "done";
@@ -66,6 +67,7 @@ export function useTokenize() {
           buybackEnabled: input.buybackEnabled ?? false,
         },
         onHash: (h) => {
+          rememberLaunchTx(h);
           setTxHash(h);
           setStep("confirm");
         },

@@ -13,7 +13,7 @@ export default function App() {
         {route.page === "launch" && (
           <>
             <Launchpad key={route.handle ?? ""} handle={route.handle} />
-            <TopProfiles compact />
+            {!route.handle && <TopProfiles compact />}
           </>
         )}
         {route.page === "top" && <TopProfiles />}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Avatar } from "./Avatar";
 import { fmtNum } from "../lib/format";
-import { launchHref, profileHref } from "../lib/router";
+import { launchHref } from "../lib/router";
 import { useTopProfiles } from "../lib/topProfiles";
 
 const PAGE_SIZE = 20;
@@ -49,7 +49,7 @@ export function TopProfiles({ compact = false }: { compact?: boolean }) {
               <tr key={p.handle}>
                 <td className="num rank">{i + 1}</td>
                 <td>
-                  <a className="profile-cell" href={profileHref(p.handle)}>
+                  <a className="profile-cell" href={launchHref(p.handle)}>
                     <Avatar src={p.avatar} name={p.handle} size={36} />
                     <span>
                       <strong>{p.displayName || `@${p.handle}`}</strong>

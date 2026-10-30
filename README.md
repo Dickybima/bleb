@@ -12,8 +12,9 @@ plus leaderboard **Top Profile Zora**.
 - **Top Profile** – profil Zora diurutkan berdasarkan jumlah followers (tanpa data harga/market cap). Kandidat
   diambil dari daftar creator Zora (most valuable, trending, featured, top volume), lalu followers tiap profil
   dibaca lewat `getProfileSocial`.
-- **Tombol Tokenize** (di Top Profile dan halaman profil) – membuka form peluncuran `#/launch/<handle>` yang
-  otomatis terisi nama, ticker, logo, bio, dan sosial dari profil tersebut. Jika profil bukan milik wallet yang
+- **Tombol Tokenize** (di Top Profile dan halaman profil) – langsung membuka formulir deploy `#/launch/<handle>`
+  yang otomatis terisi nama, ticker, logo, bio, dan sosial dari profil tersebut. Formulir tampil tanpa harus
+  connect wallet dulu; wallet baru diminta saat menekan tombol luncurkan. Jika profil bukan milik wallet yang
   terhubung, form memberi peringatan dan penerima fee bisa dipilih: wallet sendiri atau wallet profil.
 - **Connect wallet** – modal RainbowKit dengan banyak pilihan: MetaMask, Coinbase Wallet, Rabby, OKX, Trust,
   Rainbow, WalletConnect (QR untuk wallet HP), Phantom, Bitget, Binance, Uniswap, Zerion, Brave, Ledger, Safe,

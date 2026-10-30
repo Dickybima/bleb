@@ -1,9 +1,9 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useAccount } from "wagmi";
+import { useChainModal, useConnectModal } from "@rainbow-me/rainbowkit";
 import { getAddress, isAddress, type Address } from "viem";
 import { useZoraProfile } from "./ProfileView";
 import { Avatar } from "./Avatar";
-import { ConnectButton } from "./ConnectButton";
 import { LaunchSuccess } from "./LaunchSuccess";
 import { TokenizeSteps } from "./TokenizeSteps";
 import { robinhoodChain } from "../lib/chains";
@@ -15,8 +15,50 @@ import { hasApiKey } from "../lib/zora";
 
 /** Launch page. With `handle`, the form is prefilled from that Zora profile; otherwise from the connected wallet's profile. */
 export function Launchpad({ handle }: { handle?: string }) {
-  const { address, isConnected, chainId } = useAccount();
+  const { address } = useAccount();
   const { data: profile, isPending: profileLoading } = useZoraProfile(handle ?? address);
+  const loading = Boolean(handle ?? address) && profileLoading;
+
+  const card = (
+    <div className="panel launch-card">
+      {handle && !loading && !profile ? (
+        <div className="center stack">
+          <h3>Profil @{handle} tidak ditemukan</h3>
+          <a className="btn btn-ghost" href="#/top">Pilih dari Top Profile</a>
+        </div>
+      ) : loading ? (
+        <span className="skeleton tall" />
+      ) : (
+        <LaunchForm
+          key={handle ?? address ?? ""}
+          profile={
+            profile
+              ? {
+                  handle: profile.handle,
+                  displayName: profile.displayName,
+                  description: profile.bio ?? "",
+                  avatar: profile.avatar?.medium,
+                  socials: socialsFromProfile(profile.socialAccounts, profile.website),
+                  wallet: profile.publicWallet.walletAddress,
+                  ownWallets: [profile.publicWallet.walletAddress, ...profile.linkedWallets.edges.map((e) => e.node.walletAddress)],
+                }
+              : undefined
+          }
+        />
+      )}
+    </div>
+  );
+
+  if (handle) {
+    return (
+      <section className="launch-page">
+        <a className="link small muted" href="#/top">← Kembali ke Top Profile</a>
+        <h1>Deploy token @{handle}</h1>
+        <p className="muted">Data sudah terisi dari profil Zora. Periksa, ubah jika perlu, lalu luncurkan di Pons V2.</p>
+        {card}
+      </section>
+    );
+  }
 
   return (
     <section className="hero">
@@ -33,47 +75,7 @@ export function Launchpad({ handle }: { handle?: string }) {
           <li>Diluncurkan langsung di kontrak Pons V2, dipasangkan dengan ETH</li>
         </ul>
       </div>
-
-      <div className="panel launch-card">
-        {handle && !profileLoading && !profile ? (
-          <div className="center stack">
-            <h3>Profil @{handle} tidak ditemukan</h3>
-            <a className="btn btn-ghost" href="#/top">Pilih dari Top Profile</a>
-          </div>
-        ) : !isConnected ? (
-          <div className="center stack">
-            {profile && <Target handle={profile.handle} name={profile.displayName} avatar={profile.avatar?.medium} />}
-            <h3>Hubungkan wallet untuk meluncurkan</h3>
-            <ConnectButton />
-          </div>
-        ) : chainId !== robinhoodChain.id ? (
-          <div className="center stack">
-            <h3>Jaringan salah</h3>
-            <p className="muted">Token Pons diluncurkan di Robinhood Chain.</p>
-            <ConnectButton />
-          </div>
-        ) : profileLoading ? (
-          <span className="skeleton tall" />
-        ) : (
-          <LaunchForm
-            key={`${handle ?? ""}:${address}`}
-            launcher={address!}
-            profile={
-              profile
-                ? {
-                    handle: profile.handle,
-                    displayName: profile.displayName,
-                    description: profile.bio ?? "",
-                    avatar: profile.avatar?.medium,
-                    socials: socialsFromProfile(profile.socialAccounts, profile.website),
-                    wallet: profile.publicWallet.walletAddress,
-                    ownWallets: [profile.publicWallet.walletAddress, ...profile.linkedWallets.edges.map((e) => e.node.walletAddress)],
-                  }
-                : undefined
-            }
-          />
-        )}
-      </div>
+      {card}
     </section>
   );
 }
@@ -101,7 +103,11 @@ type ProfileDefaults = {
   ownWallets: string[];
 };
 
-function LaunchForm({ launcher, profile }: { launcher: Address; profile?: ProfileDefaults }) {
+function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
+  const { address: launcher, isConnected, chainId } = useAccount();
+  const { openConnectModal } = useConnectModal();
+  const { openChainModal } = useChainModal();
+  const onChain = isConnected && chainId === robinhoodChain.id;
   const tk = useTokenize();
   const { busy, error } = tk;
 
@@ -114,10 +120,10 @@ function LaunchForm({ launcher, profile }: { launcher: Address; profile?: Profil
   const [buyback, setBuyback] = useState(false);
   const [preview, setPreview] = useState<string | undefined>(profile?.avatar);
 
-  const isOwnProfile = Boolean(profile?.ownWallets.some((w) => w.toLowerCase() === launcher.toLowerCase()));
+  const isOwnProfile = Boolean(launcher && profile?.ownWallets.some((w) => w.toLowerCase() === launcher.toLowerCase()));
   const profileWallet = profile && isAddress(profile.wallet) ? getAddress(profile.wallet) : undefined;
   const [feeTo, setFeeTo] = useState<"me" | "profile">("me");
-  const feeRecipient = feeTo === "profile" && profileWallet ? profileWallet : launcher;
+  const feeRecipient: Address | undefined = feeTo === "profile" && profileWallet ? profileWallet : launcher;
 
   useEffect(() => {
     if (!logoFile) return setPreview(logoUrl || undefined);
@@ -127,10 +133,12 @@ function LaunchForm({ launcher, profile }: { launcher: Address; profile?: Profil
   }, [logoFile, logoUrl]);
 
   const taxBps = Math.round(Number(taxPct) * 100);
-  const canSubmit = !busy && name.trim() && symbol.trim() && tk.ready && Number.isFinite(taxBps) && taxBps >= 0;
+  const formValid = Boolean(name.trim() && symbol.trim()) && Number.isFinite(taxBps) && taxBps >= 0;
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (!isConnected || !launcher) return openConnectModal?.();
+    if (!onChain) return openChainModal?.();
     tk.tokenize({
       creator: launcher,
       feeRecipient,
@@ -197,7 +205,7 @@ function LaunchForm({ launcher, profile }: { launcher: Address; profile?: Profil
         </label>
       </div>
 
-      {profileWallet && !isOwnProfile && (
+      {profileWallet && launcher && !isOwnProfile && (
         <div className="field">
           <span>Penerima fee kreator</span>
           <div className="radio-row">
@@ -216,23 +224,29 @@ function LaunchForm({ launcher, profile }: { launcher: Address; profile?: Profil
       <dl className="summary">
         <div><dt>Jaringan</dt><dd>Robinhood Chain</dd></div>
         <div><dt>Pasangan</dt><dd>ETH</dd></div>
-        <div><dt>Penerima fee</dt><dd className="mono">{shortAddr(feeRecipient)}</dd></div>
+        <div><dt>Penerima fee</dt><dd className="mono">{feeRecipient ? shortAddr(feeRecipient) : "Wallet kamu"}</dd></div>
       </dl>
 
-      {profile && !isOwnProfile && (
+      {profile && launcher && !isOwnProfile && (
         <div className="notice">
           Kamu meluncurkan token untuk profil @{profile.handle} yang bukan milik wallet ini. Token ini tidak resmi dari pemilik profil.
         </div>
       )}
-      {!profile && (
+      {!profile && launcher && (
         <div className="notice">Wallet ini belum punya profil Zora. Isi data manual, atau pilih profil dari <a href="#/top">Top Profile</a>.</div>
       )}
 
       <TokenizeSteps state={tk} withUpload={Boolean(logoFile)} />
       {error && <div className="notice notice-error">{error}</div>}
 
-      <button className="btn btn-primary btn-lg block" type="submit" disabled={!canSubmit}>
-        {busy ? "Memproses…" : `Luncurkan $${symbol.toUpperCase() || "TOKEN"} di Pons`}
+      <button className="btn btn-primary btn-lg block" type="submit" disabled={busy || !formValid || (onChain && !tk.ready)}>
+        {busy
+          ? "Memproses…"
+          : !isConnected
+            ? "Connect wallet untuk meluncurkan"
+            : !onChain
+              ? "Pindah ke Robinhood Chain"
+              : `Luncurkan $${symbol.toUpperCase() || "TOKEN"} di Pons`}
       </button>
     </form>
   );

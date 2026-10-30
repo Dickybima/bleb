@@ -196,7 +196,7 @@ main.container { padding-top: 32px; padding-bottom: 48px; display: flex; flex-di
 .stat { background: var(--surface-2); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
 .stat strong { font-size: 22px; }
 
-.footer.container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding-top: 24px; padding-bottom: 32px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
+.footer.container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 24px; padding-bottom: 32px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
 
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; gap: 24px; }
@@ -263,3 +263,5 @@ main.container { padding-top: 32px; padding-bottom: 48px; display: flex; flex-di
   .hide-xs { display: none; }
   .nav a { padding: 6px 6px; font-size: 13px; }
 }
+.social-link { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--text); font-weight: 600; padding: 4px 12px; border: 1px solid var(--border); border-radius: 999px; }
+.social-link:hover { background: var(--surface-2); }

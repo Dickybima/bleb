@@ -5,6 +5,7 @@ import { Explore } from "./components/Explore";
 import { ProfileView } from "./components/ProfileView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useRoute } from "./lib/router";
+import { X_URL } from "./lib/site";
 
 export default function App() {
   const route = useRoute();
@@ -34,7 +35,12 @@ export default function App() {
       </main>
       <footer className="footer container">
         <span>Dibangun di Robinhood Chain · data profil dari Zora</span>
-        <span>Bukan aplikasi resmi Zora. Trading token berisiko tinggi.</span>
+        <a className="social-link" href={X_URL || "#"} target={X_URL ? "_blank" : undefined} rel="noreferrer" aria-label="X">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          </svg>
+          <span>X</span>
+        </a>
       </footer>
     </>
   );

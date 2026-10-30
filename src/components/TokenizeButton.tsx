@@ -5,9 +5,9 @@ export function TokenizeButton({ handle }: { handle: string }) {
   return (
     <div className="tokenize">
       <div>
-        <strong>Tokenize profil ini</strong>
+        <strong>Tokenize this profile</strong>
         <p className="muted">
-          Nama, ticker <b>${handle.toUpperCase()}</b>, logo, bio, dan sosial akan terisi otomatis di form peluncuran.
+          Name, ticker <b>${handle.toUpperCase()}</b>, avatar, bio and socials drop straight into the launch form.
         </p>
       </div>
       <a className="btn btn-primary btn-lg" href={launchHref(handle)}>Tokenize</a>

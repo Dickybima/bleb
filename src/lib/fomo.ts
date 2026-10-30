@@ -37,7 +37,7 @@ export function useFomoProfile(handle?: string) {
       const res = await fomoRoute<FomoUser>(`/api/fomo/user?handle=${encodeURIComponent(clean(handle!))}`);
       if (!res) return manual;
       if (res.status === 404) return manual;
-      if (res.status !== 200 || !res.body?.handle) throw new Error(`fomo API gagal (HTTP ${res.status}).`);
+      if (res.status !== 200 || !res.body?.handle) throw new Error(`fomo request failed (HTTP ${res.status}).`);
       // Curated entries can fill gaps the API leaves (e.g. bio, wallet).
       return { ...manual, ...Object.fromEntries(Object.entries(res.body).filter(([, v]) => v !== undefined)) } as FomoUser;
     },

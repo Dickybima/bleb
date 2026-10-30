@@ -85,7 +85,7 @@ async function resolveLaunchConfigId(publicClient: Client): Promise<bigint> {
       // nonexistent id
     }
   }
-  throw new Error("Tidak ada konfigurasi peluncuran yang aktif.");
+  throw new Error("No active launch configuration right now.");
 }
 
 export type LaunchInput = {
@@ -122,9 +122,9 @@ export async function launchOnPons({
     read("launchFee"),
     read("maxCreatorTaxBps"),
   ]);
-  if (!enabled) throw new Error("Peluncuran token sedang dinonaktifkan.");
-  if (!allowed) throw new Error("Wallet ini belum diizinkan meluncurkan token.");
-  if (BigInt(input.creatorTaxBps) > maxTax) throw new Error(`Creator tax maksimal ${Number(maxTax) / 100}%.`);
+  if (!enabled) throw new Error("Launches are paused right now.");
+  if (!allowed) throw new Error("This wallet isn't allowed to launch tokens yet.");
+  if (BigInt(input.creatorTaxBps) > maxTax) throw new Error(`Creator tax can be at most ${Number(maxTax) / 100}%.`);
 
   const launchConfigId = await resolveLaunchConfigId(publicClient);
   const expectedEconomics = await publicClient.readContract({
@@ -166,7 +166,7 @@ export async function launchOnPons({
   onHash?.(hash);
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
-  if (receipt.status !== "success") throw new Error("Transaksi gagal (reverted).");
+  if (receipt.status !== "success") throw new Error("Transaction reverted.");
   const [launched] = parseEventLogs({ abi: ponsFactoryAbi, eventName: "TokenLaunched", logs: receipt.logs });
   return { hash, token: launched?.args.token, curve: launched?.args.curve };
 }

@@ -16,8 +16,8 @@ export function TopProfiles({ compact = false }: { compact?: boolean }) {
     <div className="leaderboards">
       <Leaderboard
         source="zora"
-        title="Top Profile Zora"
-        subtitle="Diurutkan berdasarkan followers di Zora."
+        title="Top Zora Profiles"
+        subtitle="Ranked by Zora followers."
         rows={zora.data ?? []}
         loading={zora.isPending}
         error={zora.isError ? (zora.error as Error).message : undefined}
@@ -26,8 +26,8 @@ export function TopProfiles({ compact = false }: { compact?: boolean }) {
       />
       <Leaderboard
         source="fomo"
-        title="Top Profile Fomo"
-        subtitle="Diurutkan berdasarkan followers di fomo.family."
+        title="Top Fomo Profiles"
+        subtitle="Ranked by fomo.family followers."
         rows={fomoTopProfiles}
         compact={compact}
       />
@@ -47,7 +47,7 @@ type LeaderboardProps = {
   emptyText?: string;
 };
 
-function Leaderboard({ source, title, subtitle, rows, loading, error, onRetry, compact, emptyText = "Belum ada data." }: LeaderboardProps) {
+function Leaderboard({ source, title, subtitle, rows, loading, error, onRetry, compact, emptyText = "Nothing here yet." }: LeaderboardProps) {
   const [shown, setShown] = useState(compact ? 10 : PAGE_SIZE);
   const visible = rows.slice(0, shown);
 
@@ -62,8 +62,8 @@ function Leaderboard({ source, title, subtitle, rows, loading, error, onRetry, c
 
       {error && (
         <div className="notice notice-error">
-          Gagal memuat data: {error}{" "}
-          {onRetry && <button className="link" onClick={onRetry}>Coba lagi</button>}
+          Couldn't load: {error}{" "}
+          {onRetry && <button className="link" onClick={onRetry}>Retry</button>}
         </div>
       )}
 
@@ -72,9 +72,9 @@ function Leaderboard({ source, title, subtitle, rows, loading, error, onRetry, c
           <thead>
             <tr>
               <th className="num">#</th>
-              <th>Profil</th>
+              <th>Profile</th>
               <th className="num">Followers</th>
-              <th className="num"><span className="sr-only">Aksi</span></th>
+              <th className="num"><span className="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
@@ -110,10 +110,10 @@ function Leaderboard({ source, title, subtitle, rows, loading, error, onRetry, c
       </div>
 
       {compact ? (
-        rows.length > shown && <a className="btn btn-ghost block" href="#/top">Lihat semua →</a>
+        rows.length > shown && <a className="btn btn-ghost block" href="#/top">See all →</a>
       ) : (
         shown < rows.length && (
-          <button className="btn btn-ghost block" onClick={() => setShown((n) => n + PAGE_SIZE)}>Muat lebih banyak</button>
+          <button className="btn btn-ghost block" onClick={() => setShown((n) => n + PAGE_SIZE)}>Load more</button>
         )
       )}
     </section>

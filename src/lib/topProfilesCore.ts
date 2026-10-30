@@ -30,7 +30,7 @@ export async function computeTopProfiles(get: Get, concurrency = 6): Promise<Top
   }
   if (candidates.size === 0) {
     const failed = lists.find((r): r is PromiseRejectedResult => r.status === "rejected");
-    throw failed?.reason ?? new Error("Zora API tidak mengembalikan data creator.");
+    throw failed?.reason ?? new Error("Zora returned no creator data.");
   }
 
   const profiles = await mapLimit([...candidates.values()], concurrency, async (c): Promise<TopProfile | null> => {

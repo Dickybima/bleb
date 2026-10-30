@@ -1,19 +1,19 @@
 /**
- * Daftar profil fomo.family untuk "Top Profile Fomo" (yang tampil di website hanya daftar ini).
+ * fomo.family profiles for "Top Fomo Profiles" (the site shows exactly this list).
  *
- * Daftar ini diisi manual. Jika FOMO_API_KEY di-set, foto, bio, dan sosial ikut diambil dari API saat Tokenize. Urutan di website otomatis
- * berdasarkan `followers` (terbesar di atas). Salin data dari halaman profil di fomo.family.
+ * Maintained by hand. When FOMO_API_KEY is set, avatar, bio and socials are also pulled from the API on Tokenize.
+ * The site sorts by `followers` (highest first). Copy the details from the profile page on fomo.family.
  *
- * Contoh entri:
+ * Example entry:
  * {
- *   handle: "namaakun",                          // tanpa @, wajib
- *   displayName: "Nama Tampilan",
- *   avatar: "https://…/foto.jpg",                // URL gambar (dipakai juga sebagai logo token)
- *   bio: "Bio singkat dari profil fomo.",
- *   followers: 12500,                            // wajib, angka
- *   twitter: "namaakunx",                        // username X tanpa @ (opsional)
- *   website: "https://…",                        // opsional
- *   wallet: "0x…",                               // wallet EVM pemilik (opsional, untuk opsi penerima fee)
+ *   handle: "yourhandle",                        // without @, required
+ *   displayName: "Display Name",
+ *   avatar: "https://…/photo.jpg",               // image URL (also used as the token logo)
+ *   bio: "Short bio from the fomo profile.",
+ *   followers: 12500,                            // required, number
+ *   twitter: "yourxhandle",                      // X username without @ (optional)
+ *   website: "https://…",                        // optional
+ *   wallet: "0x…",                               // owner's EVM wallet (optional, enables the fee-recipient option)
  * },
  */
 export type FomoProfile = {
@@ -27,7 +27,7 @@ export type FomoProfile = {
   wallet?: string;
 };
 
-// Top 25 profil fomo.family berdasarkan followers (angka dibulatkan seperti tampilannya, mis. 824.3K → 824_300).
+// Top 25 fomo.family profiles by followers (rounded as displayed, e.g. 824.3K → 824_300).
 export const FOMO_PROFILES: FomoProfile[] = [
   { handle: "unipcs", displayName: "Unipcs", followers: 824_300 },
   { handle: "DumbCrayonEater", displayName: "DumbCrayonEater", followers: 672_900 },

@@ -18,15 +18,15 @@ export function ProfileView({ id }: { id: string }) {
   if (isError)
     return (
       <section className="panel notice notice-error">
-        Gagal memuat profil: {(error as Error).message}{" "}
-        <button className="link" onClick={() => refetch()}>Coba lagi</button>
+        Couldn't load this profile: {(error as Error).message}{" "}
+        <button className="link" onClick={() => refetch()}>Retry</button>
       </section>
     );
   if (!profile)
     return (
       <section className="panel center">
-        <h2>Profil tidak ditemukan</h2>
-        <p className="muted">Tidak ada profil Zora untuk “{id}”.</p>
+        <h2>Profile not found</h2>
+        <p className="muted">No Zora profile matches “{id}”.</p>
       </section>
     );
 
@@ -61,7 +61,7 @@ export function ProfileView({ id }: { id: string }) {
       <TokenizeButton handle={profile.handle} />
 
       <div className="row gap">
-        <a className="btn btn-ghost" href={zoraProfileUrl(profile.handle)} target="_blank" rel="noreferrer">Buka di Zora ↗</a>
+        <a className="btn btn-ghost" href={zoraProfileUrl(profile.handle)} target="_blank" rel="noreferrer">Open on Zora ↗</a>
       </div>
     </section>
   );

@@ -21,14 +21,14 @@ export function Header({ active }: { active: Route["page"] }) {
         <nav className="nav">
           <a href="#/" className={active === "launch" ? "active" : ""}>Launchpad</a>
           <a href="#/explore" className={active === "explore" ? "active" : ""}>Explore</a>
-          <a href="#/top" className={active === "top" ? "active" : ""}>Top Profile</a>
+          <a href="#/top" className={active === "top" ? "active" : ""}>Top Profiles</a>
         </nav>
         <form className="search" onSubmit={onSearch} role="search">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cari @handle atau 0x…"
-            aria-label="Cari profil Zora"
+            placeholder="Search @handle or 0x…"
+            aria-label="Search Zora profiles"
           />
         </form>
         <ConnectButton />

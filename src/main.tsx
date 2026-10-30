@@ -34,7 +34,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={rkTheme} locale="id-ID" modalSize="wide" appInfo={{ appName: "FOZO" }}>
+        <RainbowKitProvider theme={rkTheme} locale="en-US" modalSize="wide" appInfo={{ appName: "FOZO" }}>
           <ErrorBoundary>
             <App />
           </ErrorBoundary>

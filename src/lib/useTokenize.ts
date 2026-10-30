@@ -8,9 +8,9 @@ import { launchOnPons, uploadLogo, type Socials } from "./pons";
 export type TokenizeStep = "idle" | "upload" | "sign" | "confirm" | "done";
 
 export const STEP_LABEL: Record<Exclude<TokenizeStep, "idle" | "done">, string> = {
-  upload: "Upload logo ke IPFS",
-  sign: "Cek kontrak & tanda tangani transaksi",
-  confirm: "Menunggu konfirmasi di Robinhood Chain",
+  upload: "Pinning logo to IPFS",
+  sign: "Checking the contract & signing",
+  confirm: "Waiting for Robinhood Chain to confirm",
 };
 const ORDER = ["upload", "sign", "confirm"] as const;
 

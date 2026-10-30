@@ -68,13 +68,13 @@ export function Launchpad({ handle, source = "zora" }: { handle?: string; source
     <div className="panel launch-card">
       {profileQuery.isError ? (
         <div className="notice notice-error">
-          Gagal memuat profil {SOURCE_LABEL[source]}: {(profileQuery.error as Error).message}{" "}
-          <button className="link" onClick={() => profileQuery.refetch()}>Coba lagi</button>
+          Couldn't load the {SOURCE_LABEL[source]} profile: {(profileQuery.error as Error).message}{" "}
+          <button className="link" onClick={() => profileQuery.refetch()}>Retry</button>
         </div>
       ) : handle && !loading && !profile ? (
         <div className="center stack">
-          <h3>Profil @{handle} tidak ditemukan</h3>
-          <a className="btn btn-ghost" href="#/top">Pilih dari Top Profile</a>
+          <h3>@{handle} isn't on {SOURCE_LABEL[source]}</h3>
+          <a className="btn btn-ghost" href="#/top">Browse top profiles</a>
         </div>
       ) : loading ? (
         <span className="skeleton tall" />
@@ -87,9 +87,9 @@ export function Launchpad({ handle, source = "zora" }: { handle?: string; source
   if (handle) {
     return (
       <section className="launch-page">
-        <a className="link small muted" href="#/top">← Kembali ke Top Profile</a>
-        <h1>Deploy token @{handle}</h1>
-        <p className="muted">Data sudah terisi dari profil {SOURCE_LABEL[source]}. Periksa, ubah jika perlu, lalu luncurkan.</p>
+        <a className="link small muted" href="#/top">← Back to Top Profiles</a>
+        <h1>Tokenize @{handle}</h1>
+        <p className="muted">Pre-loaded from @{handle}'s {SOURCE_LABEL[source]} profile. Tweak anything, then send it.</p>
         {card}
       </section>
     );
@@ -99,15 +99,15 @@ export function Launchpad({ handle, source = "zora" }: { handle?: string; source
     <section className="hero">
       <div className="hero-copy">
         <span className="eyebrow">FOZO · Robinhood Chain</span>
-        <h1>Tokenize profil Zora &amp; Fomo dalam satu klik.</h1>
+        <h1>Mint the clout.</h1>
         <p className="muted lead">
-          Ubah profil Zora atau Fomo menjadi token di Robinhood Chain: mulai di bonding curve, lalu otomatis lulus ke
-          pool Uniswap v4 saat target likuiditas tercapai.
+          FOZO turns any Zora or Fomo profile into a live token on Robinhood Chain. It's born on a bonding curve,
+          graduates to Uniswap v4 once the crowd shows up, and from there the price is set by belief, not a pitch deck.
         </p>
         <ul className="bullets">
-          <li>Nama, ticker, logo, bio, dan sosial diambil otomatis dari profil Zora atau Fomo</li>
-          <li>Pilih profil dari Top Profile, lalu klik Tokenize</li>
-          <li>Diluncurkan langsung on-chain, dipasangkan dengan ETH</li>
+          <li>Name, ticker, avatar, bio and socials lifted straight from the profile. Zero copy-paste.</li>
+          <li>Pick a creator from Top Profiles, hit Tokenize, sign once.</li>
+          <li>Fully on-chain, paired with ETH, creator fees routed to the wallet you choose.</li>
         </ul>
       </div>
       {card}
@@ -121,9 +121,9 @@ function Target({ handle, name, avatar, source }: { handle: string; name?: strin
       <Avatar src={avatar} name={handle} size={44} />
       <span className="launch-target-text">
         <strong>{name || `@${handle}`}</strong>
-        <small className="muted">@{handle} · profil {SOURCE_LABEL[source]} yang ditokenisasi</small>
+        <small className="muted">@{handle} · {SOURCE_LABEL[source]} profile</small>
       </span>
-      <a className="link small" href="#/top">Ganti</a>
+      <a className="link small" href="#/top">Change</a>
     </div>
   );
 }
@@ -198,22 +198,22 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
       {profile && <Target handle={profile.handle} name={profile.displayName} avatar={profile.avatar} source={profile.source} />}
 
       <div className="form-top">
-        <label className="image-pick" title={hasApiKey ? "Ganti logo" : "Logo dari URL"}>
+        <label className="image-pick" title={hasApiKey ? "Change logo" : "Logo from URL"}>
           <Avatar src={preview} name={name || "?"} size={88} />
           <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden
             onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)} disabled={busy || !hasApiKey} />
-          {hasApiKey && <span className="image-pick-hint">Ganti</span>}
+          {hasApiKey && <span className="image-pick-hint">Change</span>}
         </label>
         <div className="grow stack-sm">
           <label className="field">
-            <span>Nama token</span>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="namakamu" maxLength={LIMITS.name} disabled={busy} required />
+            <span>Token name</span>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="yourname" maxLength={LIMITS.name} disabled={busy} required />
           </label>
           <label className="field">
             <span>Ticker</span>
             <div className="prefix-input">
               <span>$</span>
-              <input value={symbol} onChange={(e) => setSymbol(e.target.value.replace(/\s/g, ""))} placeholder="NAMAKAMU" maxLength={LIMITS.symbol} disabled={busy} required />
+              <input value={symbol} onChange={(e) => setSymbol(e.target.value.replace(/\s/g, ""))} placeholder="YOURNAME" maxLength={LIMITS.symbol} disabled={busy} required />
             </div>
           </label>
         </div>
@@ -221,14 +221,14 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
 
       {!logoFile && (
         <label className="field">
-          <span>URL logo</span>
+          <span>Logo URL</span>
           <input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://…" maxLength={LIMITS.logo} disabled={busy} />
         </label>
       )}
 
       <label className="field">
-        <span>Bio / deskripsi</span>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={LIMITS.description} placeholder="Ceritakan tentang profil ini…" disabled={busy} />
+        <span>Bio</span>
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={LIMITS.description} placeholder="The story behind this profile…" disabled={busy} />
       </label>
 
       <div className="row gap">
@@ -238,16 +238,16 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
         </label>
         <label className="check">
           <input type="checkbox" checked={buyback} onChange={(e) => setBuyback(e.target.checked)} disabled={busy} />
-          <span>Aktifkan buyback &amp; burn</span>
+          <span>Enable buyback &amp; burn</span>
         </label>
       </div>
 
       {profileWallet && launcher && !isOwnProfile && (
         <div className="field">
-          <span>Penerima fee kreator</span>
+          <span>Creator fees go to</span>
           <div className="radio-row">
-            <label><input type="radio" checked={feeTo === "me"} onChange={() => setFeeTo("me")} disabled={busy} /> Wallet saya ({shortAddr(launcher)})</label>
-            <label><input type="radio" checked={feeTo === "profile"} onChange={() => setFeeTo("profile")} disabled={busy} /> Wallet profil @{profile!.handle} ({shortAddr(profileWallet)})</label>
+            <label><input type="radio" checked={feeTo === "me"} onChange={() => setFeeTo("me")} disabled={busy} /> My wallet ({shortAddr(launcher)})</label>
+            <label><input type="radio" checked={feeTo === "profile"} onChange={() => setFeeTo("profile")} disabled={busy} /> @{profile!.handle}'s wallet ({shortAddr(profileWallet)})</label>
           </div>
         </div>
       )}
@@ -259,18 +259,18 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
       )}
 
       <dl className="summary">
-        <div><dt>Jaringan</dt><dd>Robinhood Chain</dd></div>
-        <div><dt>Pasangan</dt><dd>ETH</dd></div>
-        <div><dt>Penerima fee</dt><dd className="mono">{feeRecipient ? shortAddr(feeRecipient) : "Wallet kamu"}</dd></div>
+        <div><dt>Network</dt><dd>Robinhood Chain</dd></div>
+        <div><dt>Paired with</dt><dd>ETH</dd></div>
+        <div><dt>Fee recipient</dt><dd className={feeRecipient ? "mono" : undefined}>{feeRecipient ? shortAddr(feeRecipient) : "Your wallet"}</dd></div>
       </dl>
 
       {profile && launcher && !isOwnProfile && (
         <div className="notice">
-          Kamu meluncurkan token untuk profil @{profile.handle} yang bukan milik wallet ini. Token ini tidak resmi dari pemilik profil.
+          Heads up: you're launching a token for @{profile.handle} from a wallet that isn't theirs. It's a community token, not an official one.
         </div>
       )}
       {!profile && launcher && (
-        <div className="notice">Wallet ini belum punya profil Zora. Isi data manual, atau pilih profil dari <a href="#/top">Top Profile</a>.</div>
+        <div className="notice">No Zora profile on this wallet. Fill it in yourself, or pick a creator from <a href="#/top">Top Profiles</a>.</div>
       )}
 
       <TokenizeSteps state={tk} withUpload={Boolean(logoFile)} />
@@ -278,12 +278,12 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
 
       <button className="btn btn-primary btn-lg block" type="submit" disabled={busy || !formValid || (onChain && !tk.ready)}>
         {busy
-          ? "Memproses…"
+          ? "Launching…"
           : !isConnected
-            ? "Connect wallet untuk meluncurkan"
+            ? "Connect wallet to launch"
             : !onChain
-              ? "Pindah ke Robinhood Chain"
-              : `Luncurkan $${symbol.toUpperCase() || "TOKEN"}`}
+              ? "Switch to Robinhood Chain"
+              : `Launch $${symbol.toUpperCase() || "TOKEN"}`}
       </button>
     </form>
   );

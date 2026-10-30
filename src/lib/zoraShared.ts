@@ -11,10 +11,10 @@ export class ZoraApiError extends Error {
   constructor(readonly status: number) {
     super(
       status === 429
-        ? "Zora API sedang membatasi permintaan. Coba lagi sebentar."
+        ? "Zora is rate-limiting us. Give it a moment and retry."
         : status >= 500
-          ? `Zora API sedang bermasalah (HTTP ${status}).`
-          : `Permintaan ke Zora API gagal (HTTP ${status}).`,
+          ? `Zora is having a moment (HTTP ${status}).`
+          : `Zora request failed (HTTP ${status}).`,
     );
   }
 }

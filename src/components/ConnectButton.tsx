@@ -17,7 +17,7 @@ export function ConnectButton() {
         if (chain?.unsupported) {
           return (
             <button className="btn btn-warn" onClick={openChainModal}>
-              <span>Pindah<span className="hide-xs"> ke Robinhood Chain</span></span>
+              <span>Switch<span className="hide-xs"> to Robinhood Chain</span></span>
             </button>
           );
         }

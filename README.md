@@ -1,69 +1,74 @@
 # FOZO
 
-Launchpad untuk men-tokenize profil **Zora** dan **Fomo** (fomo.family) di Robinhood Chain, lewat Pons V2.
+**Mint the clout.** FOZO turns any **Zora** or **Fomo** (fomo.family) profile into a live token on Robinhood
+Chain, launched through Pons V2. Tokens are born on a bonding curve and graduate to Uniswap v4 once the crowd
+shows up.
 
-## Fitur
+## Features
 
-- **Launchpad** – hubungkan wallet; profil Zora milik wallet itu otomatis terdeteksi dan mengisi nama, ticker,
-  logo (avatar), deskripsi (bio), dan sosial (X, Farcaster, website). Bisa atur creator tax dan buyback & burn.
-  Token diluncurkan lewat `launchToken` di Pons V2 factory `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e`,
-  dipasangkan dengan ETH: mulai di bonding curve lalu lulus ke Uniswap v4.
-- **Top Profile** – profil Zora diurutkan berdasarkan jumlah followers (tanpa data harga/market cap). Kandidat
-  diambil dari daftar creator Zora (most valuable, trending, featured, top volume), lalu followers tiap profil
-  dibaca lewat `getProfileSocial`.
-- **Top Profile Fomo** – berdampingan dengan Top Profile Zora: 25 profil fomo.family teratas berdasarkan followers,
-  dari daftar di `src/data/fomoProfiles.ts`. Tokenize membuka `#/launch/fomo/<handle>` yang terisi dari daftar itu;
-  jika `FOMO_API_KEY` (getfomoapi.fun) di-set, foto, bio, X, website, dan wallet ikut diambil lewat `/api/fomo/user`.
-- **Tombol Tokenize** (di Top Profile dan halaman profil) – langsung membuka formulir deploy `#/launch/<handle>`
-  yang otomatis terisi nama, ticker, logo, bio, dan sosial dari profil tersebut. Formulir tampil tanpa harus
-  connect wallet dulu; wallet baru diminta saat menekan tombol luncurkan. Jika profil bukan milik wallet yang
-  terhubung, form memberi peringatan dan penerima fee bisa dipilih: wallet sendiri atau wallet profil.
-- **Explore** – hanya token yang diluncurkan lewat website ini (token Pons dari tempat lain tidak ditampilkan).
-  Data dibaca langsung dari event `TokenLaunched` di factory Pons V2 (tanpa server), terbaru di atas, refresh
-  otomatis tiap 30 detik dan langsung diperbarui setelah peluncuran berhasil. Token dari website ini dikenali dari
-  penanda 6 byte di awal `salt` (`keccak256("profile-launchpad/v1")`), yang dibaca kembali dari calldata transaksi.
-- **Connect wallet** – modal RainbowKit dengan banyak pilihan: MetaMask, Coinbase Wallet, Rabby, OKX, Trust,
-  Rainbow, WalletConnect (QR untuk wallet HP), Phantom, Bitget, Binance, Uniswap, Zerion, Brave, Ledger, Safe,
-  dan wallet browser lain. Wallet yang terpasang terdeteksi otomatis.
-- **Halaman profil** – cari `@handle` atau `0x…`; menampilkan bio, sosial, followers, dan following.
+- **Launchpad**: connect a wallet and its Zora profile is detected automatically, prefilling name, ticker,
+  logo (avatar), description (bio) and socials (X, Farcaster, website). Creator tax and buyback & burn are
+  configurable. Tokens launch via `launchToken` on the Pons V2 factory
+  `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e`, paired with ETH: bonding curve first, then Uniswap v4.
+- **Top Zora Profiles**: Zora profiles ranked by followers (no price or market cap data). Candidates come from
+  Zora's creator lists (most valuable, trending, featured, top volume); each profile's follower count is read via
+  `getProfileSocial`.
+- **Top Fomo Profiles**: side by side with the Zora list; the top 25 fomo.family profiles by followers, from
+  `src/data/fomoProfiles.ts`. Tokenize opens `#/launch/fomo/<handle>` prefilled from that list; when
+  `FOMO_API_KEY` (getfomoapi.fun) is set, avatar, bio, X, website and wallet are also pulled via
+  `/api/fomo/user`.
+- **Tokenize button** (on Top Profiles and profile pages): opens the launch form `#/launch/<handle>` directly,
+  prefilled with the profile's name, ticker, logo, bio and socials. The form renders before a wallet is
+  connected; the wallet is requested only on submit. When the profile isn't owned by the connected wallet, the
+  form shows a notice and lets the launcher choose the creator-fee recipient: their own wallet or the profile's.
+- **Explore**: only tokens launched from this site (other Pons launches are filtered out). Read straight from
+  the Pons V2 factory's `TokenLaunched` events (no backend), newest first, refreshed every 30 seconds and right
+  after a successful launch. This site's launches are recognised by a 6-byte tag at the start of the `salt`
+  (`keccak256("profile-launchpad/v1")`), read back from the transaction calldata.
+- **Connect wallet**: RainbowKit modal with MetaMask, Coinbase Wallet, Rabby, OKX, Trust, Rainbow,
+  WalletConnect (QR for mobile wallets), Phantom, Bitget, Binance, Uniswap, Zerion, Brave, Ledger, Safe and other
+  browser wallets. Installed wallets are detected automatically.
+- **Profile page**: search `@handle` or `0x…` to see bio, socials, followers and following.
 
-## Alur peluncuran (Pons V2)
+## Launch flow (Pons V2)
 
-1. Baca `launchEnabled`, `canLaunch(wallet)`, `launchFee`, `maxCreatorTaxBps` dari factory.
-2. Pilih launch config (env `VITE_PONS_LAUNCH_CONFIG_ID`, atau config aktif pertama).
+1. Read `launchEnabled`, `canLaunch(wallet)`, `launchFee` and `maxCreatorTaxBps` from the factory.
+2. Pick the launch config (`VITE_PONS_LAUNCH_CONFIG_ID`, or the first active config).
 3. `previewLaunchEconomics(configId, ETH)` → `expectedEconomics`.
-4. Simulasi lalu kirim `launchToken(params, configId, ETH, [])` dengan `value = launchFee`
-   (fallback ke overload tanpa `snipeTaxExemptions`).
-5. Ambil alamat token & curve dari event `TokenLaunched`.
+4. Simulate, then send `launchToken(params, configId, ETH, [])` with `value = launchFee`
+   (falls back to the overload without `snipeTaxExemptions`).
+5. Read the token and curve addresses from the `TokenLaunched` event.
 
-ABI diambil dari SDK pihak ketiga `0xfnzero/pons-trade-sdk` dan dicocokkan dengan signature resminya;
-verifikasi ulang dengan dokumentasi Pons (docs.ponsfamily.com/v2) sebelum produksi.
+The ABI comes from the third-party SDK `0xfnzero/pons-trade-sdk` and was checked against its official
+signatures; re-verify against the Pons docs (docs.ponsfamily.com/v2) before production.
 
 ## API (Vercel Functions)
 
-Semua data Zora diambil lewat serverless function di folder `api/` (otomatis aktif saat deploy di Vercel):
+All Zora data goes through the serverless functions in `api/` (enabled automatically on Vercel):
 
-- `GET /api/top-profiles` – ranking Top Profile dihitung di server sekali, di-cache CDN 10 menit
-  (`stale-while-revalidate` 1 hari). Browser cukup 1 request, bukan ~100 request ke Zora.
-- `GET /api/zora/{explore|profile|profileSocial}` – proxy ber-cache ke Zora API.
-- `GET /api/fomo/user?handle=` – profil fomo.family dari getfomoapi.fun (butuh `FOMO_API_KEY`), di-cache CDN
-  10 menit, retry saat kena batas 5 request/detik.
+- `GET /api/top-profiles`: the Top Zora Profiles ranking, computed once on the server and cached on the CDN for
+  10 minutes (`stale-while-revalidate` 1 day). The browser makes one request instead of ~100 Zora calls.
+- `GET /api/zora/{explore|profile|profileSocial}`: cached proxy to the Zora API.
+- `GET /api/fomo/user?handle=`: fomo.family profile from getfomoapi.fun (requires `FOMO_API_KEY`), cached on
+  the CDN for 10 minutes, retried when the 5 requests/second limit is hit.
 
-Server memakai `ZORA_API_KEY` (rahasia, tidak ikut ke browser) dan otomatis retry saat Zora membalas 429/5xx.
-Di `npm run dev`, `/api/zora` di-proxy oleh Vite; Top Profile dihitung di browser sebagai fallback.
+The server uses `ZORA_API_KEY` (kept secret, never shipped to the browser) and retries automatically when Zora
+answers 429/5xx. In `npm run dev`, `/api/zora` is proxied by Vite and Top Zora Profiles is computed in the
+browser as a fallback.
 
-## Menjalankan
+## Running locally
 
 ```bash
 npm install
-cp .env.example .env   # isi VITE_WALLETCONNECT_PROJECT_ID (gratis di cloud.reown.com)
+cp .env.example .env   # set VITE_WALLETCONNECT_PROJECT_ID (free at cloud.reown.com)
 npm run dev
 ```
 
-Build produksi: `npm run build` (hasil di `dist/`, static site).
+Production build: `npm run build` (output in `dist/`, a static site plus `api/` functions on Vercel).
 
 ## Stack
 
-Vite + React + TypeScript, wagmi/viem + RainbowKit (Robinhood Chain), `@zoralabs/coins-sdk` (data profil Zora & upload IPFS).
+Vite + React + TypeScript, wagmi/viem + RainbowKit (Robinhood Chain), `@zoralabs/coins-sdk` (Zora profile data
+and IPFS uploads).
 
-> Bukan aplikasi resmi Zora maupun Pons. Token baru sangat berisiko.
+> Not an official Zora, fomo.family or Pons app. New tokens are extremely risky.

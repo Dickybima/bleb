@@ -25,7 +25,7 @@ const APP_NAME = "FOZO";
 /** Reown (WalletConnect) project ID; needed for QR / mobile wallet connections. Free at cloud.reown.com. */
 export const walletConnectProjectId = (import.meta.env.VITE_WALLETCONNECT_PROJECT_ID as string | undefined) ?? "";
 if (!walletConnectProjectId) {
-  console.warn("VITE_WALLETCONNECT_PROJECT_ID belum di-set: wallet via QR/WalletConnect tidak akan bisa terhubung.");
+  console.warn("VITE_WALLETCONNECT_PROJECT_ID is not set: QR / WalletConnect wallets won't be able to connect.");
 }
 
 const connectors = connectorsForWallets(

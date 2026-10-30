@@ -12,7 +12,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error) {
-    console.error("[launchpad] render error:", error);
+    console.error("[fozo] render error:", error);
   }
 
   render() {
@@ -20,11 +20,11 @@ export class ErrorBoundary extends Component<Props, State> {
     if (!error) return this.props.children;
     return (
       <section className={this.props.compact ? "notice notice-error" : "panel center stack"}>
-        <strong>Bagian ini gagal ditampilkan.</strong>
+        <strong>This section hit a snag.</strong>
         <span className="muted small">{error.message}</span>
         <div className="row gap center-row">
-          <button className="btn btn-ghost" onClick={() => this.setState({ error: null })}>Coba lagi</button>
-          <button className="btn btn-primary" onClick={() => window.location.reload()}>Muat ulang halaman</button>
+          <button className="btn btn-ghost" onClick={() => this.setState({ error: null })}>Try again</button>
+          <button className="btn btn-primary" onClick={() => window.location.reload()}>Reload page</button>
         </div>
       </section>
     );

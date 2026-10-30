@@ -1,2 +1,2 @@
-/** Link akun X (Twitter). Isi dengan URL lengkap, misalnya "https://x.com/namaakun". */
+/** X (Twitter) account link. Use the full URL, e.g. "https://x.com/youraccount". */
 export const X_URL = "";

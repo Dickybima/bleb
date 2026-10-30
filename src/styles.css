@@ -265,3 +265,13 @@ main.container { padding-top: 32px; padding-bottom: 48px; display: flex; flex-di
 }
 .social-link { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; color: var(--text); border: 1px solid var(--border); border-radius: 999px; }
 .social-link:hover { background: var(--surface-2); }
+
+/* Side-by-side leaderboards */
+.leaderboards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.leaderboard .profile-cell strong { max-width: 160px; }
+.source-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.source-dot.zora { background: radial-gradient(circle at 30% 30%, #cfe3ff, #4b6bff 55%, #1b1464); }
+.source-dot.fomo { background: linear-gradient(135deg, #ff8a3d, #ff3d77); }
+@media (max-width: 960px) {
+  .leaderboards { grid-template-columns: 1fr; }
+}

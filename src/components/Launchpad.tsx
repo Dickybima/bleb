@@ -12,17 +12,60 @@ import { socialsFromProfile } from "../lib/profileSocials";
 import { useTokenize } from "../lib/useTokenize";
 import { shortAddr } from "../lib/format";
 import { hasApiKey } from "../lib/zora";
+import { findFomoProfile } from "../lib/fomo";
+import type { ProfileSource } from "../lib/router";
+import { emptySocials } from "../lib/pons";
 
-/** Launch page. With `handle`, the form is prefilled from that Zora profile; otherwise from the connected wallet's profile. */
-export function Launchpad({ handle }: { handle?: string }) {
+const SOURCE_LABEL: Record<ProfileSource, string> = { zora: "Zora", fomo: "Fomo" };
+
+/** Prefill for a fomo profile from the curated list (fomo.family has no public API). */
+function fomoDefaults(handle: string): ProfileDefaults | undefined {
+  const p = findFomoProfile(handle);
+  if (!p) return undefined;
+  const socials = emptySocials();
+  if (p.twitter) socials.twitter = `https://x.com/${p.twitter.replace(/^@/, "")}`;
+  if (p.website) socials.website = p.website;
+  return {
+    source: "fomo",
+    handle: p.handle.replace(/^@/, ""),
+    displayName: p.displayName,
+    description: p.bio ?? "",
+    avatar: p.avatar,
+    socials,
+    wallet: p.wallet,
+    ownWallets: p.wallet ? [p.wallet] : [],
+  };
+}
+
+/**
+ * Launch page. With `handle`, the form is prefilled from that Zora or fomo profile;
+ * otherwise from the connected wallet's Zora profile.
+ */
+export function Launchpad({ handle, source = "zora" }: { handle?: string; source?: ProfileSource }) {
   const { address } = useAccount();
-  const profileQuery = useZoraProfile(handle ?? address);
-  const { data: profile, isPending: profileLoading } = profileQuery;
-  const loading = Boolean(handle ?? address) && profileLoading;
+  const isFomo = Boolean(handle) && source === "fomo";
+  const profileQuery = useZoraProfile(isFomo ? undefined : (handle ?? address));
+  const zoraProfile = profileQuery.data;
+  const loading = !isFomo && Boolean(handle ?? address) && profileQuery.isPending;
+
+  const profile: ProfileDefaults | undefined = isFomo
+    ? fomoDefaults(handle!)
+    : zoraProfile
+      ? {
+          source: "zora",
+          handle: zoraProfile.handle,
+          displayName: zoraProfile.displayName,
+          description: zoraProfile.bio,
+          avatar: zoraProfile.avatar,
+          socials: socialsFromProfile(zoraProfile.socialAccounts, zoraProfile.website),
+          wallet: zoraProfile.wallet,
+          ownWallets: zoraProfile.wallets,
+        }
+      : undefined;
 
   const card = (
     <div className="panel launch-card">
-      {profileQuery.isError ? (
+      {!isFomo && profileQuery.isError ? (
         <div className="notice notice-error">
           Gagal memuat profil Zora: {(profileQuery.error as Error).message}{" "}
           <button className="link" onClick={() => profileQuery.refetch()}>Coba lagi</button>
@@ -35,22 +78,7 @@ export function Launchpad({ handle }: { handle?: string }) {
       ) : loading ? (
         <span className="skeleton tall" />
       ) : (
-        <LaunchForm
-          key={handle ?? address ?? ""}
-          profile={
-            profile
-              ? {
-                  handle: profile.handle,
-                  displayName: profile.displayName,
-                  description: profile.bio,
-                  avatar: profile.avatar,
-                  socials: socialsFromProfile(profile.socialAccounts, profile.website),
-                  wallet: profile.wallet,
-                  ownWallets: profile.wallets,
-                }
-              : undefined
-          }
-        />
+        <LaunchForm key={`${source}:${handle ?? address ?? ""}`} profile={profile} />
       )}
     </div>
   );
@@ -60,7 +88,7 @@ export function Launchpad({ handle }: { handle?: string }) {
       <section className="launch-page">
         <a className="link small muted" href="#/top">← Kembali ke Top Profile</a>
         <h1>Deploy token @{handle}</h1>
-        <p className="muted">Data sudah terisi dari profil Zora. Periksa, ubah jika perlu, lalu luncurkan.</p>
+        <p className="muted">Data sudah terisi dari profil {SOURCE_LABEL[source]}. Periksa, ubah jika perlu, lalu luncurkan.</p>
         {card}
       </section>
     );
@@ -70,13 +98,13 @@ export function Launchpad({ handle }: { handle?: string }) {
     <section className="hero">
       <div className="hero-copy">
         <span className="eyebrow">Profile Launchpad · Robinhood Chain</span>
-        <h1>Tokenize profil Zora dalam satu klik.</h1>
+        <h1>Tokenize profil Zora &amp; Fomo dalam satu klik.</h1>
         <p className="muted lead">
-          Ubah profil Zora menjadi token di Robinhood Chain: mulai di bonding curve, lalu otomatis lulus ke
+          Ubah profil Zora atau Fomo menjadi token di Robinhood Chain: mulai di bonding curve, lalu otomatis lulus ke
           pool Uniswap v4 saat target likuiditas tercapai.
         </p>
         <ul className="bullets">
-          <li>Nama, ticker, logo, bio, dan sosial diambil otomatis dari profil Zora</li>
+          <li>Nama, ticker, logo, bio, dan sosial diambil otomatis dari profil Zora atau Fomo</li>
           <li>Pilih profil dari Top Profile, lalu klik Tokenize</li>
           <li>Diluncurkan langsung on-chain, dipasangkan dengan ETH</li>
         </ul>
@@ -86,13 +114,13 @@ export function Launchpad({ handle }: { handle?: string }) {
   );
 }
 
-function Target({ handle, name, avatar }: { handle: string; name?: string; avatar?: string }) {
+function Target({ handle, name, avatar, source }: { handle: string; name?: string; avatar?: string; source: ProfileSource }) {
   return (
     <div className="launch-target">
       <Avatar src={avatar} name={handle} size={44} />
       <span className="launch-target-text">
         <strong>{name || `@${handle}`}</strong>
-        <small className="muted">@{handle} · profil yang ditokenisasi</small>
+        <small className="muted">@{handle} · profil {SOURCE_LABEL[source]} yang ditokenisasi</small>
       </span>
       <a className="link small" href="#/top">Ganti</a>
     </div>
@@ -100,6 +128,7 @@ function Target({ handle, name, avatar }: { handle: string; name?: string; avata
 }
 
 type ProfileDefaults = {
+  source: ProfileSource;
   handle: string;
   displayName?: string;
   description: string;
@@ -164,7 +193,7 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
 
   return (
     <form className="form" onSubmit={onSubmit}>
-      {profile && <Target handle={profile.handle} name={profile.displayName} avatar={profile.avatar} />}
+      {profile && <Target handle={profile.handle} name={profile.displayName} avatar={profile.avatar} source={profile.source} />}
 
       <div className="form-top">
         <label className="image-pick" title={hasApiKey ? "Ganti logo" : "Logo dari URL"}>

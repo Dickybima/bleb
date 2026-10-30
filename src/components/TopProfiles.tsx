@@ -1,30 +1,68 @@
 import { useState } from "react";
 import { Avatar } from "./Avatar";
 import { fmtNum } from "../lib/format";
-import { launchHref } from "../lib/router";
-import { useTopProfiles } from "../lib/topProfiles";
+import { fomoTopProfiles } from "../lib/fomo";
+import { launchHref, type ProfileSource } from "../lib/router";
+import { useTopProfiles, type TopProfile } from "../lib/topProfiles";
 
 const PAGE_SIZE = 20;
 
+/** Zora and fomo leaderboards side by side. */
 export function TopProfiles({ compact = false }: { compact?: boolean }) {
-  const query = useTopProfiles();
+  const zora = useTopProfiles();
+  return (
+    <div className="leaderboards">
+      <Leaderboard
+        source="zora"
+        title="Top Profile Zora"
+        subtitle="Diurutkan berdasarkan followers di Zora."
+        rows={zora.data ?? []}
+        loading={zora.isPending}
+        error={zora.isError ? (zora.error as Error).message : undefined}
+        onRetry={() => zora.refetch()}
+        compact={compact}
+      />
+      <Leaderboard
+        source="fomo"
+        title="Top Profile Fomo"
+        subtitle="Diurutkan berdasarkan followers di fomo.family."
+        rows={fomoTopProfiles}
+        compact={compact}
+        emptyText="Belum ada profil Fomo. Tambahkan di src/data/fomoProfiles.ts."
+      />
+    </div>
+  );
+}
+
+type LeaderboardProps = {
+  source: ProfileSource;
+  title: string;
+  subtitle: string;
+  rows: TopProfile[];
+  loading?: boolean;
+  error?: string;
+  onRetry?: () => void;
+  compact: boolean;
+  emptyText?: string;
+};
+
+function Leaderboard({ source, title, subtitle, rows, loading, error, onRetry, compact, emptyText = "Belum ada data." }: LeaderboardProps) {
   const [shown, setShown] = useState(compact ? 10 : PAGE_SIZE);
-  const all = query.data ?? [];
-  const rows = all.slice(0, shown);
+  const visible = rows.slice(0, shown);
 
   return (
-    <section className="panel">
+    <section className="panel leaderboard">
       <div className="panel-head">
         <div>
-          <h2>Top Profile Zora</h2>
-          <p className="muted">Diurutkan berdasarkan jumlah followers di Zora.</p>
+          <h2><span className={`source-dot ${source}`} aria-hidden />{title}</h2>
+          <p className="muted">{subtitle}</p>
         </div>
       </div>
 
-      {query.isError && (
+      {error && (
         <div className="notice notice-error">
-          Gagal memuat data: {(query.error as Error).message}{" "}
-          <button className="link" onClick={() => query.refetch()}>Coba lagi</button>
+          Gagal memuat data: {error}{" "}
+          {onRetry && <button className="link" onClick={onRetry}>Coba lagi</button>}
         </div>
       )}
 
@@ -39,17 +77,17 @@ export function TopProfiles({ compact = false }: { compact?: boolean }) {
             </tr>
           </thead>
           <tbody>
-            {query.isPending &&
-              Array.from({ length: compact ? 5 : 10 }, (_, i) => (
+            {loading &&
+              Array.from({ length: 5 }, (_, i) => (
                 <tr key={i} className="skeleton-row">
                   <td colSpan={4}><span className="skeleton" /></td>
                 </tr>
               ))}
-            {rows.map((p, i) => (
+            {visible.map((p, i) => (
               <tr key={p.handle}>
                 <td className="num rank">{i + 1}</td>
                 <td>
-                  <a className="profile-cell" href={launchHref(p.handle)}>
+                  <a className="profile-cell" href={launchHref(p.handle, source)}>
                     <Avatar src={p.avatar} name={p.handle} size={36} />
                     <span>
                       <strong>{p.displayName || `@${p.handle}`}</strong>
@@ -59,21 +97,21 @@ export function TopProfiles({ compact = false }: { compact?: boolean }) {
                 </td>
                 <td className="num followers">{fmtNum(p.followers)}</td>
                 <td className="num">
-                  <a className="btn btn-primary btn-sm" href={launchHref(p.handle)}>Tokenize</a>
+                  <a className="btn btn-primary btn-sm" href={launchHref(p.handle, source)}>Tokenize</a>
                 </td>
               </tr>
             ))}
-            {!query.isPending && !query.isError && all.length === 0 && (
-              <tr><td colSpan={4} className="muted center">Belum ada data.</td></tr>
+            {!loading && !error && rows.length === 0 && (
+              <tr><td colSpan={4} className="muted center">{emptyText}</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
       {compact ? (
-        <a className="btn btn-ghost block" href="#/top">Lihat semua top profile →</a>
+        rows.length > shown && <a className="btn btn-ghost block" href="#/top">Lihat semua →</a>
       ) : (
-        shown < all.length && (
+        shown < rows.length && (
           <button className="btn btn-ghost block" onClick={() => setShown((n) => n + PAGE_SIZE)}>Muat lebih banyak</button>
         )
       )}

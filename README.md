@@ -12,6 +12,9 @@ plus leaderboard **Top Profile Zora**.
 - **Top Profile** – profil Zora diurutkan berdasarkan jumlah followers (tanpa data harga/market cap). Kandidat
   diambil dari daftar creator Zora (most valuable, trending, featured, top volume), lalu followers tiap profil
   dibaca lewat `getProfileSocial`.
+- **Top Profile Fomo** – berdampingan dengan Top Profile Zora, diurutkan berdasarkan followers. fomo.family tidak
+  punya API publik (API aplikasinya wajib login dan memblokir klien non-browser), jadi datanya diisi manual di
+  `src/data/fomoProfiles.ts`. Tokenize membuka `#/launch/fomo/<handle>` yang terisi dari data tersebut.
 - **Tombol Tokenize** (di Top Profile dan halaman profil) – langsung membuka formulir deploy `#/launch/<handle>`
   yang otomatis terisi nama, ticker, logo, bio, dan sosial dari profil tersebut. Formulir tampil tanpa harus
   connect wallet dulu; wallet baru diminta saat menekan tombol luncurkan. Jika profil bukan milik wallet yang

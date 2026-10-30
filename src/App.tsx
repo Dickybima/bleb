@@ -10,7 +10,8 @@ import { X_URL } from "./lib/site";
 export default function App() {
   const route = useRoute();
   // Keyed by route so navigating away from a crashed section resets its boundary.
-  const routeKey = route.page === "profile" ? `profile:${route.id}` : route.page === "launch" ? `launch:${route.handle ?? ""}` : route.page;
+  const routeKey =
+    route.page === "profile" ? `profile:${route.id}` : route.page === "launch" ? `launch:${route.source}:${route.handle ?? ""}` : route.page;
   return (
     <>
       <ErrorBoundary compact>
@@ -20,7 +21,7 @@ export default function App() {
         {route.page === "launch" && (
           <>
             <ErrorBoundary key={routeKey}>
-              <Launchpad key={route.handle ?? ""} handle={route.handle} />
+              <Launchpad key={`${route.source}:${route.handle ?? ""}`} handle={route.handle} source={route.source} />
             </ErrorBoundary>
             {!route.handle && (
               <ErrorBoundary>
@@ -34,7 +35,7 @@ export default function App() {
         {route.page === "profile" && <ErrorBoundary key={routeKey}><ProfileView id={route.id} /></ErrorBoundary>}
       </main>
       <footer className="footer container">
-        <span>Dibangun di Robinhood Chain · data profil dari Zora</span>
+        <span>Dibangun di Robinhood Chain · data profil dari Zora &amp; Fomo</span>
         <a className="social-link" href={X_URL || "#"} target={X_URL ? "_blank" : undefined} rel="noreferrer" aria-label="X">
           <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
             <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />

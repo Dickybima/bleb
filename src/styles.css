@@ -263,5 +263,5 @@ main.container { padding-top: 32px; padding-bottom: 48px; display: flex; flex-di
   .hide-xs { display: none; }
   .nav a { padding: 6px 6px; font-size: 13px; }
 }
-.social-link { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--text); font-weight: 600; padding: 4px 12px; border: 1px solid var(--border); border-radius: 999px; }
+.social-link { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; color: var(--text); border: 1px solid var(--border); border-radius: 999px; }
 .social-link:hover { background: var(--surface-2); }

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { wagmiConfig } from "./lib/wagmi";
 import "./lib/zora";
@@ -23,10 +23,16 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 60_000, refetchOnWindowFocus: false } },
 });
 
-const rkTheme = {
-  lightMode: lightTheme({ accentColor: "#111111", borderRadius: "large" }),
-  darkMode: darkTheme({ accentColor: "#f2f2f0", accentColorForeground: "#0b0b0c", borderRadius: "large" }),
-};
+// Matches the site's dark, monochrome theme.
+const rkTheme = darkTheme({
+  accentColor: "#f4f4f5",
+  accentColorForeground: "#0a0a0a",
+  borderRadius: "small",
+  overlayBlur: "small",
+});
+rkTheme.colors.modalBackground = "#0e0e0f";
+rkTheme.colors.modalBorder = "#2e2e31";
+rkTheme.fonts.body = "Inter, system-ui, sans-serif";
 
 (window as { __launchpadMounted?: boolean }).__launchpadMounted = true;
 

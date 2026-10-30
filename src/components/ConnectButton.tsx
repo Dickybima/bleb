@@ -22,8 +22,9 @@ export function ConnectButton() {
           );
         }
         return (
-          <button className="btn btn-ghost" onClick={openAccountModal}>
-            {account.ensName ?? shortAddr(account.address)}
+          <button className="btn btn-ghost account-pill" onClick={openAccountModal}>
+            <span className="live-dot" aria-hidden />
+            <span className="mono">{account.ensName ?? shortAddr(account.address)}</span>
           </button>
         );
       }}

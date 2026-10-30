@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "motion/react";
 import { ArrowUpRight, Coins, MousePointerClick, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,17 @@ const FEATURES = [
   { icon: MousePointerClick, text: "Pick a creator from Top Profiles, hit Tokenize, sign once." },
   { icon: Coins, text: "Fully on-chain, paired with ETH, creator fees routed to the wallet you choose." },
 ];
+
+/** Full-bleed profile photo for a hero card; reports a failed load so the card can fall back to its gradient. */
+function CardPhoto({ src, alt, onFail }: { src: string; alt: string; onFail: () => void }) {
+  return (
+    <>
+      <img src={src} alt={alt} loading="eager" onError={onFail} className="absolute inset-0 h-full w-full object-cover" />
+      {/* Keeps the rank chip and the name/ticker legible over any photo. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/30" />
+    </>
+  );
+}
 
 const ticker = (handle: string) => handle.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() || handle.toUpperCase();
 
@@ -91,43 +103,9 @@ export function FozoHero({ onLaunchOwn }: { onLaunchOwn: () => void }) {
               <Skeleton className="h-60 w-40 rounded-2xl ring-2 ring-white/60 sm:h-72 sm:w-48 md:h-80 md:w-56 dark:ring-zinc-700/60" />
             </div>
           ))}
-        {cards.map((p, i) => {
-          const slot = SLOTS[i];
-          return (
-            <motion.a
-              key={p.handle}
-              href={launchHref(p.handle)}
-              aria-label={`Tokenize @${p.handle}`}
-              initial={{ opacity: 0, y: 60 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ y: -14 }}
-              transition={{ duration: 0.65, delay: slot.delay, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute bottom-0 origin-bottom"
-              style={{ rotate: slot.rotate, zIndex: slot.z, translateX: `calc(${slot.pos} * var(--spread))` }}
-            >
-              <Card className="h-60 w-40 overflow-hidden rounded-2xl border-0 p-0 shadow-xl ring-2 ring-white/60 sm:h-72 sm:w-48 md:h-80 md:w-56 dark:ring-zinc-700/60">
-                <CardContent className={`relative flex h-full w-full flex-col justify-between bg-gradient-to-br p-4 text-left text-white ${CARD_GRADIENTS[i]}`}>
-                  <div className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-white/15 blur-2xl" />
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-full bg-black/25 px-2 py-0.5 font-mono text-[11px] backdrop-blur">#{i + 1}</span>
-                    <ArrowUpRight className="size-4 opacity-70" />
-                  </div>
-                  <div className="flex flex-col items-start gap-3">
-                    <Avatar src={p.avatar} name={p.handle} size={52} className="from-white to-white/80 text-zinc-900 ring-2 ring-white/40 dark:from-white dark:to-white/80" />
-                    <div className="min-w-0 max-w-full">
-                      <p className="truncate text-lg font-bold leading-tight">{p.displayName || `@${p.handle}`}</p>
-                      <p className="truncate text-sm text-white/75">@{p.handle}</p>
-                    </div>
-                    <div className="flex w-full items-center justify-between gap-2 border-t border-white/20 pt-3">
-                      <span className="truncate font-mono text-xs font-semibold">${ticker(p.handle)}</span>
-                      <span className="font-mono text-xs text-white/80">{fmtNum(p.followers)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.a>
-          );
-        })}
+        {cards.map((p, i) => (
+          <HeroCard key={p.handle} profile={p} index={i} />
+        ))}
       </div>
       )}
 
@@ -149,5 +127,54 @@ export function FozoHero({ onLaunchOwn }: { onLaunchOwn: () => void }) {
         ))}
       </div>
     </section>
+  );
+}
+
+type HeroProfile = { handle: string; displayName?: string; avatar?: string; avatarLarge?: string; followers?: number };
+
+function HeroCard({ profile: p, index: i }: { profile: HeroProfile; index: number }) {
+  const slot = SLOTS[i];
+  const photo = p.avatarLarge ?? p.avatar;
+  const [failed, setFailed] = useState(false);
+  const showPhoto = Boolean(photo) && !failed;
+
+  return (
+    <motion.a
+      href={launchHref(p.handle)}
+      aria-label={`Tokenize @${p.handle}`}
+      initial={{ opacity: 0, y: 60 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -14 }}
+      transition={{ duration: 0.65, delay: slot.delay, ease: [0.22, 1, 0.36, 1] }}
+      className="absolute bottom-0 origin-bottom"
+      style={{ rotate: slot.rotate, zIndex: slot.z, translateX: `calc(${slot.pos} * var(--spread))` }}
+    >
+      <Card className="h-60 w-40 overflow-hidden rounded-2xl border-0 p-0 shadow-xl ring-2 ring-white/60 sm:h-72 sm:w-48 md:h-80 md:w-56 dark:ring-zinc-700/60">
+        <CardContent className={`relative flex h-full w-full flex-col justify-between bg-gradient-to-br p-4 text-left text-white ${CARD_GRADIENTS[i]}`}>
+          {showPhoto ? (
+            <CardPhoto src={photo!} alt={p.displayName || p.handle} onFail={() => setFailed(true)} />
+          ) : (
+            <div className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-white/15 blur-2xl" />
+          )}
+          <div className="relative flex items-center justify-between">
+            <span className="rounded-full bg-black/35 px-2 py-0.5 font-mono text-[11px] backdrop-blur">#{i + 1}</span>
+            <ArrowUpRight className="size-4 opacity-80 drop-shadow" />
+          </div>
+          <div className="relative flex flex-col items-start gap-3">
+            {!showPhoto && (
+              <Avatar name={p.handle} size={52} className="from-white to-white/80 text-zinc-900 ring-2 ring-white/40 dark:from-white dark:to-white/80" />
+            )}
+            <div className="min-w-0 max-w-full drop-shadow">
+              <p className="truncate text-lg font-bold leading-tight">{p.displayName || `@${p.handle}`}</p>
+              <p className="truncate text-sm text-white/80">@{p.handle}</p>
+            </div>
+            <div className="flex w-full items-center justify-between gap-2 border-t border-white/25 pt-3">
+              <span className="truncate font-mono text-xs font-semibold">${ticker(p.handle)}</span>
+              <span className="font-mono text-xs text-white/85">{fmtNum(p.followers)}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.a>
   );
 }

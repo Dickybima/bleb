@@ -7,6 +7,8 @@ export type TopProfile = {
   handle: string;
   displayName?: string;
   avatar?: string;
+  /** Larger avatar (Zora "medium") for big surfaces like the hero cards. */
+  avatarLarge?: string;
   followers: number;
 };
 
@@ -37,7 +39,13 @@ export async function computeTopProfiles(get: Get, concurrency = 6): Promise<Top
     try {
       const p = (await get<GetProfileSocialResponse>("profileSocial", { identifier: c.handle }))?.profile;
       if (!p?.handle || typeof p.followers?.count !== "number") return null;
-      return { handle: p.handle, displayName: p.displayName, avatar: p.avatar?.small ?? c.avatar, followers: p.followers.count };
+      return {
+        handle: p.handle,
+        displayName: p.displayName,
+        avatar: p.avatar?.small ?? c.avatar,
+        avatarLarge: p.avatar?.medium ?? p.avatar?.small ?? c.avatar,
+        followers: p.followers.count,
+      };
     } catch {
       return null;
     }

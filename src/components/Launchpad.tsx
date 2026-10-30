@@ -12,22 +12,19 @@ import { socialsFromProfile } from "../lib/profileSocials";
 import { useTokenize } from "../lib/useTokenize";
 import { shortAddr } from "../lib/format";
 import { hasApiKey } from "../lib/zora";
-import { findFomoProfile } from "../lib/fomo";
+import { useFomoProfile, type FomoUser } from "../lib/fomo";
 import type { ProfileSource } from "../lib/router";
 import { emptySocials } from "../lib/pons";
 
 const SOURCE_LABEL: Record<ProfileSource, string> = { zora: "Zora", fomo: "Fomo" };
 
-/** Prefill for a fomo profile from the curated list (fomo.family has no public API). */
-function fomoDefaults(handle: string): ProfileDefaults | undefined {
-  const p = findFomoProfile(handle);
-  if (!p) return undefined;
+function fomoDefaults(p: FomoUser): ProfileDefaults {
   const socials = emptySocials();
-  if (p.twitter) socials.twitter = `https://x.com/${p.twitter.replace(/^@/, "")}`;
+  if (p.twitter) socials.twitter = `https://x.com/${p.twitter}`;
   if (p.website) socials.website = p.website;
   return {
     source: "fomo",
-    handle: p.handle.replace(/^@/, ""),
+    handle: p.handle,
     displayName: p.displayName,
     description: p.bio ?? "",
     avatar: p.avatar,
@@ -44,12 +41,16 @@ function fomoDefaults(handle: string): ProfileDefaults | undefined {
 export function Launchpad({ handle, source = "zora" }: { handle?: string; source?: ProfileSource }) {
   const { address } = useAccount();
   const isFomo = Boolean(handle) && source === "fomo";
-  const profileQuery = useZoraProfile(isFomo ? undefined : (handle ?? address));
-  const zoraProfile = profileQuery.data;
-  const loading = !isFomo && Boolean(handle ?? address) && profileQuery.isPending;
+  const zoraQuery = useZoraProfile(isFomo ? undefined : (handle ?? address));
+  const fomoQuery = useFomoProfile(isFomo ? handle : undefined);
+  const profileQuery = isFomo ? fomoQuery : zoraQuery;
+  const zoraProfile = zoraQuery.data;
+  const loading = Boolean(handle ?? address) && profileQuery.isPending;
 
   const profile: ProfileDefaults | undefined = isFomo
-    ? fomoDefaults(handle!)
+    ? fomoQuery.data
+      ? fomoDefaults(fomoQuery.data)
+      : undefined
     : zoraProfile
       ? {
           source: "zora",
@@ -65,9 +66,9 @@ export function Launchpad({ handle, source = "zora" }: { handle?: string; source
 
   const card = (
     <div className="panel launch-card">
-      {!isFomo && profileQuery.isError ? (
+      {profileQuery.isError ? (
         <div className="notice notice-error">
-          Gagal memuat profil Zora: {(profileQuery.error as Error).message}{" "}
+          Gagal memuat profil {SOURCE_LABEL[source]}: {(profileQuery.error as Error).message}{" "}
           <button className="link" onClick={() => profileQuery.refetch()}>Coba lagi</button>
         </div>
       ) : handle && !loading && !profile ? (

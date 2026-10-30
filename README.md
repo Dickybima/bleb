@@ -12,9 +12,11 @@ plus leaderboard **Top Profile Zora**.
 - **Top Profile** – profil Zora diurutkan berdasarkan jumlah followers (tanpa data harga/market cap). Kandidat
   diambil dari daftar creator Zora (most valuable, trending, featured, top volume), lalu followers tiap profil
   dibaca lewat `getProfileSocial`.
-- **Top Profile Fomo** – berdampingan dengan Top Profile Zora, diurutkan berdasarkan followers. fomo.family tidak
-  punya API publik (API aplikasinya wajib login dan memblokir klien non-browser), jadi datanya diisi manual di
-  `src/data/fomoProfiles.ts`. Tokenize membuka `#/launch/fomo/<handle>` yang terisi dari data tersebut.
+- **Top Profile Fomo** – berdampingan dengan Top Profile Zora: leaderboard trader fomo.family (24j / 7h / 30h /
+  Semua) dari API pihak ketiga [getfomoapi.fun](https://getfomoapi.fun) lewat `/api/fomo/leaderboard`. Kolom
+  menampilkan followers bila tersedia, selain itu PnL. Tokenize membuka `#/launch/fomo/<handle>` yang terisi dari
+  `/api/fomo/user` (nama, foto, bio, X, website, wallet EVM). Tanpa `FOMO_API_KEY`, dipakai daftar manual di
+  `src/data/fomoProfiles.ts`.
 - **Tombol Tokenize** (di Top Profile dan halaman profil) – langsung membuka formulir deploy `#/launch/<handle>`
   yang otomatis terisi nama, ticker, logo, bio, dan sosial dari profil tersebut. Formulir tampil tanpa harus
   connect wallet dulu; wallet baru diminta saat menekan tombol luncurkan. Jika profil bukan milik wallet yang
@@ -47,6 +49,8 @@ Semua data Zora diambil lewat serverless function di folder `api/` (otomatis akt
 - `GET /api/top-profiles` – ranking Top Profile dihitung di server sekali, di-cache CDN 10 menit
   (`stale-while-revalidate` 1 hari). Browser cukup 1 request, bukan ~100 request ke Zora.
 - `GET /api/zora/{explore|profile|profileSocial}` – proxy ber-cache ke Zora API.
+- `GET /api/fomo/leaderboard?window=24h|7d|30d|all` dan `GET /api/fomo/user?handle=` – data fomo.family dari
+  getfomoapi.fun (butuh `FOMO_API_KEY`), di-cache CDN 10 menit, retry saat kena batas 5 request/detik.
 
 Server memakai `ZORA_API_KEY` (rahasia, tidak ikut ke browser) dan otomatis retry saat Zora membalas 429/5xx.
 Di `npm run dev`, `/api/zora` di-proxy oleh Vite; Top Profile dihitung di browser sebagai fallback.

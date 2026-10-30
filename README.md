@@ -1,7 +1,6 @@
-# Profile Launchpad (Pons V2)
+# FOZO
 
-Launchpad bergaya "tokenize profile" Zora yang meluncurkan token di **Pons V2** (Robinhood Chain, chain id 4663),
-plus leaderboard **Top Profile Zora**.
+Launchpad untuk men-tokenize profil **Zora** dan **Fomo** (fomo.family) di Robinhood Chain, lewat Pons V2.
 
 ## Fitur
 

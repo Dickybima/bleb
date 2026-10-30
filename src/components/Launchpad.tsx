@@ -98,7 +98,7 @@ export function Launchpad({ handle, source = "zora" }: { handle?: string; source
   return (
     <section className="hero">
       <div className="hero-copy">
-        <span className="eyebrow">Profile Launchpad · Robinhood Chain</span>
+        <span className="eyebrow">FOZO · Robinhood Chain</span>
         <h1>Tokenize profil Zora &amp; Fomo dalam satu klik.</h1>
         <p className="muted lead">
           Ubah profil Zora atau Fomo menjadi token di Robinhood Chain: mulai di bonding curve, lalu otomatis lulus ke

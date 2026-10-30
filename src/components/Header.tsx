@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { ConnectButton } from "./ConnectButton";
+import { FozoLogo } from "./FozoLogo";
 import { profileHref, type Route } from "../lib/router";
 
 export function Header({ active }: { active: Route["page"] }) {
@@ -14,9 +15,8 @@ export function Header({ active }: { active: Route["page"] }) {
   return (
     <header className="header">
       <div className="container header-inner">
-        <a href="#/" className="brand">
-          <span className="orb" aria-hidden />
-          <span>Profile Launchpad</span>
+        <a href="#/" className="brand" aria-label="FOZO">
+          <FozoLogo />
         </a>
         <nav className="nav">
           <a href="#/" className={active === "launch" ? "active" : ""}>Launchpad</a>

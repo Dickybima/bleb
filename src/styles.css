@@ -204,7 +204,7 @@ main.container { padding-top: 32px; padding-bottom: 48px; display: flex; flex-di
 }
 @media (max-width: 600px) {
   .header-inner { gap: 8px; }
-  .brand span:last-child { display: none; }
+  .fozo-word { font-size: 17px; }
   .header-inner .btn { padding: 8px 14px; font-size: 14px; }
   .nav a { padding: 6px 8px; font-size: 14px; }
   .header-inner > .btn { margin-left: auto; }
@@ -273,5 +273,20 @@ main.container { padding-top: 32px; padding-bottom: 48px; display: flex; flex-di
 .source-dot.zora { background: radial-gradient(circle at 30% 30%, #cfe3ff, #4b6bff 55%, #1b1464); }
 .source-dot.fomo { background: linear-gradient(135deg, #ff8a3d, #ff3d77); }
 @media (max-width: 960px) {
-  .leaderboards { grid-template-columns: 1fr; }
+  .leaderboards { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .leaderboard .profile-cell strong, .leaderboard .profile-cell small { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* FOZO brand */
+.fozo-logo { display: inline-flex; align-items: center; gap: 9px; }
+.fozo-logo svg { flex: none; filter: drop-shadow(0 2px 6px rgb(91 124 255 / 0.25)); }
+.fozo-word {
+  font-weight: 900; font-size: 20px; letter-spacing: 0.12em;
+  background: linear-gradient(90deg, #4b6bff 0%, #8f5bff 45%, #ff4d7d 75%, #ff9a4d 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+@media (max-width: 480px) {
+  .fozo-word { display: none; }
 }

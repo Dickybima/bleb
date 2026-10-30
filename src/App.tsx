@@ -6,6 +6,7 @@ import { TopProfiles } from "./components/TopProfiles";
 import { Explore } from "./components/Explore";
 import { ProfileView } from "./components/ProfileView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import DataRain from "@/components/ui/data-rain";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { ZeonMark } from "./components/ZeonLogo";
 import { Reveal } from "@/components/ui/primitives";
@@ -19,6 +20,8 @@ export default function App() {
     route.page === "profile" ? `profile:${route.id}` : route.page === "launch" ? `launch:${route.handle ?? ""}` : route.page;
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden">
+      {/* Animated full-screen background behind every page. */}
+      <DataRain />
       <ErrorBoundary compact>
         <Header active={route.page} />
       </ErrorBoundary>

@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
+@import "tw-animate-css";
 
 /* Dark mode is class-based so the theme toggle (and the pre-paint script in index.html) controls it. */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -78,6 +79,85 @@
   * { @apply border-border; }
   html { color-scheme: light; }
   html.dark { color-scheme: dark; }
-  body { @apply bg-zinc-50 text-zinc-900 antialiased transition-colors duration-500 dark:bg-zinc-950 dark:text-zinc-50; }
+  body { @apply bg-zinc-50 text-zinc-900 antialiased transition-colors duration-500 dark:bg-[#020308] dark:text-zinc-50; }
   ::selection { @apply bg-zinc-900 text-white dark:bg-white dark:text-zinc-900; }
+}
+
+/* ───────────── DataRain background (src/components/ui/data-rain.tsx) ───────────── */
+:root {
+  --dr-bg-0: #020308;
+  --dr-bg-1: #05070d;
+  --dr-bg-2: #0a1020;
+  --dr-calm: #22e6ff;
+  --dr-mid: #8a5cff;
+  --dr-hot: #ff3d9a;
+  --dr-core: #eafcff;
+  --dr-vignette: 0.62;
+  --dr-grain: 0.05;
+  --dr-bloom-blur: 10px;
+  --dr-bloom-opacity: 0.7;
+}
+
+@keyframes dr-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fixed full-viewport layer behind the app; never intercepts clicks (the component listens on window). */
+.dr-root {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 0%, var(--dr-bg-2) 0%, var(--dr-bg-1) 45%, var(--dr-bg-0) 100%);
+  animation: dr-fade-in 1.2s ease-out both;
+}
+.dr-root--contained {
+  position: absolute;
+}
+.dr-root canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+/* Quarter-resolution copy of the main canvas, upscaled and blurred into a glow. */
+.dr-bloom {
+  filter: blur(var(--dr-bloom-blur));
+  opacity: var(--dr-bloom-opacity);
+  mix-blend-mode: screen;
+}
+.dr-main {
+  mix-blend-mode: screen;
+}
+.dr-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, transparent 35%, rgb(0 0 0 / var(--dr-vignette)) 100%);
+}
+.dr-grain {
+  position: absolute;
+  inset: 0;
+  opacity: var(--dr-grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Light theme: pale backdrop, normal blending so the coloured streaks stay visible on white. */
+html:not(.dark) .dr-root {
+  --dr-bg-0: #e9edf5;
+  --dr-bg-1: #f3f5fa;
+  --dr-bg-2: #ffffff;
+  --dr-vignette: 0.06;
+  --dr-grain: 0.035;
+  --dr-bloom-opacity: 0.35;
+}
+html:not(.dark) .dr-main,
+html:not(.dark) .dr-bloom {
+  mix-blend-mode: normal;
 }

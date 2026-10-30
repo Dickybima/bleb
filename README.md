@@ -15,6 +15,9 @@ plus leaderboard **Top Profile Zora**.
 - **Tombol Tokenize** (di Top Profile dan halaman profil) – membuka form peluncuran `#/launch/<handle>` yang
   otomatis terisi nama, ticker, logo, bio, dan sosial dari profil tersebut. Jika profil bukan milik wallet yang
   terhubung, form memberi peringatan dan penerima fee bisa dipilih: wallet sendiri atau wallet profil.
+- **Connect wallet** – modal RainbowKit dengan banyak pilihan: MetaMask, Coinbase Wallet, Rabby, OKX, Trust,
+  Rainbow, WalletConnect (QR untuk wallet HP), Phantom, Bitget, Binance, Uniswap, Zerion, Brave, Ledger, Safe,
+  dan wallet browser lain. Wallet yang terpasang terdeteksi otomatis.
 - **Halaman profil** – cari `@handle` atau `0x…`; menampilkan bio, sosial, followers, dan following.
 
 ## Alur peluncuran (Pons V2)
@@ -33,7 +36,7 @@ verifikasi ulang dengan dokumentasi Pons (docs.ponsfamily.com/v2) sebelum produk
 
 ```bash
 npm install
-cp .env.example .env
+cp .env.example .env   # isi VITE_WALLETCONNECT_PROJECT_ID (gratis di cloud.reown.com)
 npm run dev
 ```
 
@@ -41,6 +44,6 @@ Build produksi: `npm run build` (hasil di `dist/`, static site).
 
 ## Stack
 
-Vite + React + TypeScript, wagmi/viem (Robinhood Chain), `@zoralabs/coins-sdk` (data profil Zora & upload IPFS).
+Vite + React + TypeScript, wagmi/viem + RainbowKit (Robinhood Chain), `@zoralabs/coins-sdk` (data profil Zora & upload IPFS).
 
 > Bukan aplikasi resmi Zora maupun Pons. Token baru sangat berisiko.

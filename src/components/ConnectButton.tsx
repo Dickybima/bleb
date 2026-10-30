@@ -1,51 +1,24 @@
-import { useState } from "react";
-import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
-import { robinhoodChain } from "../lib/chains";
+import { ConnectButton as RKConnectButton } from "@rainbow-me/rainbowkit";
 import { shortAddr } from "../lib/format";
 
+/** Wallet button: opens the multi-wallet picker, prompts a network switch, or shows the connected account. */
 export function ConnectButton() {
-  const { address, isConnected, chainId } = useAccount();
-  const { connectors, connect, isPending } = useConnect();
-  const { disconnect } = useDisconnect();
-  const { switchChain } = useSwitchChain();
-  const [open, setOpen] = useState(false);
-
-  if (isConnected && chainId !== robinhoodChain.id) {
-    return (
-      <button className="btn btn-warn" onClick={() => switchChain({ chainId: robinhoodChain.id })}>
-        Pindah ke Robinhood Chain
-      </button>
-    );
-  }
-
-  if (isConnected) {
-    return (
-      <button className="btn btn-ghost" onClick={() => disconnect()} title="Klik untuk disconnect">
-        {shortAddr(address)}
-      </button>
-    );
-  }
-
   return (
-    <div className="dropdown">
-      <button className="btn btn-primary" onClick={() => setOpen((o) => !o)} disabled={isPending}>
-        {isPending ? "Menghubungkan…" : "Connect Wallet"}
-      </button>
-      {open && (
-        <div className="dropdown-menu">
-          {connectors.map((c) => (
-            <button
-              key={c.uid}
-              onClick={() => {
-                connect({ connector: c, chainId: robinhoodChain.id });
-                setOpen(false);
-              }}
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+    <RKConnectButton.Custom>
+      {({ account, chain, mounted, openConnectModal, openChainModal, openAccountModal }) => {
+        if (!mounted) return <button className="btn btn-primary" disabled aria-hidden>Connect Wallet</button>;
+        if (!account) {
+          return <button className="btn btn-primary" onClick={openConnectModal}>Connect Wallet</button>;
+        }
+        if (chain?.unsupported) {
+          return <button className="btn btn-warn" onClick={openChainModal}>Pindah ke Robinhood Chain</button>;
+        }
+        return (
+          <button className="btn btn-ghost" onClick={openAccountModal}>
+            {account.ensName ?? shortAddr(account.address)}
+          </button>
+        );
+      }}
+    </RKConnectButton.Custom>
   );
 }

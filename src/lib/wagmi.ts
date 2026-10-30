@@ -1,10 +1,60 @@
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import {
+  binanceWallet,
+  bitgetWallet,
+  braveWallet,
+  coinbaseWallet,
+  injectedWallet,
+  ledgerWallet,
+  metaMaskWallet,
+  okxWallet,
+  phantomWallet,
+  rabbyWallet,
+  rainbowWallet,
+  safeWallet,
+  trustWallet,
+  uniswapWallet,
+  walletConnectWallet,
+  zerionWallet,
+} from "@rainbow-me/rainbowkit/wallets";
 import { createConfig, http } from "wagmi";
-import { coinbaseWallet, injected } from "wagmi/connectors";
 import { robinhoodChain } from "./chains";
 
+const APP_NAME = "Profile Launchpad";
+
+/** Reown (WalletConnect) project ID; needed for QR / mobile wallet connections. Free at cloud.reown.com. */
+export const walletConnectProjectId = (import.meta.env.VITE_WALLETCONNECT_PROJECT_ID as string | undefined) ?? "";
+if (!walletConnectProjectId) {
+  console.warn("VITE_WALLETCONNECT_PROJECT_ID belum di-set: wallet via QR/WalletConnect tidak akan bisa terhubung.");
+}
+
+const connectors = connectorsForWallets(
+  [
+    {
+      groupName: "Populer",
+      wallets: [metaMaskWallet, coinbaseWallet, rabbyWallet, okxWallet, trustWallet, rainbowWallet, walletConnectWallet],
+    },
+    {
+      groupName: "Lainnya",
+      wallets: [
+        phantomWallet,
+        bitgetWallet,
+        binanceWallet,
+        uniswapWallet,
+        zerionWallet,
+        braveWallet,
+        ledgerWallet,
+        safeWallet,
+        injectedWallet,
+      ],
+    },
+  ],
+  { appName: APP_NAME, projectId: walletConnectProjectId || "missing-project-id" },
+);
+
 export const wagmiConfig = createConfig({
+  connectors,
   chains: [robinhoodChain],
-  connectors: [injected(), coinbaseWallet({ appName: "Profile Launchpad" })],
   transports: { [robinhoodChain.id]: http() },
 });
 

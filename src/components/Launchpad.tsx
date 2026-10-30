@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { ArrowLeft, ImagePlus } from "lucide-react";
 import { useAccount } from "wagmi";
 import { useChainModal, useConnectModal } from "@rainbow-me/rainbowkit";
 import { getAddress, isAddress, type Address } from "viem";
 import { useZoraProfile } from "../lib/profile";
 import { Avatar } from "./Avatar";
-import { FozoHero } from "./FozoHero";
 import { OrbButton } from "@/components/ui/hero-with-cards-utils/orb-button";
-import { Notice, Panel, Reveal, SectionHeading, Skeleton, ghostButtonClass, inputClass, labelClass, linkButtonClass } from "@/components/ui/primitives";
+import { Notice, Panel, Reveal, Skeleton, ghostButtonClass, inputClass, labelClass, linkButtonClass } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 import { LaunchSuccess } from "./LaunchSuccess";
 import { TokenizeSteps } from "./TokenizeSteps";
@@ -27,7 +26,6 @@ export function Launchpad({ handle }: { handle?: string }) {
   const profileQuery = useZoraProfile(handle ?? address);
   const zoraProfile = profileQuery.data;
   const loading = Boolean(handle ?? address) && profileQuery.isPending;
-  const formRef = useRef<HTMLDivElement>(null);
 
   const profile: ProfileDefaults | undefined = zoraProfile
     ? {
@@ -80,19 +78,17 @@ export function Launchpad({ handle }: { handle?: string }) {
     );
   }
 
+  // The Launch page: launch from scratch, prefilled from the connected wallet's Zora profile.
   return (
-    <>
-      <FozoHero onLaunchOwn={() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })} />
-      <section ref={formRef} className="mx-auto w-full max-w-2xl scroll-mt-24">
-        <Reveal>
-          <SectionHeading
-            title={<>Launch your <em className="italic text-zinc-600 dark:text-zinc-300">own</em></>}
-            subtitle="Connect a wallet and its Zora profile drops in automatically."
-          />
-        </Reveal>
-        <Reveal delay={0.1}>{card}</Reveal>
-      </section>
-    </>
+    <section className="mx-auto flex w-full max-w-2xl flex-col gap-3">
+      <Reveal>
+        <h1 className="text-4xl font-bold tracking-tight text-zinc-900 md:text-5xl dark:text-white">
+          Launch your <em className="font-extrabold italic text-zinc-600 dark:text-zinc-300">own</em>
+        </h1>
+        <p className="mb-4 mt-3 text-zinc-500 dark:text-zinc-400">Connect a wallet and its Zora profile drops in automatically.</p>
+      </Reveal>
+      <Reveal delay={0.1}>{card}</Reveal>
+    </section>
   );
 }
 

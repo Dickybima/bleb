@@ -6,7 +6,8 @@ shows up.
 
 ## Features
 
-- **Launchpad**: connect a wallet and its Zora profile is detected automatically, prefilling name, ticker,
+- **Home / Launch**: the Home page has the hero and top profiles; the **Launch** page (`#/launch`) is the
+  launch-your-own form: connect a wallet and its Zora profile is detected automatically, prefilling name, ticker,
   logo (avatar), description (bio) and socials (X, Farcaster, website). Creator tax and buyback & burn are
   configurable. Tokens launch via `launchToken` on the Pons V2 factory
   `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e`, paired with ETH: bonding curve first, then Uniswap v4.

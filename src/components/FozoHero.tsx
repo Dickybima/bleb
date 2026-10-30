@@ -45,7 +45,7 @@ function CardPhoto({ src, alt, onFail }: { src: string; alt: string; onFail: () 
 
 const ticker = (handle: string) => handle.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() || handle.toUpperCase();
 
-export function FozoHero({ onLaunchOwn }: { onLaunchOwn: () => void }) {
+export function FozoHero() {
   const top = useTopProfiles();
   const cards = (top.data ?? []).slice(0, SLOTS.length);
 
@@ -87,7 +87,7 @@ export function FozoHero({ onLaunchOwn }: { onLaunchOwn: () => void }) {
         className="mt-8 flex flex-wrap items-center justify-center gap-3"
       >
         <OrbButton href="#/top">Tokenize a profile</OrbButton>
-        <OrbButton variant="outline" noOrb onClick={onLaunchOwn}>Launch your own</OrbButton>
+        <OrbButton variant="outline" noOrb href="#/launch">Launch your own</OrbButton>
       </motion.div>
 
       {(top.isPending || cards.length > 0) && (

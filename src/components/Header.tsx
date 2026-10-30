@@ -7,7 +7,8 @@ import { ThemeToggle } from "./ThemeToggle";
 import { profileHref, type Route } from "../lib/router";
 
 const LINKS: { href: string; page: Route["page"]; label: string }[] = [
-  { href: "#/", page: "launch", label: "Launchpad" },
+  { href: "#/", page: "home", label: "Home" },
+  { href: "#/launch", page: "launch", label: "Launch" },
   { href: "#/explore", page: "explore", label: "Explore" },
   { href: "#/top", page: "top", label: "Top Profiles" },
 ];

@@ -38,12 +38,12 @@ export function FozoMark({ size = 32, title }: { size?: number; title?: string }
   );
 }
 
-/** Mark plus "FOZO" wordmark, for the header. */
-export function FozoLogo({ size = 30 }: { size?: number }) {
+/** Mark plus "FOZO" wordmark, for the navbar. */
+export function FozoLogo({ size = 28 }: { size?: number }) {
   return (
-    <span className="fozo-logo">
+    <span className="inline-flex items-center gap-2">
       <FozoMark size={size} />
-      <span className="fozo-word">FOZO</span>
+      <span className="hidden text-base font-bold tracking-tight text-zinc-900 min-[420px]:inline md:text-2xl dark:text-white">FOZO</span>
     </span>
   );
 }

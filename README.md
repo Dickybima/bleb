@@ -68,7 +68,18 @@ Production build: `npm run build` (output in `dist/`, a static site plus `api/` 
 
 ## Stack
 
-Vite + React + TypeScript, wagmi/viem + RainbowKit (Robinhood Chain), `@zoralabs/coins-sdk` (Zora profile data
-and IPFS uploads).
+Vite + React + TypeScript, Tailwind CSS v4 (`@tailwindcss/vite`), shadcn/ui structure, `motion` for animation,
+`lucide-react` icons, wagmi/viem + RainbowKit (Robinhood Chain), `@zoralabs/coins-sdk` (Zora profile data and IPFS
+uploads).
+
+## UI structure (shadcn)
+
+- `components.json`: shadcn config (zinc base color, CSS variables, `@/` aliases), so `npx shadcn@latest add <component>`
+  drops new primitives into the right place.
+- `src/index.css`: Tailwind entry, shadcn theme tokens (light + `.dark`), fonts.
+- `src/lib/utils.ts`: `cn()` helper (clsx + tailwind-merge).
+- `src/components/ui/`: shared primitives: `card.tsx`, `hero-with-cards.tsx` (+ demo) with its
+  `hero-with-cards-utils/orb-button.tsx`, and `primitives.tsx` (Panel, Reveal, SectionHeading, Notice, input styles).
+- Dark mode is class-based (`html.dark`), dark by default, toggled from the navbar/footer and remembered per browser.
 
 > Not an official Zora, fomo.family or Pons app. New tokens are extremely risky.

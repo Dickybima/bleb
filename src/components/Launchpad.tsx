@@ -1,9 +1,14 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { ArrowLeft, ImagePlus } from "lucide-react";
 import { useAccount } from "wagmi";
 import { useChainModal, useConnectModal } from "@rainbow-me/rainbowkit";
 import { getAddress, isAddress, type Address } from "viem";
 import { useZoraProfile } from "../lib/profile";
 import { Avatar } from "./Avatar";
+import { FozoHero } from "./FozoHero";
+import { OrbButton } from "@/components/ui/hero-with-cards-utils/orb-button";
+import { Notice, Panel, Reveal, SectionHeading, Skeleton, ghostButtonClass, inputClass, labelClass, linkButtonClass } from "@/components/ui/primitives";
+import { cn } from "@/lib/utils";
 import { LaunchSuccess } from "./LaunchSuccess";
 import { TokenizeSteps } from "./TokenizeSteps";
 import { robinhoodChain } from "../lib/chains";
@@ -46,6 +51,7 @@ export function Launchpad({ handle, source = "zora" }: { handle?: string; source
   const profileQuery = isFomo ? fomoQuery : zoraQuery;
   const zoraProfile = zoraQuery.data;
   const loading = Boolean(handle ?? address) && profileQuery.isPending;
+  const formRef = useRef<HTMLDivElement>(null);
 
   const profile: ProfileDefaults | undefined = isFomo
     ? fomoQuery.data
@@ -65,65 +71,69 @@ export function Launchpad({ handle, source = "zora" }: { handle?: string; source
       : undefined;
 
   const card = (
-    <div className="panel launch-card">
+    <Panel>
       {profileQuery.isError ? (
-        <div className="notice notice-error">
+        <Notice tone="error">
           Couldn't load the {SOURCE_LABEL[source]} profile: {(profileQuery.error as Error).message}{" "}
-          <button className="link" onClick={() => profileQuery.refetch()}>Retry</button>
-        </div>
+          <button className={linkButtonClass} onClick={() => profileQuery.refetch()}>Retry</button>
+        </Notice>
       ) : handle && !loading && !profile ? (
-        <div className="center stack">
-          <h3>@{handle} isn't on {SOURCE_LABEL[source]}</h3>
-          <a className="btn btn-ghost" href="#/top">Browse top profiles</a>
+        <div className="flex flex-col items-center gap-4 py-8 text-center">
+          <h3 className="text-lg font-bold">@{handle} isn't on {SOURCE_LABEL[source]}</h3>
+          <a className={ghostButtonClass} href="#/top">Browse top profiles</a>
         </div>
       ) : loading ? (
-        <span className="skeleton tall" />
+        <Skeleton className="h-96" />
       ) : (
         <LaunchForm key={`${source}:${handle ?? address ?? ""}`} profile={profile} />
       )}
-    </div>
+    </Panel>
   );
 
   if (handle) {
     return (
-      <section className="launch-page">
-        <a className="link small muted" href="#/top">← Back to Top Profiles</a>
-        <h1>Tokenize @{handle}</h1>
-        <p className="muted">Pre-loaded from @{handle}'s {SOURCE_LABEL[source]} profile. Tweak anything, then send it.</p>
-        {card}
+      <section className="mx-auto flex w-full max-w-2xl flex-col gap-3">
+        <Reveal>
+          <a className="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white" href="#/top">
+            <ArrowLeft className="size-4" /> Back to Top Profiles
+          </a>
+          <h1 className="mt-3 text-4xl font-bold tracking-tight text-zinc-900 md:text-5xl dark:text-white">
+            Tokenize <em className="font-extrabold italic text-zinc-600 dark:text-zinc-300">@{handle}</em>
+          </h1>
+          <p className="mb-4 mt-3 text-zinc-500 dark:text-zinc-400">
+            Pre-loaded from @{handle}'s {SOURCE_LABEL[source]} profile. Tweak anything, then send it.
+          </p>
+        </Reveal>
+        <Reveal delay={0.1}>{card}</Reveal>
       </section>
     );
   }
 
   return (
-    <section className="hero">
-      <div className="hero-copy">
-        <span className="eyebrow">FOZO · Robinhood Chain</span>
-        <h1>Mint the clout.</h1>
-        <p className="muted lead">
-          FOZO turns any Zora or Fomo profile into a live token on Robinhood Chain. It's born on a bonding curve,
-          graduates to Uniswap v4 once the crowd shows up, and from there the price is set by belief, not a pitch deck.
-        </p>
-        <ul className="bullets">
-          <li>Name, ticker, avatar, bio and socials lifted straight from the profile. Zero copy-paste.</li>
-          <li>Pick a creator from Top Profiles, hit Tokenize, sign once.</li>
-          <li>Fully on-chain, paired with ETH, creator fees routed to the wallet you choose.</li>
-        </ul>
-      </div>
-      {card}
-    </section>
+    <>
+      <FozoHero onLaunchOwn={() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })} />
+      <section ref={formRef} className="mx-auto w-full max-w-2xl scroll-mt-24">
+        <Reveal>
+          <SectionHeading
+            title={<>Launch your <em className="italic text-zinc-600 dark:text-zinc-300">own</em></>}
+            subtitle="Connect a wallet and its Zora profile drops in automatically."
+          />
+        </Reveal>
+        <Reveal delay={0.1}>{card}</Reveal>
+      </section>
+    </>
   );
 }
 
 function Target({ handle, name, avatar, source }: { handle: string; name?: string; avatar?: string; source: ProfileSource }) {
   return (
-    <div className="launch-target">
+    <div className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
       <Avatar src={avatar} name={handle} size={44} />
-      <span className="launch-target-text">
-        <strong>{name || `@${handle}`}</strong>
-        <small className="muted">@{handle} · {SOURCE_LABEL[source]} profile</small>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <strong className="truncate font-semibold">{name || `@${handle}`}</strong>
+        <small className="truncate text-zinc-500 dark:text-zinc-400">@{handle} · {SOURCE_LABEL[source]} profile</small>
       </span>
-      <a className="link small" href="#/top">Change</a>
+      <a className={cn(linkButtonClass, "text-sm")} href="#/top">Change</a>
     </div>
   );
 }
@@ -138,6 +148,15 @@ type ProfileDefaults = {
   wallet?: string;
   ownWallets: string[];
 };
+
+function Field({ label, className, children }: { label: string; className?: string; children: React.ReactNode }) {
+  return (
+    <label className={cn("flex flex-col gap-2", className)}>
+      <span className={labelClass}>{label}</span>
+      {children}
+    </label>
+  );
+}
 
 function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
   const { address: launcher, isConnected, chainId } = useAccount();
@@ -192,91 +211,100 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
   if (tk.step === "done") return <LaunchSuccess state={tk} symbol={symbol} />;
 
   const socials = Object.entries(profile?.socials ?? {}).filter(([, v]) => v);
+  const summary: [string, React.ReactNode, boolean][] = [
+    ["Network", "Robinhood Chain", false],
+    ["Paired with", "ETH", false],
+    ["Fee recipient", feeRecipient ? shortAddr(feeRecipient) : "Your wallet", Boolean(feeRecipient)],
+  ];
 
   return (
-    <form className="form" onSubmit={onSubmit}>
+    <form className="flex flex-col gap-5" onSubmit={onSubmit}>
       {profile && <Target handle={profile.handle} name={profile.displayName} avatar={profile.avatar} source={profile.source} />}
 
-      <div className="form-top">
-        <label className="image-pick" title={hasApiKey ? "Change logo" : "Logo from URL"}>
-          <Avatar src={preview} name={name || "?"} size={88} />
+      <div className="flex items-start gap-4">
+        <label className="group relative shrink-0 cursor-pointer" title={hasApiKey ? "Change logo" : "Logo from URL"}>
+          <Avatar src={preview} name={name || "?"} size={92} className="rounded-2xl" />
           <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden
             onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)} disabled={busy || !hasApiKey} />
-          {hasApiKey && <span className="image-pick-hint">Change</span>}
+          {hasApiKey && (
+            <span className="absolute inset-x-0 bottom-1.5 flex items-center justify-center gap-1 text-[11px] font-bold text-white drop-shadow">
+              <ImagePlus className="size-3" /> Change
+            </span>
+          )}
         </label>
-        <div className="grow stack-sm">
-          <label className="field">
-            <span>Token name</span>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="yourname" maxLength={LIMITS.name} disabled={busy} required />
-          </label>
-          <label className="field">
-            <span>Ticker</span>
-            <div className="prefix-input">
-              <span>$</span>
-              <input value={symbol} onChange={(e) => setSymbol(e.target.value.replace(/\s/g, ""))} placeholder="YOURNAME" maxLength={LIMITS.symbol} disabled={busy} required />
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <Field label="Token name">
+            <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} placeholder="yourname" maxLength={LIMITS.name} disabled={busy} required />
+          </Field>
+          <Field label="Ticker">
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 font-mono text-zinc-400">$</span>
+              <input className={cn(inputClass, "pl-7 font-mono uppercase tracking-wide")} value={symbol} onChange={(e) => setSymbol(e.target.value.replace(/\s/g, ""))} placeholder="YOURNAME" maxLength={LIMITS.symbol} disabled={busy} required />
             </div>
-          </label>
+          </Field>
         </div>
       </div>
 
       {!logoFile && (
-        <label className="field">
-          <span>Logo URL</span>
-          <input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://…" maxLength={LIMITS.logo} disabled={busy} />
-        </label>
+        <Field label="Logo URL">
+          <input className={inputClass} value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://…" maxLength={LIMITS.logo} disabled={busy} />
+        </Field>
       )}
 
-      <label className="field">
-        <span>Bio</span>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={LIMITS.description} placeholder="The story behind this profile…" disabled={busy} />
-      </label>
+      <Field label="Bio">
+        <textarea className={cn(inputClass, "resize-y")} value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={LIMITS.description} placeholder="The story behind this profile…" disabled={busy} />
+      </Field>
 
-      <div className="row gap">
-        <label className="field grow">
-          <span>Creator tax (%)</span>
-          <input type="number" min={0} step={0.1} value={taxPct} onChange={(e) => setTaxPct(e.target.value)} disabled={busy} />
-        </label>
-        <label className="check">
-          <input type="checkbox" checked={buyback} onChange={(e) => setBuyback(e.target.checked)} disabled={busy} />
+      <div className="flex flex-wrap items-end gap-4">
+        <Field label="Creator tax (%)" className="min-w-40 flex-1">
+          <input className={cn(inputClass, "font-mono")} type="number" min={0} step={0.1} value={taxPct} onChange={(e) => setTaxPct(e.target.value)} disabled={busy} />
+        </Field>
+        <label className="flex cursor-pointer items-center gap-2 pb-3 text-sm font-medium">
+          <input type="checkbox" className="size-4 accent-zinc-900 dark:accent-white" checked={buyback} onChange={(e) => setBuyback(e.target.checked)} disabled={busy} />
           <span>Enable buyback &amp; burn</span>
         </label>
       </div>
 
       {profileWallet && launcher && !isOwnProfile && (
-        <div className="field">
-          <span>Creator fees go to</span>
-          <div className="radio-row">
-            <label><input type="radio" checked={feeTo === "me"} onChange={() => setFeeTo("me")} disabled={busy} /> My wallet ({shortAddr(launcher)})</label>
-            <label><input type="radio" checked={feeTo === "profile"} onChange={() => setFeeTo("profile")} disabled={busy} /> @{profile!.handle}'s wallet ({shortAddr(profileWallet)})</label>
+        <div className="flex flex-col gap-2">
+          <span className={labelClass}>Creator fees go to</span>
+          <div className="flex flex-col gap-2 text-sm">
+            <label className="flex cursor-pointer items-center gap-2"><input type="radio" className="accent-zinc-900 dark:accent-white" checked={feeTo === "me"} onChange={() => setFeeTo("me")} disabled={busy} /> My wallet (<span className="font-mono">{shortAddr(launcher)}</span>)</label>
+            <label className="flex cursor-pointer items-center gap-2"><input type="radio" className="accent-zinc-900 dark:accent-white" checked={feeTo === "profile"} onChange={() => setFeeTo("profile")} disabled={busy} /> @{profile!.handle}'s wallet (<span className="font-mono">{shortAddr(profileWallet)}</span>)</label>
           </div>
         </div>
       )}
 
       {socials.length > 0 && (
-        <div className="chips">
-          {socials.map(([k, v]) => <span key={k} className="chip" title={v}>{k}</span>)}
+        <div className="flex flex-wrap gap-1.5">
+          {socials.map(([k, v]) => (
+            <span key={k} title={v} className="rounded-full border border-zinc-200 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">{k}</span>
+          ))}
         </div>
       )}
 
-      <dl className="summary">
-        <div><dt>Network</dt><dd>Robinhood Chain</dd></div>
-        <div><dt>Paired with</dt><dd>ETH</dd></div>
-        <div><dt>Fee recipient</dt><dd className={feeRecipient ? "mono" : undefined}>{feeRecipient ? shortAddr(feeRecipient) : "Your wallet"}</dd></div>
+      <dl className="m-0 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200 min-[420px]:grid-cols-3 dark:border-zinc-800 dark:bg-zinc-800">
+        {summary.map(([k, v, mono]) => (
+          <div key={k} className="bg-zinc-50 px-3.5 py-2.5 dark:bg-zinc-900">
+            <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">{k}</dt>
+            <dd className={cn("m-0 mt-0.5 text-sm font-semibold", mono && "font-mono")}>{v}</dd>
+          </div>
+        ))}
       </dl>
 
       {profile && launcher && !isOwnProfile && (
-        <div className="notice">
+        <Notice>
           Heads up: you're launching a token for @{profile.handle} from a wallet that isn't theirs. It's a community token, not an official one.
-        </div>
+        </Notice>
       )}
       {!profile && launcher && (
-        <div className="notice">No Zora profile on this wallet. Fill it in yourself, or pick a creator from <a href="#/top">Top Profiles</a>.</div>
+        <Notice>No Zora profile on this wallet. Fill it in yourself, or pick a creator from <a href="#/top">Top Profiles</a>.</Notice>
       )}
 
       <TokenizeSteps state={tk} withUpload={Boolean(logoFile)} />
-      {error && <div className="notice notice-error">{error}</div>}
+      {error && <Notice tone="error">{error}</Notice>}
 
-      <button className="btn btn-primary btn-lg block" type="submit" disabled={busy || !formValid || (onChain && !tk.ready)}>
+      <OrbButton type="submit" size="lg" className="w-full" disabled={busy || !formValid || (onChain && !tk.ready)}>
         {busy
           ? "Launching…"
           : !isConnected
@@ -284,7 +312,7 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
             : !onChain
               ? "Switch to Robinhood Chain"
               : `Launch $${symbol.toUpperCase() || "TOKEN"}`}
-      </button>
+      </OrbButton>
     </form>
   );
 }

@@ -1,14 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { wagmiConfig } from "./lib/wagmi";
 import "./lib/zora";
 import App from "./App";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import "@rainbow-me/rainbowkit/styles.css";
-import "./styles.css";
+import "./index.css";
+import { useTheme } from "./lib/theme";
 
 // After a redeploy, an open tab may request JS chunks that no longer exist; reload once to pick up the new build.
 window.addEventListener("vite:preloadError", (event) => {
@@ -23,28 +24,30 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 60_000, refetchOnWindowFocus: false } },
 });
 
-// Matches the site's dark, monochrome theme.
-const rkTheme = darkTheme({
-  accentColor: "#f4f4f5",
-  accentColorForeground: "#0a0a0a",
-  borderRadius: "small",
-  overlayBlur: "small",
-});
-rkTheme.colors.modalBackground = "#0e0e0f";
-rkTheme.colors.modalBorder = "#2e2e31";
-rkTheme.fonts.body = "Inter, system-ui, sans-serif";
+// RainbowKit follows the site's light/dark toggle, with the hero's zinc palette.
+const rkDark = darkTheme({ accentColor: "#fafafa", accentColorForeground: "#09090b", borderRadius: "large", overlayBlur: "small" });
+rkDark.colors.modalBackground = "#18181b";
+const rkLight = lightTheme({ accentColor: "#09090b", accentColorForeground: "#fafafa", borderRadius: "large", overlayBlur: "small" });
+for (const t of [rkDark, rkLight]) t.fonts.body = "Inter, system-ui, sans-serif";
 
-(window as { __launchpadMounted?: boolean }).__launchpadMounted = true;
+function ThemedRainbowKit({ children }: { children: React.ReactNode }) {
+  const { theme } = useTheme();
+  return (
+    <RainbowKitProvider theme={theme === "dark" ? rkDark : rkLight} locale="en-US" modalSize="wide" appInfo={{ appName: "FOZO" }}>
+      {children}
+    </RainbowKitProvider>
+  );
+}
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={rkTheme} locale="en-US" modalSize="wide" appInfo={{ appName: "FOZO" }}>
+        <ThemedRainbowKit>
           <ErrorBoundary>
             <App />
           </ErrorBoundary>
-        </RainbowKitProvider>
+        </ThemedRainbowKit>
       </QueryClientProvider>
     </WagmiProvider>
   </React.StrictMode>,

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProfile, getProfileSocial } from "@zoralabs/coins-sdk";
+import type { GetProfileResponse, GetProfileSocialResponse } from "@zoralabs/coins-sdk";
+import { zoraGetOrNull } from "../lib/zoraApi";
 import { Avatar } from "./Avatar";
 import { TokenizeButton } from "./TokenizeButton";
 import { fmtNum, shortAddr } from "../lib/format";
@@ -7,12 +8,11 @@ import { zoraProfileUrl } from "../lib/zora";
 
 export function useZoraProfile(identifier?: string) {
   return useQuery({
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
     queryKey: ["profile", identifier?.toLowerCase()],
     enabled: Boolean(identifier),
-    queryFn: async () => {
-      const res = await getProfile({ identifier: identifier! });
-      return res.data?.profile ?? null;
-    },
+    queryFn: async () => (await zoraGetOrNull<GetProfileResponse>("profile", { identifier: identifier! }))?.profile ?? null,
   });
 }
 
@@ -26,7 +26,7 @@ const SOCIAL_URLS: Record<string, (u: string) => string> = {
 function useZoraProfileSocial(identifier: string) {
   return useQuery({
     queryKey: ["profile-social", identifier.toLowerCase()],
-    queryFn: async () => (await getProfileSocial({ identifier })).data?.profile ?? null,
+    queryFn: async () => (await zoraGetOrNull<GetProfileSocialResponse>("profileSocial", { identifier }))?.profile ?? null,
   });
 }
 

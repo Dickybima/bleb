@@ -37,6 +37,17 @@ plus leaderboard **Top Profile Zora**.
 ABI diambil dari SDK pihak ketiga `0xfnzero/pons-trade-sdk` dan dicocokkan dengan signature resminya;
 verifikasi ulang dengan dokumentasi Pons (docs.ponsfamily.com/v2) sebelum produksi.
 
+## API (Vercel Functions)
+
+Semua data Zora diambil lewat serverless function di folder `api/` (otomatis aktif saat deploy di Vercel):
+
+- `GET /api/top-profiles` – ranking Top Profile dihitung di server sekali, di-cache CDN 10 menit
+  (`stale-while-revalidate` 1 hari). Browser cukup 1 request, bukan ~100 request ke Zora.
+- `GET /api/zora/{explore|profile|profileSocial}` – proxy ber-cache ke Zora API.
+
+Server memakai `ZORA_API_KEY` (rahasia, tidak ikut ke browser) dan otomatis retry saat Zora membalas 429/5xx.
+Di `npm run dev`, `/api/zora` di-proxy oleh Vite; Top Profile dihitung di browser sebagai fallback.
+
 ## Menjalankan
 
 ```bash

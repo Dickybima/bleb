@@ -16,12 +16,18 @@ import { hasApiKey } from "../lib/zora";
 /** Launch page. With `handle`, the form is prefilled from that Zora profile; otherwise from the connected wallet's profile. */
 export function Launchpad({ handle }: { handle?: string }) {
   const { address } = useAccount();
-  const { data: profile, isPending: profileLoading } = useZoraProfile(handle ?? address);
+  const profileQuery = useZoraProfile(handle ?? address);
+  const { data: profile, isPending: profileLoading } = profileQuery;
   const loading = Boolean(handle ?? address) && profileLoading;
 
   const card = (
     <div className="panel launch-card">
-      {handle && !loading && !profile ? (
+      {profileQuery.isError ? (
+        <div className="notice notice-error">
+          Gagal memuat profil Zora: {(profileQuery.error as Error).message}{" "}
+          <button className="link" onClick={() => profileQuery.refetch()}>Coba lagi</button>
+        </div>
+      ) : handle && !loading && !profile ? (
         <div className="center stack">
           <h3>Profil @{handle} tidak ditemukan</h3>
           <a className="btn btn-ghost" href="#/top">Pilih dari Top Profile</a>

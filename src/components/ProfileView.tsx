@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getProfile } from "@zoralabs/coins-sdk";
 import { Avatar } from "./Avatar";
+import { TokenizeButton } from "./TokenizeButton";
 import { fmtNum, fmtPct, fmtUsd, pctChange, shortAddr } from "../lib/format";
 import { zoraCoinUrl, zoraProfileUrl } from "../lib/zora";
 
@@ -70,7 +71,12 @@ export function ProfileView({ id }: { id: string }) {
           <div className="stat"><span className="muted">Creator coin</span><strong className="mono">{shortAddr(coin.address)}</strong></div>
         </div>
       ) : (
-        <div className="notice">Profil ini belum ditokenisasi. <a href="#/">Luncurkan creator coin →</a></div>
+        <TokenizeButton
+          handle={profile.handle}
+          bio={profile.bio}
+          avatar={profile.avatar?.medium}
+          wallets={[profile.publicWallet.walletAddress, ...profile.linkedWallets.edges.map((e) => e.node.walletAddress)]}
+        />
       )}
 
       <div className="row gap">

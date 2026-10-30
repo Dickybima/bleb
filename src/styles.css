@@ -224,3 +224,15 @@ main.container { padding-top: 32px; padding-bottom: 48px; display: flex; flex-di
   .profile-head { flex-direction: column; }
   .profile-cell strong { max-width: 140px; }
 }
+
+/* One-click tokenize */
+.tokenize {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 18px 20px; border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+.tokenize > div:first-child { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 8px; }
+.tokenize p { margin: 0; }
+.tokenize.done { background: color-mix(in srgb, var(--up) 10%, var(--surface)); border-color: color-mix(in srgb, var(--up) 35%, var(--border)); }
+.small { font-size: 13px; }

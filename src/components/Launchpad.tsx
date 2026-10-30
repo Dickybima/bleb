@@ -1,24 +1,16 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount } from "wagmi";
 import { base } from "wagmi/chains";
-import type { Address, Hash } from "viem";
+import type { Address } from "viem";
 import { useZoraProfile } from "./ProfileView";
 import { Avatar } from "./Avatar";
 import { ConnectButton } from "./ConnectButton";
-import { deployCreatorCoin, fetchCreatorPoolConfig, uploadMetadata } from "../lib/launch";
+import { TokenizeSteps } from "./TokenizeSteps";
+import { useTokenize } from "../lib/useTokenize";
 import { fmtUsd, shortAddr } from "../lib/format";
 import { profileHref } from "../lib/router";
 import { basescanTxUrl, hasApiKey, PLATFORM_REFERRER, zoraCoinUrl } from "../lib/zora";
 import { zeroAddress } from "viem";
-
-type Step = "idle" | "upload" | "config" | "sign" | "confirm" | "done";
-
-const STEP_LABEL: Record<Exclude<Step, "idle" | "done">, string> = {
-  upload: "Upload metadata ke IPFS",
-  config: "Ambil pool config creator coin",
-  sign: "Tanda tangani transaksi di wallet",
-  confirm: "Menunggu konfirmasi di Base",
-};
 
 export function Launchpad() {
   const { address, isConnected, chainId } = useAccount();
@@ -99,8 +91,8 @@ function LaunchForm({
   creator: Address;
   defaults: { handle?: string; description: string; avatar?: string };
 }) {
-  const publicClient = usePublicClient({ chainId: base.id });
-  const { data: walletClient } = useWalletClient({ chainId: base.id });
+  const tk = useTokenize();
+  const { busy, step, txHash, coin, error } = tk;
 
   const [name, setName] = useState(defaults.handle ?? "");
   const [symbol, setSymbol] = useState(defaults.handle ?? "");
@@ -109,11 +101,6 @@ function LaunchForm({
   const [metadataUri, setMetadataUri] = useState("");
   const [preview, setPreview] = useState<string | undefined>(defaults.avatar);
 
-  const [step, setStep] = useState<Step>("idle");
-  const [error, setError] = useState<string | null>(null);
-  const [txHash, setTxHash] = useState<Hash | null>(null);
-  const [coin, setCoin] = useState<Address | null>(null);
-
   useEffect(() => {
     if (!imageFile) return setPreview(defaults.avatar);
     const url = URL.createObjectURL(imageFile);
@@ -121,46 +108,21 @@ function LaunchForm({
     return () => URL.revokeObjectURL(url);
   }, [imageFile, defaults.avatar]);
 
-  const busy = step !== "idle" && step !== "done";
   const image = imageFile ?? defaults.avatar;
   const canSubmit =
-    !busy && name.trim() && symbol.trim() && walletClient && publicClient &&
+    !busy && name.trim() && symbol.trim() && tk.ready &&
     (hasApiKey ? Boolean(image) : /^(ipfs|https?|ar):\/\//.test(metadataUri.trim()));
 
-  const onSubmit = async (e: FormEvent) => {
+  const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!walletClient || !publicClient) return;
-    setError(null);
-    setTxHash(null);
-    try {
-      let uri = metadataUri.trim();
-      if (hasApiKey) {
-        setStep("upload");
-        uri = await uploadMetadata({ creator, name: name.trim(), symbol: symbol.trim(), description, image: image! });
-      }
-      setStep("config");
-      const poolConfig = await fetchCreatorPoolConfig();
-      setStep("sign");
-      const result = await deployCreatorCoin({
-        walletClient,
-        publicClient,
-        account: creator,
-        uri,
-        name: name.trim(),
-        symbol: symbol.trim(),
-        poolConfig,
-        onHash: (h) => {
-          setTxHash(h);
-          setStep("confirm");
-        },
-      });
-      setCoin(result.coin ?? null);
-      setStep("done");
-    } catch (err) {
-      const e = err as { shortMessage?: string; message?: string };
-      setError(e.shortMessage ?? e.message ?? String(err));
-      setStep("idle");
-    }
+    tk.tokenize({
+      creator,
+      name: name.trim(),
+      symbol: symbol.trim(),
+      description,
+      image,
+      metadataUri: hasApiKey ? undefined : metadataUri,
+    });
   };
 
   if (step === "done") {
@@ -227,18 +189,7 @@ function LaunchForm({
         <div className="notice">Wallet ini belum punya profil Zora. Coin tetap bisa diluncurkan, tapi tidak akan muncul sebagai creator coin profil di Zora.</div>
       )}
 
-      {busy && (
-        <ol className="steps">
-          {(Object.keys(STEP_LABEL) as (keyof typeof STEP_LABEL)[])
-            .filter((s) => hasApiKey || s !== "upload")
-            .map((s) => {
-              const order = ["upload", "config", "sign", "confirm"];
-              const state = order.indexOf(s) < order.indexOf(step) ? "done" : s === step ? "active" : "";
-              return <li key={s} className={state}>{STEP_LABEL[s]}</li>;
-            })}
-          {txHash && <li className="muted"><a href={basescanTxUrl(txHash)} target="_blank" rel="noreferrer">tx {shortAddr(txHash)} ↗</a></li>}
-        </ol>
-      )}
+      <TokenizeSteps state={tk} withUpload={hasApiKey} />
 
       {error && <div className="notice notice-error">{error}</div>}
 

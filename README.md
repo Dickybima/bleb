@@ -11,6 +11,9 @@ Website launchpad untuk **men-tokenize profil Zora** menjadi creator coin di Bas
 - **Top Profile** – peringkat creator coin berdasarkan Market Cap, Volume 24 jam, Trending, dan Profil Baru,
   dengan pagination "Muat lebih banyak".
 - **Halaman profil** – cari `@handle` atau alamat `0x…` untuk melihat bio, akun sosial, dan statistik creator coin.
+  Jika profil belum punya creator coin, ada tombol **Tokenize**: sekali klik langsung membuat creator coin
+  `$HANDLE` dari handle, bio, dan avatar profil (metadata di-upload otomatis ke IPFS). Tombol hanya aktif untuk
+  wallet pemilik profil (public wallet atau linked wallet) dan butuh `VITE_ZORA_API_KEY`.
 
 ## Menjalankan
 

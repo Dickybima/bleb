@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 
-export type Route = { page: "launch" } | { page: "top" } | { page: "profile"; id: string };
+export type Route =
+  | { page: "launch"; handle?: string }
+  | { page: "top" }
+  | { page: "profile"; id: string };
 
 function parse(hash: string): Route {
   const path = hash.replace(/^#\/?/, "");
   if (path.startsWith("profile/")) return { page: "profile", id: decodeURIComponent(path.slice(8)) };
+  if (path.startsWith("launch/")) return { page: "launch", handle: decodeURIComponent(path.slice(7)) };
   if (path === "top") return { page: "top" };
   return { page: "launch" };
 }
@@ -23,3 +27,5 @@ export function useRoute() {
 }
 
 export const profileHref = (id: string) => `#/profile/${encodeURIComponent(id)}`;
+/** Launch form prefilled from the given Zora profile. */
+export const launchHref = (handle: string) => `#/launch/${encodeURIComponent(handle)}`;

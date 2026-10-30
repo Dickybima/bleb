@@ -12,7 +12,7 @@ export default function App() {
       <main className="container">
         {route.page === "launch" && (
           <>
-            <Launchpad />
+            <Launchpad key={route.handle ?? ""} handle={route.handle} />
             <TopProfiles compact />
           </>
         )}

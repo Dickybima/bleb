@@ -15,6 +15,7 @@ const ORDER = ["upload", "sign", "confirm"] as const;
 
 export type TokenizeInput = {
   creator: Address;
+  feeRecipient?: Address;
   name: string;
   symbol: string;
   description: string;
@@ -53,6 +54,7 @@ export function useTokenize() {
         publicClient,
         input: {
           account: input.creator,
+          feeRecipient: input.feeRecipient,
           name: input.name,
           symbol: input.symbol,
           logo,

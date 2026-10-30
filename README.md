@@ -9,10 +9,13 @@ plus leaderboard **Top Profile Zora**.
   logo (avatar), deskripsi (bio), dan sosial (X, Farcaster, website). Bisa atur creator tax dan buyback & burn.
   Token diluncurkan lewat `launchToken` di Pons V2 factory `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e`,
   dipasangkan dengan ETH: mulai di bonding curve lalu lulus ke Uniswap v4.
-- **Tombol Tokenize di halaman profil** – sekali klik langsung meluncurkan token `$HANDLE` di Pons dari data profil.
-  Hanya aktif untuk wallet pemilik profil (public wallet atau linked wallet).
-- **Top Profile** – peringkat creator coin Zora (Market Cap, Volume 24j, Trending, Baru), data live dari Zora API.
-- **Halaman profil** – cari `@handle` atau `0x…`.
+- **Top Profile** – profil Zora diurutkan berdasarkan jumlah followers (tanpa data harga/market cap). Kandidat
+  diambil dari daftar creator Zora (most valuable, trending, featured, top volume), lalu followers tiap profil
+  dibaca lewat `getProfileSocial`.
+- **Tombol Tokenize** (di Top Profile dan halaman profil) – membuka form peluncuran `#/launch/<handle>` yang
+  otomatis terisi nama, ticker, logo, bio, dan sosial dari profil tersebut. Jika profil bukan milik wallet yang
+  terhubung, form memberi peringatan dan penerima fee bisa dipilih: wallet sendiri atau wallet profil.
+- **Halaman profil** – cari `@handle` atau `0x…`; menampilkan bio, sosial, followers, dan following.
 
 ## Alur peluncuran (Pons V2)
 

@@ -75,6 +75,8 @@ async function resolveLaunchConfigId(publicClient: Client): Promise<bigint> {
 
 export type LaunchInput = {
   account: Address;
+  /** Receives creator fees and creator tax; defaults to the launching account. */
+  feeRecipient?: Address;
   name: string;
   symbol: string;
   logo: string;
@@ -125,7 +127,7 @@ export async function launchOnPons({
     socials: Object.fromEntries(
       Object.entries(input.socials).map(([k, v]) => [k, fitBytes(v, LIMITS.social)]),
     ) as Socials,
-    creatorFeeRecipient: account,
+    creatorFeeRecipient: input.feeRecipient ?? account,
     creatorTaxBps: input.creatorTaxBps,
     buybackEnabled: input.buybackEnabled,
     expectedEconomics,

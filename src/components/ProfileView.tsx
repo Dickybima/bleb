@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProfile } from "@zoralabs/coins-sdk";
+import { getProfile, getProfileSocial } from "@zoralabs/coins-sdk";
 import { Avatar } from "./Avatar";
 import { TokenizeButton } from "./TokenizeButton";
-import { socialsFromProfile } from "../lib/profileSocials";
-import { fmtNum, fmtPct, fmtUsd, pctChange, shortAddr } from "../lib/format";
-import { zoraCoinUrl, zoraProfileUrl } from "../lib/zora";
+import { fmtNum, shortAddr } from "../lib/format";
+import { zoraProfileUrl } from "../lib/zora";
 
 export function useZoraProfile(identifier?: string) {
   return useQuery({
@@ -24,8 +23,15 @@ const SOCIAL_URLS: Record<string, (u: string) => string> = {
   tiktok: (u) => `https://tiktok.com/@${u}`,
 };
 
+function useZoraProfileSocial(identifier: string) {
+  return useQuery({
+    queryKey: ["profile-social", identifier.toLowerCase()],
+    queryFn: async () => (await getProfileSocial({ identifier })).data?.profile ?? null,
+  });
+}
+
 export function ProfileView({ id }: { id: string }) {
-  const { data: profile, isPending, isError, error } = useZoraProfile(id);
+  const { data: profile, isPending, isError, error } = useZoraProfileSocial(id);
 
   if (isPending) return <section className="panel"><span className="skeleton tall" /></section>;
   if (isError) return <section className="panel notice notice-error">Gagal memuat profil: {(error as Error).message}</section>;
@@ -37,8 +43,6 @@ export function ProfileView({ id }: { id: string }) {
       </section>
     );
 
-  const coin = profile.creatorCoin;
-  const pct = coin ? pctChange(coin.marketCap, coin.marketCapDelta24h) : null;
   const socials = Object.entries(profile.socialAccounts ?? {}).filter(([, s]) => s?.username);
 
   return (
@@ -62,28 +66,15 @@ export function ProfileView({ id }: { id: string }) {
         </div>
       </div>
 
-      {coin && (
-        <div className="stats">
-          <div className="stat"><span className="muted">Zora creator coin</span><strong>{fmtUsd(coin.marketCap)}</strong></div>
-          <div className="stat">
-            <span className="muted">Perubahan 24j</span>
-            <strong className={pct === null || pct === 0 ? "" : pct > 0 ? "up" : "down"}>{fmtPct(pct)}</strong>
-          </div>
-          <div className="stat"><span className="muted">Alamat coin (Base)</span><strong className="mono">{shortAddr(coin.address)}</strong></div>
-        </div>
-      )}
+      <div className="stats">
+        <div className="stat"><span className="muted">Followers</span><strong>{fmtNum(profile.followers.count)}</strong></div>
+        <div className="stat"><span className="muted">Following</span><strong>{fmtNum(profile.following.count)}</strong></div>
+      </div>
 
-      <TokenizeButton
-        handle={profile.handle}
-        bio={profile.bio}
-        avatar={profile.avatar?.medium}
-        socials={socialsFromProfile(profile.socialAccounts, profile.website)}
-        wallets={[profile.publicWallet.walletAddress, ...profile.linkedWallets.edges.map((e) => e.node.walletAddress)]}
-      />
+      <TokenizeButton handle={profile.handle} />
 
       <div className="row gap">
         <a className="btn btn-ghost" href={zoraProfileUrl(profile.handle)} target="_blank" rel="noreferrer">Buka di Zora ↗</a>
-        {coin && <a className="btn btn-primary" href={zoraCoinUrl(coin.address)} target="_blank" rel="noreferrer">Coin di Zora ↗</a>}
       </div>
     </section>
   );

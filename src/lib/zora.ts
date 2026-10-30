@@ -13,7 +13,6 @@ export const zoraProfileUrl = (handleOrAddress: string) =>
     ? `https://zora.co/${handleOrAddress}`
     : `https://zora.co/@${handleOrAddress}`;
 
-export const zoraCoinUrl = (address: string) => `https://zora.co/coin/base:${address}`;
 
 const explorer = robinhoodChain.blockExplorers.default.url;
 export const explorerTxUrl = (hash: string) => `${explorer}/tx/${hash}`;

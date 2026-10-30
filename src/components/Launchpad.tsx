@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useAccount } from "wagmi";
-import type { Address } from "viem";
+import { getAddress, isAddress, type Address } from "viem";
 import { useZoraProfile } from "./ProfileView";
 import { Avatar } from "./Avatar";
 import { ConnectButton } from "./ConnectButton";
@@ -13,31 +13,37 @@ import { useTokenize } from "../lib/useTokenize";
 import { shortAddr } from "../lib/format";
 import { hasApiKey } from "../lib/zora";
 
-export function Launchpad() {
+/** Launch page. With `handle`, the form is prefilled from that Zora profile; otherwise from the connected wallet's profile. */
+export function Launchpad({ handle }: { handle?: string }) {
   const { address, isConnected, chainId } = useAccount();
-  const { data: profile, isPending: profileLoading } = useZoraProfile(address);
+  const { data: profile, isPending: profileLoading } = useZoraProfile(handle ?? address);
 
   return (
     <section className="hero">
       <div className="hero-copy">
         <span className="eyebrow">Profile Launchpad · Pons V2</span>
-        <h1>Tokenize profil kamu dalam satu klik.</h1>
+        <h1>Tokenize profil Zora dalam satu klik.</h1>
         <p className="muted lead">
-          Ubah profil Zora kamu menjadi token di Robinhood Chain lewat Pons V2: mulai di bonding curve, lalu otomatis
-          lulus ke pool Uniswap v4 saat target likuiditas tercapai.
+          Ubah profil Zora menjadi token di Robinhood Chain lewat Pons V2: mulai di bonding curve, lalu otomatis lulus ke
+          pool Uniswap v4 saat target likuiditas tercapai.
         </p>
         <ul className="bullets">
-          <li>Nama, logo, bio, dan sosial diambil otomatis dari profil Zora</li>
-          <li>Fee kreator dan creator tax mengalir ke wallet kamu</li>
+          <li>Nama, ticker, logo, bio, dan sosial diambil otomatis dari profil Zora</li>
+          <li>Pilih profil dari Top Profile, lalu klik Tokenize</li>
           <li>Diluncurkan langsung di kontrak Pons V2, dipasangkan dengan ETH</li>
         </ul>
       </div>
 
       <div className="panel launch-card">
-        {!isConnected ? (
+        {handle && !profileLoading && !profile ? (
           <div className="center stack">
-            <h3>Hubungkan wallet untuk mulai</h3>
-            <p className="muted">Gunakan wallet yang terhubung ke profil Zora kamu.</p>
+            <h3>Profil @{handle} tidak ditemukan</h3>
+            <a className="btn btn-ghost" href="#/top">Pilih dari Top Profile</a>
+          </div>
+        ) : !isConnected ? (
+          <div className="center stack">
+            {profile && <Target handle={profile.handle} name={profile.displayName} avatar={profile.avatar?.medium} />}
+            <h3>Hubungkan wallet untuk meluncurkan</h3>
             <ConnectButton />
           </div>
         ) : chainId !== robinhoodChain.id ? (
@@ -50,14 +56,21 @@ export function Launchpad() {
           <span className="skeleton tall" />
         ) : (
           <LaunchForm
-            key={address}
-            creator={address!}
-            defaults={{
-              handle: profile?.handle,
-              description: profile?.bio ?? "",
-              avatar: profile?.avatar?.medium,
-              socials: socialsFromProfile(profile?.socialAccounts, profile?.website),
-            }}
+            key={`${handle ?? ""}:${address}`}
+            launcher={address!}
+            profile={
+              profile
+                ? {
+                    handle: profile.handle,
+                    displayName: profile.displayName,
+                    description: profile.bio ?? "",
+                    avatar: profile.avatar?.medium,
+                    socials: socialsFromProfile(profile.socialAccounts, profile.website),
+                    wallet: profile.publicWallet.walletAddress,
+                    ownWallets: [profile.publicWallet.walletAddress, ...profile.linkedWallets.edges.map((e) => e.node.walletAddress)],
+                  }
+                : undefined
+            }
           />
         )}
       </div>
@@ -65,24 +78,46 @@ export function Launchpad() {
   );
 }
 
-function LaunchForm({
-  creator,
-  defaults,
-}: {
-  creator: Address;
-  defaults: { handle?: string; description: string; avatar?: string; socials: Socials };
-}) {
+function Target({ handle, name, avatar }: { handle: string; name?: string; avatar?: string }) {
+  return (
+    <div className="launch-target">
+      <Avatar src={avatar} name={handle} size={44} />
+      <span className="launch-target-text">
+        <strong>{name || `@${handle}`}</strong>
+        <small className="muted">@{handle} · profil yang ditokenisasi</small>
+      </span>
+      <a className="link small" href="#/top">Ganti</a>
+    </div>
+  );
+}
+
+type ProfileDefaults = {
+  handle: string;
+  displayName?: string;
+  description: string;
+  avatar?: string;
+  socials: Socials;
+  wallet: string;
+  ownWallets: string[];
+};
+
+function LaunchForm({ launcher, profile }: { launcher: Address; profile?: ProfileDefaults }) {
   const tk = useTokenize();
   const { busy, error } = tk;
 
-  const [name, setName] = useState(defaults.handle ?? "");
-  const [symbol, setSymbol] = useState(defaults.handle?.toUpperCase() ?? "");
-  const [description, setDescription] = useState(defaults.description);
-  const [logoUrl, setLogoUrl] = useState(defaults.avatar ?? "");
+  const [name, setName] = useState(profile?.displayName || profile?.handle || "");
+  const [symbol, setSymbol] = useState(profile?.handle.toUpperCase() ?? "");
+  const [description, setDescription] = useState(profile?.description ?? "");
+  const [logoUrl, setLogoUrl] = useState(profile?.avatar ?? "");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [taxPct, setTaxPct] = useState("0");
   const [buyback, setBuyback] = useState(false);
-  const [preview, setPreview] = useState<string | undefined>(defaults.avatar);
+  const [preview, setPreview] = useState<string | undefined>(profile?.avatar);
+
+  const isOwnProfile = Boolean(profile?.ownWallets.some((w) => w.toLowerCase() === launcher.toLowerCase()));
+  const profileWallet = profile && isAddress(profile.wallet) ? getAddress(profile.wallet) : undefined;
+  const [feeTo, setFeeTo] = useState<"me" | "profile">("me");
+  const feeRecipient = feeTo === "profile" && profileWallet ? profileWallet : launcher;
 
   useEffect(() => {
     if (!logoFile) return setPreview(logoUrl || undefined);
@@ -97,12 +132,13 @@ function LaunchForm({
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     tk.tokenize({
-      creator,
+      creator: launcher,
+      feeRecipient,
       name: name.trim(),
       symbol: symbol.trim(),
       description,
       logo: logoFile ?? logoUrl.trim(),
-      socials: defaults.socials,
+      socials: profile?.socials ?? { twitter: "", telegram: "", discord: "", website: "", farcaster: "" },
       creatorTaxBps: taxBps,
       buybackEnabled: buyback,
     });
@@ -110,10 +146,12 @@ function LaunchForm({
 
   if (tk.step === "done") return <LaunchSuccess state={tk} symbol={symbol} />;
 
-  const socials = Object.entries(defaults.socials).filter(([, v]) => v);
+  const socials = Object.entries(profile?.socials ?? {}).filter(([, v]) => v);
 
   return (
     <form className="form" onSubmit={onSubmit}>
+      {profile && <Target handle={profile.handle} name={profile.displayName} avatar={profile.avatar} />}
+
       <div className="form-top">
         <label className="image-pick" title={hasApiKey ? "Ganti logo" : "Logo dari URL"}>
           <Avatar src={preview} name={name || "?"} size={88} />
@@ -144,8 +182,8 @@ function LaunchForm({
       )}
 
       <label className="field">
-        <span>Deskripsi</span>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={LIMITS.description} placeholder="Ceritakan tentang kamu…" disabled={busy} />
+        <span>Bio / deskripsi</span>
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={LIMITS.description} placeholder="Ceritakan tentang profil ini…" disabled={busy} />
       </label>
 
       <div className="row gap">
@@ -159,6 +197,16 @@ function LaunchForm({
         </label>
       </div>
 
+      {profileWallet && !isOwnProfile && (
+        <div className="field">
+          <span>Penerima fee kreator</span>
+          <div className="radio-row">
+            <label><input type="radio" checked={feeTo === "me"} onChange={() => setFeeTo("me")} disabled={busy} /> Wallet saya ({shortAddr(launcher)})</label>
+            <label><input type="radio" checked={feeTo === "profile"} onChange={() => setFeeTo("profile")} disabled={busy} /> Wallet profil @{profile!.handle} ({shortAddr(profileWallet)})</label>
+          </div>
+        </div>
+      )}
+
       {socials.length > 0 && (
         <div className="chips">
           {socials.map(([k, v]) => <span key={k} className="chip" title={v}>{k}</span>)}
@@ -168,11 +216,16 @@ function LaunchForm({
       <dl className="summary">
         <div><dt>Jaringan</dt><dd>Robinhood Chain</dd></div>
         <div><dt>Pasangan</dt><dd>ETH</dd></div>
-        <div><dt>Penerima fee</dt><dd className="mono">{shortAddr(creator)}</dd></div>
+        <div><dt>Penerima fee</dt><dd className="mono">{shortAddr(feeRecipient)}</dd></div>
       </dl>
 
-      {!defaults.handle && (
-        <div className="notice">Wallet ini belum punya profil Zora. Token tetap bisa diluncurkan, isi data secara manual.</div>
+      {profile && !isOwnProfile && (
+        <div className="notice">
+          Kamu meluncurkan token untuk profil @{profile.handle} yang bukan milik wallet ini. Token ini tidak resmi dari pemilik profil.
+        </div>
+      )}
+      {!profile && (
+        <div className="notice">Wallet ini belum punya profil Zora. Isi data manual, atau pilih profil dari <a href="#/top">Top Profile</a>.</div>
       )}
 
       <TokenizeSteps state={tk} withUpload={Boolean(logoFile)} />

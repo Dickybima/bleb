@@ -1,17 +1,10 @@
-import { useState } from "react";
 import { Avatar } from "./Avatar";
-import { useExplore, type ExploreScope, type LaunchedToken } from "../lib/explore";
+import { useExplore, type LaunchedToken } from "../lib/explore";
 import { shortAddr, timeAgo } from "../lib/format";
 import { explorerAddressUrl, explorerTokenUrl, explorerTxUrl } from "../lib/zora";
 
-const SCOPES: { id: ExploreScope; label: string }[] = [
-  { id: "launchpad", label: "Dari launchpad ini" },
-  { id: "all", label: "Semua token Pons" },
-];
-
 export function Explore() {
-  const [scope, setScope] = useState<ExploreScope>("launchpad");
-  const query = useExplore(scope);
+  const query = useExplore();
   const tokens = query.data?.pages.flatMap((p) => p.items) ?? [];
 
   return (
@@ -20,17 +13,9 @@ export function Explore() {
         <div>
           <h2>Explore</h2>
           <p className="muted">
-            Token terbaru yang diluncurkan di Pons V2, dibaca langsung dari Robinhood Chain.
+            Token yang diluncurkan lewat launchpad ini, terbaru di atas.
             {query.isFetching && !query.isPending && <span className="live"> · memperbarui…</span>}
           </p>
-        </div>
-        <div className="tabs" role="tablist">
-          {SCOPES.map((s) => (
-            <button key={s.id} role="tab" aria-selected={scope === s.id}
-              className={scope === s.id ? "tab active" : "tab"} onClick={() => setScope(s.id)}>
-              {s.label}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -74,7 +59,6 @@ function TokenCard({ token: t }: { token: LaunchedToken }) {
           <strong>{t.name || symbol}</strong>
           <span className="muted">${symbol.toUpperCase()}</span>
         </div>
-        {t.fromLaunchpad && <span className="badge">Launchpad</span>}
       </div>
       {t.description && <p className="token-desc">{t.description}</p>}
       <div className="token-meta muted">

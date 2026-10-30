@@ -10,14 +10,14 @@ export function ConnectButton() {
         if (!account) {
           return (
             <button className="btn btn-primary" onClick={openConnectModal}>
-              Connect<span className="hide-xs"> Wallet</span>
+              <span>Connect<span className="hide-xs"> Wallet</span></span>
             </button>
           );
         }
         if (chain?.unsupported) {
           return (
             <button className="btn btn-warn" onClick={openChainModal}>
-              Pindah<span className="hide-xs"> ke Robinhood Chain</span>
+              <span>Pindah<span className="hide-xs"> ke Robinhood Chain</span></span>
             </button>
           );
         }

@@ -21,8 +21,6 @@ import { robinhoodChain } from "./chains";
 export const PONS_FACTORY: Address = "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e";
 /** First block of the Pons V2 factory on Robinhood Chain. */
 export const PONS_FACTORY_DEPLOY_BLOCK = 57_412_596n;
-/** Pons V2 launch-and-buy router (alternate launch entry point). */
-export const PONS_LAUNCH_AND_BUY: Address = "0xe33E9E479dF8802cb0866d5d05258bEc4cF62948";
 
 /**
  * Launches from this site carry this 6-byte prefix in their CREATE2 salt (the rest is random),
@@ -36,10 +34,6 @@ export const NATIVE_QUOTE: Address = zeroAddress;
 
 const TOKEN_PARAMS =
   "(string name, string symbol, string logo, string description, (string twitter, string telegram, string discord, string website, string farcaster) socials, address creatorFeeRecipient, uint16 creatorTaxBps, bool buybackEnabled, bytes32 expectedEconomics, bytes32 salt)";
-
-export const ponsLaunchAndBuyAbi = parseAbi([
-  `function launchAndBuy(${TOKEN_PARAMS} params, uint256 launchConfigId, address pairToken, uint256 quoteIn, uint256 minTokensOut, address recipient, address[] snipeTaxExemptions) payable returns (address token, address curve, uint256 tokensOut)`,
-]);
 
 export const ponsFactoryAbi = parseAbi([
   "function launchEnabled() view returns (bool)",

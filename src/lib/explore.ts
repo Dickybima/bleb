@@ -1,18 +1,15 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
-import { decodeFunctionData, erc20Abi, getAbiItem, type Address, type Hash, type Hex, type PublicClient, type Transport } from "viem";
+import { decodeFunctionData, getAbiItem, type Address, type Hash, type Hex, type PublicClient, type Transport } from "viem";
 import { robinhoodChain } from "./chains";
 import {
   PONS_FACTORY,
   PONS_FACTORY_DEPLOY_BLOCK,
   isLaunchpadSalt,
   ponsFactoryAbi,
-  ponsLaunchAndBuyAbi,
   type Socials,
 } from "./pons";
 import { mapLimit } from "./util";
-
-export type ExploreScope = "launchpad" | "all";
 
 export type LaunchedToken = {
   token: Address;
@@ -26,7 +23,6 @@ export type LaunchedToken = {
   logo?: string;
   description?: string;
   socials?: Socials;
-  fromLaunchpad: boolean;
 };
 
 type Client = PublicClient<Transport, typeof robinhoodChain>;
@@ -48,37 +44,25 @@ type TokenParams = {
   salt: Hex;
 };
 
-/** Recovers the launch params from the transaction calldata (direct factory call or launch-and-buy router). */
+/** Recovers the launch params from the factory call's calldata; null if the transaction was not a direct launchToken call. */
 function decodeLaunchParams(input: Hex): TokenParams | null {
-  for (const abi of [ponsFactoryAbi, ponsLaunchAndBuyAbi] as const) {
-    try {
-      const { functionName, args } = decodeFunctionData({ abi, data: input });
-      if (functionName === "launchToken" || functionName === "launchAndBuy") return args[0] as TokenParams;
-    } catch {
-      // not this ABI
-    }
+  try {
+    const { functionName, args } = decodeFunctionData({ abi: ponsFactoryAbi, data: input });
+    return functionName === "launchToken" ? (args[0] as TokenParams) : null;
+  } catch {
+    return null;
   }
-  return null;
 }
 
 async function describeLaunch(client: Client, log: { args: { token?: Address; curve?: Address; deployer?: Address }; transactionHash: Hash; blockNumber: bigint }) {
   const { token, curve, deployer } = log.args;
   if (!token || !curve || !deployer) return null;
 
-  const [tx, block] = await Promise.all([
-    client.getTransaction({ hash: log.transactionHash }),
-    client.getBlock({ blockNumber: log.blockNumber }).catch(() => null),
-  ]);
+  // Only launches made from this site (tagged salt) are listed; skip the block lookup for anything else.
+  const tx = await client.getTransaction({ hash: log.transactionHash });
   const params = decodeLaunchParams(tx.input);
-
-  let name = params?.name ?? "";
-  let symbol = params?.symbol ?? "";
-  if (!params) {
-    [name, symbol] = await Promise.all([
-      client.readContract({ address: token, abi: erc20Abi, functionName: "name" }).catch(() => ""),
-      client.readContract({ address: token, abi: erc20Abi, functionName: "symbol" }).catch(() => ""),
-    ]);
-  }
+  if (!params || !isLaunchpadSalt(params.salt)) return null;
+  const block = await client.getBlock({ blockNumber: log.blockNumber }).catch(() => null);
 
   return {
     token,
@@ -87,19 +71,18 @@ async function describeLaunch(client: Client, log: { args: { token?: Address; cu
     txHash: log.transactionHash,
     blockNumber: log.blockNumber,
     timestamp: block ? Number(block.timestamp) : undefined,
-    name,
-    symbol,
-    logo: params?.logo || undefined,
-    description: params?.description || undefined,
-    socials: params?.socials,
-    fromLaunchpad: params ? isLaunchpadSalt(params.salt) : false,
+    name: params.name,
+    symbol: params.symbol,
+    logo: params.logo || undefined,
+    description: params.description || undefined,
+    socials: params.socials,
   } satisfies LaunchedToken;
 }
 
 type Page = { items: LaunchedToken[]; nextToBlock: bigint | null };
 
 /** Scans TokenLaunched logs backwards from `toBlock`, shrinking the range when the RPC rejects a request. */
-async function fetchPage(client: Client, scope: ExploreScope, toBlock: bigint | undefined): Promise<Page> {
+async function fetchPage(client: Client, toBlock: bigint | undefined): Promise<Page> {
   let to = toBlock ?? (await client.getBlockNumber());
   let chunk = INITIAL_CHUNK;
   const items: LaunchedToken[] = [];
@@ -116,7 +99,7 @@ async function fetchPage(client: Client, scope: ExploreScope, toBlock: bigint | 
     }
 
     const described = await mapLimit([...logs].reverse(), 4, (log) => describeLaunch(client, log).catch(() => null));
-    for (const t of described) if (t && (scope === "all" || t.fromLaunchpad)) items.push(t);
+    for (const t of described) if (t) items.push(t);
 
     to = from - 1n;
     if (logs.length === 0 && chunk < INITIAL_CHUNK * 4n) chunk *= 2n;
@@ -126,15 +109,14 @@ async function fetchPage(client: Client, scope: ExploreScope, toBlock: bigint | 
   return { items, nextToBlock: to >= PONS_FACTORY_DEPLOY_BLOCK ? to : null };
 }
 
-export const exploreQueryKey = (scope: ExploreScope) => ["explore-pons", scope] as const;
-
-export function useExplore(scope: ExploreScope) {
+/** Tokens launched from this site, newest first. */
+export function useExplore() {
   const client = usePublicClient({ chainId: robinhoodChain.id });
   return useInfiniteQuery({
-    queryKey: exploreQueryKey(scope),
+    queryKey: ["explore-pons"],
     enabled: Boolean(client),
     initialPageParam: undefined as bigint | undefined,
-    queryFn: ({ pageParam }) => fetchPage(client!, scope, pageParam),
+    queryFn: ({ pageParam }) => fetchPage(client!, pageParam),
     getNextPageParam: (last) => last.nextToBlock ?? undefined,
     // New launches show up without a manual refresh.
     refetchInterval: 30_000,

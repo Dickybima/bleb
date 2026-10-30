@@ -1,7 +1,7 @@
 /**
  * Robinhood Stock Tokens offered as Pons pair (quote) assets. Addresses are never hard-coded: tickers are not
- * identity (look-alike tokens exist), so they are resolved from Robinhood's asset list and then checked on-chain
- * against the Pons factory's approvedPairTokens. Shared by the /api/stock-tokens route and the browser.
+ * identity (look-alike tokens exist), so they come from the Pons factory's own approved-pair list on-chain.
+ * Robinhood's asset list is only used for logos. Shared by the /api/stock-tokens route and the browser.
  */
 export const ROBINHOOD_CHAIN_ID = 4663;
 export const RHJ_ASSETS_URL = "https://api.robinhood.com/rhj/assets/";
@@ -25,6 +25,13 @@ export const STOCKS: StockMeta[] = [
   { symbol: "MU", name: "Micron", color: "#0067B1" },
   { symbol: "PLTR", name: "Palantir", color: "#111316" },
 ];
+
+/** Maps an on-chain ERC-20 symbol to one of our tickers ("TSLA", "tsla", "TSLAx" → "TSLA"), or null. */
+export function matchStockSymbol(symbol: string): string | null {
+  const norm = symbol.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  for (const { symbol: t } of STOCKS) if (norm === t || norm === `${t}X` || norm === `X${t}`) return t;
+  return null;
+}
 
 export type ResolvedStock = { symbol: string; name?: string; address: string; logo?: string };
 

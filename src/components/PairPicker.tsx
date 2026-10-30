@@ -28,8 +28,8 @@ const EthLogo = ({ size = 28 }: { size?: number }) => (
 );
 
 const STATUS_HINT: Record<Exclude<StockPair["status"], "ready">, string> = {
-  unlisted: "No Robinhood Chain token found for this ticker",
-  unapproved: "Not enabled as a pair on Pons yet",
+  unlisted: "Not enabled as a pair asset on Pons yet",
+  unapproved: "Pair approval was revoked on Pons",
 };
 
 /** "Paired asset (quote)": ETH by default, or an approved Robinhood stock token. */
@@ -86,6 +86,16 @@ export function PairPicker({ value, onChange, disabled }: { value: PairChoice; o
         })}
       </div>
 
+      {stocks.data && (
+        <p className="m-0 text-xs text-zinc-500 dark:text-zinc-400">
+          {(() => {
+            const ready = stocks.data.filter((s) => s.status === "ready").length;
+            return ready === 0
+              ? "None of these stocks are enabled as pair assets on Pons yet. ETH works today; faded stocks unlock automatically once Pons approves them."
+              : `${ready} of ${stocks.data.length} stocks are enabled as pair assets on Pons right now. Faded ones aren't approved yet.`;
+          })()}
+        </p>
+      )}
       {stocks.isError && (
         <p className="m-0 text-xs text-zinc-500 dark:text-zinc-400">
           Stock pairs are unavailable right now ({(stocks.error as Error).message}). ETH still works.

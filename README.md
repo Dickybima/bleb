@@ -47,10 +47,11 @@ All Zora data goes through the serverless functions in `api/` (enabled automatic
 - `GET /api/top-profiles`: the Top Zora Profiles ranking, computed once on the server and cached on the CDN for
   10 minutes (`stale-while-revalidate` 1 day). The browser makes one request instead of ~100 Zora calls.
 - `GET /api/zora/{explore|profile|profileSocial}`: cached proxy to the Zora API.
-- `GET /api/stock-tokens`: Robinhood Chain addresses for the stock pairs (NVDA, SPCX, GOOGL, TSLA, GME, AAPL, SPY,
-  SNDK, AMD, AMZN, META, CRCL, MU, PLTR), resolved from Robinhood's asset list (`api.robinhood.com/rhj/assets`, chain
-  4663) and cached for an hour. Addresses are never guessed from tickers; the Launch page then checks each one
-  against the Pons factory's `approvedPairTokens` and only lets approved ones be picked.
+- `GET /api/stock-tokens`: the stock pairs (NVDA, SPCX, GOOGL, TSLA, GME, AAPL, SPY, SNDK, AMD, AMZN, META, CRCL,
+  MU, PLTR) that Pons has approved, read straight from the Pons factory's `PairTokenApprovalUpdated` history and each
+  token's on-chain `symbol()`, so look-alike tokens can't appear. Robinhood's asset list is only used for logos
+  (matched by exact address). Cached for 30 minutes; `approvedPairs` lists every approved pair for transparency.
+  Optional `ROBINHOOD_RPC_URL` overrides the RPC used server-side.
 
 The server uses `ZORA_API_KEY` (kept secret, never shipped to the browser) and retries automatically when Zora
 answers 429/5xx. In `npm run dev`, `/api/zora` is proxied by Vite and Top Zora Profiles is computed in the

@@ -17,10 +17,10 @@ import {
 } from "viem";
 import { robinhoodChain } from "./chains";
 
-/** Pons V2 launch factory on Robinhood Chain (chain id 4663). */
-export const PONS_FACTORY: Address = "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e";
-/** First block of the Pons V2 factory on Robinhood Chain. */
-export const PONS_FACTORY_DEPLOY_BLOCK = 57_412_596n;
+import { PONS_FACTORY, PONS_FACTORY_DEPLOY_BLOCK } from "./ponsShared";
+
+/** Pons V2 launch factory on Robinhood Chain (chain id 4663) and its first block. */
+export { PONS_FACTORY, PONS_FACTORY_DEPLOY_BLOCK };
 
 /**
  * Launches from this site carry this 6-byte prefix in their CREATE2 salt (the rest is random),

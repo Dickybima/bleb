@@ -9,7 +9,7 @@ import { PROXY_HEADER } from "./zoraShared";
 export type StockPair = StockMeta & {
   address?: Address;
   logo?: string;
-  /** ready: selectable · unlisted: no Robinhood Chain address found · unapproved: Pons hasn't enabled it as a pair. */
+  /** ready: selectable · unlisted: not among the Pons factory's approved pairs · unapproved: approval was revoked since. */
   status: "ready" | "unlisted" | "unapproved";
 };
 
@@ -36,9 +36,10 @@ export function useStockPairs() {
           const r = resolved.get(meta.symbol);
           if (!r) return { ...meta, status: "unlisted" };
           const address = getAddress(r.address);
+          // Live re-check; if the browser's RPC call fails, keep the server's (already on-chain) answer.
           const approved = await client!
             .readContract({ address: PONS_FACTORY, abi: ponsFactoryAbi, functionName: "approvedPairTokens", args: [address] })
-            .catch(() => false);
+            .catch(() => true);
           return { ...meta, address, logo: r.logo, status: approved ? "ready" : "unapproved" };
         }),
       );

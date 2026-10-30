@@ -17,10 +17,10 @@ import {
 } from "viem";
 import { robinhoodChain } from "./chains";
 
-import { PONS_FACTORY, PONS_FACTORY_DEPLOY_BLOCK } from "./ponsShared";
-
-/** Pons V2 launch factory on Robinhood Chain (chain id 4663) and its first block. */
-export { PONS_FACTORY, PONS_FACTORY_DEPLOY_BLOCK };
+/** Pons V2 launch factory on Robinhood Chain (chain id 4663). */
+export const PONS_FACTORY: Address = "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e";
+/** First block of the Pons V2 factory on Robinhood Chain. */
+export const PONS_FACTORY_DEPLOY_BLOCK = 57_412_596n;
 
 /**
  * Launches from this site carry this 6-byte prefix in their CREATE2 salt (the rest is random),
@@ -43,7 +43,6 @@ export const ponsFactoryAbi = parseAbi([
   "function launchConfigCount() view returns (uint256)",
   "function getLaunchConfig(uint256 id) view returns ((uint256 supply, uint256 curveFeeBps, uint256 phantomQuote, uint256 graduationThreshold, uint24 poolFee, int24 tickSpacing, bool enabled))",
   "function previewLaunchEconomics(uint256 launchConfigId, address pairToken) view returns (bytes32)",
-  "function approvedPairTokens(address pairToken) view returns (bool)",
   `function launchToken(${TOKEN_PARAMS} params, uint256 launchConfigId, address pairToken, address[] snipeTaxExemptions) payable returns (address token, address curve)`,
   `function launchToken(${TOKEN_PARAMS} params, uint256 launchConfigId, address pairToken) payable returns (address token, address curve)`,
   "event TokenLaunched(address indexed token, address indexed curve, address indexed deployer, address pairToken, uint256 launchConfigId, uint256 graduationThreshold)",
@@ -100,8 +99,6 @@ export type LaunchInput = {
   socials: Socials;
   creatorTaxBps: number;
   buybackEnabled: boolean;
-  /** Quote asset: native ETH (default) or an approved ERC-20 such as a Robinhood stock token. */
-  pairToken?: Address;
 };
 
 export async function launchOnPons({
@@ -129,18 +126,12 @@ export async function launchOnPons({
   if (!allowed) throw new Error("This wallet isn't allowed to launch tokens yet.");
   if (BigInt(input.creatorTaxBps) > maxTax) throw new Error(`Creator tax can be at most ${Number(maxTax) / 100}%.`);
 
-  const pairToken = input.pairToken ?? NATIVE_QUOTE;
-  if (pairToken !== NATIVE_QUOTE) {
-    const approved = await publicClient.readContract({ address: PONS_FACTORY, abi: ponsFactoryAbi, functionName: "approvedPairTokens", args: [pairToken] });
-    if (!approved) throw new Error("This pair asset isn't enabled for launches on Pons yet.");
-  }
-
   const launchConfigId = await resolveLaunchConfigId(publicClient);
   const expectedEconomics = await publicClient.readContract({
     address: PONS_FACTORY,
     abi: ponsFactoryAbi,
     functionName: "previewLaunchEconomics",
-    args: [launchConfigId, pairToken],
+    args: [launchConfigId, NATIVE_QUOTE],
   });
 
   const params = {
@@ -162,10 +153,10 @@ export async function launchOnPons({
   const base = { address: PONS_FACTORY, abi: ponsFactoryAbi, functionName: "launchToken", account, value: launchFee, chain: robinhoodChain } as const;
   let request;
   try {
-    ({ request } = await publicClient.simulateContract({ ...base, args: [params, launchConfigId, pairToken, []] }));
+    ({ request } = await publicClient.simulateContract({ ...base, args: [params, launchConfigId, NATIVE_QUOTE, []] }));
   } catch (err) {
     try {
-      ({ request } = await publicClient.simulateContract({ ...base, args: [params, launchConfigId, pairToken] }));
+      ({ request } = await publicClient.simulateContract({ ...base, args: [params, launchConfigId, NATIVE_QUOTE] }));
     } catch {
       throw err;
     }

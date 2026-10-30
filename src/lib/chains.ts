@@ -1,7 +1,6 @@
 import { defineChain } from "viem";
-import { DEFAULT_ROBINHOOD_RPC } from "./ponsShared";
 
-const rpcUrl = (import.meta.env.VITE_ROBINHOOD_RPC_URL as string | undefined) || DEFAULT_ROBINHOOD_RPC;
+const rpcUrl = (import.meta.env.VITE_ROBINHOOD_RPC_URL as string | undefined) || "https://rpc.mainnet.chain.robinhood.com";
 
 export const robinhoodChain = defineChain({
   id: 4663,

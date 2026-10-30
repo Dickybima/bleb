@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { ArrowLeft, AtSign, ImagePlus, Lock, Wallet } from "lucide-react";
+import { ArrowLeft, AtSign, ImagePlus, Wallet } from "lucide-react";
 import { useAccount } from "wagmi";
 import { useChainModal, useConnectModal } from "@rainbow-me/rainbowkit";
 import { getAddress, isAddress, type Address } from "viem";
@@ -9,6 +9,7 @@ import { OrbButton } from "@/components/ui/hero-with-cards-utils/orb-button";
 import { Notice, Panel, Reveal, Skeleton, inputClass, labelClass } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 import { LaunchSuccess } from "./LaunchSuccess";
+import { PairPicker, type PairChoice } from "./PairPicker";
 import { TokenizeSteps } from "./TokenizeSteps";
 import { robinhoodChain } from "../lib/chains";
 import { LIMITS, emptySocials } from "../lib/pons";
@@ -290,6 +291,7 @@ function ReviewAndLaunch({ profile, fields, set }: { profile?: ZoraProfile | nul
   const [taxPct, setTaxPct] = useState("0");
   const [buyback, setBuyback] = useState(false);
   const [feeTo, setFeeTo] = useState<"me" | "profile">("me");
+  const [pair, setPair] = useState<PairChoice>({ kind: "eth" });
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -320,6 +322,7 @@ function ReviewAndLaunch({ profile, fields, set }: { profile?: ZoraProfile | nul
       socials: { ...emptySocials(), twitter: fields.twitter.trim(), website: fields.website.trim(), farcaster: fields.farcaster },
       creatorTaxBps: taxBps,
       buybackEnabled: buyback,
+      pairToken: pair.kind === "stock" ? pair.stock.address : undefined,
     });
   };
 
@@ -376,14 +379,10 @@ function ReviewAndLaunch({ profile, fields, set }: { profile?: ZoraProfile | nul
         <textarea className={cn(inputClass, "resize-y")} rows={2} value={fields.description} onChange={(e) => set.description(e.target.value)} placeholder="Who is this profile?" maxLength={LIMITS.description} disabled={busy} />
       </Field>
 
-      <Field label="Paired asset (quote)">
-        <div className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 dark:border-zinc-800 dark:bg-zinc-900">
-          <span className="inline-flex size-7 items-center justify-center rounded-full bg-[#627eea] text-xs font-bold text-white">Ξ</span>
-          <span className="font-semibold">ETH</span>
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">Ether</span>
-          <Lock className="ml-auto size-4 text-zinc-400" aria-label="ETH is the only supported pair" />
-        </div>
-      </Field>
+      <div className="flex flex-col gap-2">
+        <span className={labelClass}>Paired asset (quote)</span>
+        <PairPicker value={pair} onChange={setPair} disabled={busy} />
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="X / Twitter (optional)">

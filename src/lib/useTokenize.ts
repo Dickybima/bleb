@@ -25,6 +25,8 @@ export type TokenizeInput = {
   socials: Socials;
   creatorTaxBps?: number;
   buybackEnabled?: boolean;
+  /** Quote asset; native ETH when omitted. */
+  pairToken?: Address;
 };
 
 export function useTokenize() {
@@ -64,6 +66,7 @@ export function useTokenize() {
           socials: input.socials,
           creatorTaxBps: input.creatorTaxBps ?? 0,
           buybackEnabled: input.buybackEnabled ?? false,
+          pairToken: input.pairToken,
         },
         onHash: (h) => {
           setTxHash(h);

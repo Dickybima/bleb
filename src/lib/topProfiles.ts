@@ -12,7 +12,8 @@ async function fetchTopProfiles(): Promise<TopProfile[]> {
     const body = await res.json();
     if (Array.isArray(body)) return body.filter((p): p is TopProfile => typeof p?.handle === "string");
   }
-  return computeTopProfiles((path, query) => zoraGet(path, query), 3);
+  // Browser fallback stays lighter so it doesn't trip Zora's rate limit.
+  return computeTopProfiles((path, query) => zoraGet(path, query), { concurrency: 3, pages: 2, perPage: 50, maxCandidates: 200 });
 }
 
 export function useTopProfiles() {

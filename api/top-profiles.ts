@@ -8,7 +8,7 @@ export async function GET() {
       const res = await zoraFetch(path, query);
       if (!res.ok) throw new Error(`Zora ${path} HTTP ${res.status}`);
       return res.json();
-    });
+    }, { concurrency: 10, pages: 4, perPage: 50, allLists: true, maxCandidates: 500 });
     return json(profiles, 200, 600);
   } catch (err) {
     return json({ error: (err as Error).message }, 502, 0);

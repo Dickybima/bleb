@@ -13,8 +13,9 @@ shows up.
   configurable. Tokens launch via `launchToken` on the Pons V2 factory
   `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e`, paired with ETH: bonding curve first, then Uniswap v4.
 - **Top Zora Profiles**: Zora profiles ranked by followers (no price or market cap data); the home hero fans out
-  the top five as clickable cards. Candidates come from Zora's creator lists (most valuable, trending, featured,
-  top volume); each profile's follower count is read via `getProfileSocial`.
+  the top five as clickable cards. Candidates are pooled from Zora's creator lists (most valuable, trending, featured,
+  top volume, new) plus the mixed coin lists, several pages deep (up to ~500 profiles); each profile's follower
+  count is read via `getProfileSocial`.
 - **Tokenize button** (on Top Profiles and profile pages): opens the launch form `#/launch/<handle>` directly,
   prefilled with the profile's name, ticker, logo, bio and socials. The form renders before a wallet is
   connected; the wallet is requested only on submit. When the profile isn't owned by the connected wallet, the

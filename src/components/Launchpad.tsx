@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useAccount } from "wagmi";
 import { useChainModal, useConnectModal } from "@rainbow-me/rainbowkit";
 import { getAddress, isAddress, type Address } from "viem";
-import { useZoraProfile } from "./ProfileView";
+import { useZoraProfile } from "../lib/profile";
 import { Avatar } from "./Avatar";
 import { LaunchSuccess } from "./LaunchSuccess";
 import { TokenizeSteps } from "./TokenizeSteps";
@@ -42,11 +42,11 @@ export function Launchpad({ handle }: { handle?: string }) {
               ? {
                   handle: profile.handle,
                   displayName: profile.displayName,
-                  description: profile.bio ?? "",
-                  avatar: profile.avatar?.medium,
+                  description: profile.bio,
+                  avatar: profile.avatar,
                   socials: socialsFromProfile(profile.socialAccounts, profile.website),
-                  wallet: profile.publicWallet.walletAddress,
-                  ownWallets: [profile.publicWallet.walletAddress, ...profile.linkedWallets.edges.map((e) => e.node.walletAddress)],
+                  wallet: profile.wallet,
+                  ownWallets: profile.wallets,
                 }
               : undefined
           }
@@ -105,7 +105,7 @@ type ProfileDefaults = {
   description: string;
   avatar?: string;
   socials: Socials;
-  wallet: string;
+  wallet?: string;
   ownWallets: string[];
 };
 
@@ -127,7 +127,7 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
   const [preview, setPreview] = useState<string | undefined>(profile?.avatar);
 
   const isOwnProfile = Boolean(launcher && profile?.ownWallets.some((w) => w.toLowerCase() === launcher.toLowerCase()));
-  const profileWallet = profile && isAddress(profile.wallet) ? getAddress(profile.wallet) : undefined;
+  const profileWallet = profile?.wallet && isAddress(profile.wallet) ? getAddress(profile.wallet) : undefined;
   const [feeTo, setFeeTo] = useState<"me" | "profile">("me");
   const feeRecipient: Address | undefined = feeTo === "profile" && profileWallet ? profileWallet : launcher;
 

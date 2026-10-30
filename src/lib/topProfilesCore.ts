@@ -22,10 +22,10 @@ export async function computeTopProfiles(get: Get, concurrency = 6): Promise<Top
   const candidates = new Map<string, { handle: string; avatar?: string }>();
   for (const res of lists) {
     if (res.status !== "fulfilled") continue;
-    for (const { node } of res.value.exploreList?.edges ?? []) {
-      const p = node.creatorProfile;
+    for (const edge of res.value?.exploreList?.edges ?? []) {
+      const p = edge?.node?.creatorProfile;
       if (!p?.handle || p.platformBlocked || candidates.has(p.handle)) continue;
-      candidates.set(p.handle, { handle: p.handle, avatar: p.avatar?.previewImage.small });
+      candidates.set(p.handle, { handle: p.handle, avatar: p.avatar?.previewImage?.small });
     }
   }
   if (candidates.size === 0) {
@@ -35,8 +35,8 @@ export async function computeTopProfiles(get: Get, concurrency = 6): Promise<Top
 
   const profiles = await mapLimit([...candidates.values()], concurrency, async (c): Promise<TopProfile | null> => {
     try {
-      const p = (await get<GetProfileSocialResponse>("profileSocial", { identifier: c.handle })).profile;
-      if (!p) return null;
+      const p = (await get<GetProfileSocialResponse>("profileSocial", { identifier: c.handle }))?.profile;
+      if (!p?.handle || typeof p.followers?.count !== "number") return null;
       return { handle: p.handle, displayName: p.displayName, avatar: p.avatar?.small ?? c.avatar, followers: p.followers.count };
     } catch {
       return null;

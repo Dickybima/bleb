@@ -9,6 +9,18 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Shown only if the app script never starts (e.g. it failed to download or crashed before React mounted). -->
+    <div id="boot-fallback" hidden style="max-width:480px;margin:96px auto;padding:24px;font-family:system-ui,sans-serif;text-align:center;color:#888">
+      <p style="font-size:18px;font-weight:600;color:inherit">Halaman gagal dimuat.</p>
+      <p>Periksa koneksi lalu muat ulang. Jika masih kosong, coba nonaktifkan sementara ekstensi wallet yang bentrok.</p>
+      <button onclick="location.reload()" style="padding:10px 20px;border-radius:999px;border:0;background:#5b7cff;color:#fff;font:inherit;font-weight:600;cursor:pointer">Muat ulang</button>
+    </div>
+    <script>
+      setTimeout(function () {
+        var root = document.getElementById("root");
+        if (!window.__launchpadMounted || !root || !root.childElementCount) document.getElementById("boot-fallback").hidden = false;
+      }, 8000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

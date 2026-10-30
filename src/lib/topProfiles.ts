@@ -9,7 +9,8 @@ async function fetchTopProfiles(): Promise<TopProfile[]> {
   const res = await fetch("/api/top-profiles").catch(() => null);
   if (res?.headers.get(PROXY_HEADER)) {
     if (!res.ok) throw new ZoraApiError(res.status);
-    return res.json();
+    const body = await res.json();
+    if (Array.isArray(body)) return body.filter((p): p is TopProfile => typeof p?.handle === "string");
   }
   return computeTopProfiles((path, query) => zoraGet(path, query), 3);
 }

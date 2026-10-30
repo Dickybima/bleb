@@ -3,23 +3,34 @@ import { Launchpad } from "./components/Launchpad";
 import { TopProfiles } from "./components/TopProfiles";
 import { Explore } from "./components/Explore";
 import { ProfileView } from "./components/ProfileView";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useRoute } from "./lib/router";
 
 export default function App() {
   const route = useRoute();
+  // Keyed by route so navigating away from a crashed section resets its boundary.
+  const routeKey = route.page === "profile" ? `profile:${route.id}` : route.page === "launch" ? `launch:${route.handle ?? ""}` : route.page;
   return (
     <>
-      <Header active={route.page} />
+      <ErrorBoundary compact>
+        <Header active={route.page} />
+      </ErrorBoundary>
       <main className="container">
         {route.page === "launch" && (
           <>
-            <Launchpad key={route.handle ?? ""} handle={route.handle} />
-            {!route.handle && <TopProfiles compact />}
+            <ErrorBoundary key={routeKey}>
+              <Launchpad key={route.handle ?? ""} handle={route.handle} />
+            </ErrorBoundary>
+            {!route.handle && (
+              <ErrorBoundary>
+                <TopProfiles compact />
+              </ErrorBoundary>
+            )}
           </>
         )}
-        {route.page === "top" && <TopProfiles />}
-        {route.page === "explore" && <Explore />}
-        {route.page === "profile" && <ProfileView id={route.id} />}
+        {route.page === "top" && <ErrorBoundary key={routeKey}><TopProfiles /></ErrorBoundary>}
+        {route.page === "explore" && <ErrorBoundary key={routeKey}><Explore /></ErrorBoundary>}
+        {route.page === "profile" && <ErrorBoundary key={routeKey}><ProfileView id={route.id} /></ErrorBoundary>}
       </main>
       <footer className="footer container">
         <span>Dibangun di atas Pons V2 · Robinhood Chain · data profil dari Zora</span>

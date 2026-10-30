@@ -5,13 +5,6 @@ export function fmtNum(value?: string | number | null) {
   return Number.isFinite(n) ? compactNum.format(n) : "–";
 }
 
-const compactUsd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 });
-
-export function fmtUsd(value?: string | number | null) {
-  const n = Number(value);
-  return value !== undefined && value !== null && Number.isFinite(n) ? compactUsd.format(n) : "–";
-}
-
 export const shortAddr = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
 
 const rtf = new Intl.RelativeTimeFormat("id", { numeric: "auto" });

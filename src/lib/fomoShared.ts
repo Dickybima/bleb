@@ -4,15 +4,12 @@
  * so the normalizers below accept the field names fomo's own API is known to use plus common alternatives.
  */
 export const FOMO_API = "https://getfomoapi.fun/api";
-export const FOMO_WINDOWS = ["24h", "7d", "30d", "all"] as const;
-export type FomoWindow = (typeof FOMO_WINDOWS)[number];
 
 export type FomoRow = {
   handle: string;
   displayName?: string;
   avatar?: string;
   followers?: number;
-  pnl?: number;
 };
 
 export type FomoUser = FomoRow & {
@@ -51,33 +48,11 @@ function userFields(raw: Obj): FomoUser | null {
     displayName: str(pick(u, ["displayName", "name", "fullName"])),
     avatar: str(pick(u, ["profilePictureUrl", "profilePicture", "profileImageUrl", "pfpUrl", "avatarUrl", "avatar", "imageUrl", "image"])),
     followers: num(pick(u, ["followerCount", "followersCount", "numFollowers", "followers"])),
-    pnl: num(pick(raw, ["pnl", "totalPnl", "pnlUsd", "realizedPnl", "profit"])),
     bio: str(pick(u, ["bio", "description", "about"])),
     twitter: twitter?.replace(/^@/, "").replace(/^https?:\/\/(x|twitter)\.com\//, ""),
     website: str(pick(u, ["website", "websiteUrl", "url"])),
     wallet: wallet && /^0x[0-9a-fA-F]{40}$/.test(wallet) ? wallet : undefined,
   };
-}
-
-/** Normalizes a leaderboard response (array, `{ leaderboard }`, `{ data }`, possibly enveloped) into rows. */
-export function normalizeLeaderboard(body: unknown): FomoRow[] {
-  const inner = unwrap(body);
-  const list = Array.isArray(inner)
-    ? inner
-    : isObj(inner)
-      ? (pick(inner, ["leaderboard", "data", "users", "items", "results"]) as unknown)
-      : undefined;
-  if (!Array.isArray(list)) return [];
-  const seen = new Set<string>();
-  const rows: FomoRow[] = [];
-  for (const entry of list) {
-    if (!isObj(entry)) continue;
-    const u = userFields(entry);
-    if (!u || seen.has(u.handle.toLowerCase())) continue;
-    seen.add(u.handle.toLowerCase());
-    rows.push({ handle: u.handle, displayName: u.displayName, avatar: u.avatar, followers: u.followers, pnl: u.pnl });
-  }
-  return rows;
 }
 
 export function normalizeUser(body: unknown): FomoUser | null {

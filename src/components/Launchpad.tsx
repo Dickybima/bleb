@@ -148,7 +148,8 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
   const { busy, error } = tk;
 
   const [name, setName] = useState(profile?.displayName || profile?.handle || "");
-  const [symbol, setSymbol] = useState(profile?.handle.toUpperCase() ?? "");
+  // Tickers stay alphanumeric: "@PoorGoat_" → "POORGOAT".
+  const [symbol, setSymbol] = useState(profile ? profile.handle.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() || profile.handle.toUpperCase() : "");
   const [description, setDescription] = useState(profile?.description ?? "");
   const [logoUrl, setLogoUrl] = useState(profile?.avatar ?? "");
   const [logoFile, setLogoFile] = useState<File | null>(null);

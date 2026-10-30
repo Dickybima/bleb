@@ -23,7 +23,9 @@ shows up.
 - **Explore**: only tokens launched from this site (other Pons launches are filtered out). Read straight from
   the Pons V2 factory's `TokenLaunched` events (no backend), newest first, refreshed every 30 seconds and right
   after a successful launch. This site's launches are recognised by a 6-byte tag at the start of the `salt`
-  (`keccak256("profile-launchpad/v1")`), read back from the transaction calldata.
+  (`keccak256("profile-launchpad/v1")`), read back from the transaction calldata (also when wrapped by a smart
+  wallet). Launches before `LISTED_FROM` (test launches) and any address in `HIDDEN_TOKENS` (`src/lib/explore.ts`)
+  are not listed.
 - **Connect wallet**: RainbowKit modal with MetaMask, Coinbase Wallet, Rabby, OKX, Trust, Rainbow,
   WalletConnect (QR for mobile wallets), Phantom, Bitget, Binance, Uniswap, Zerion, Brave, Ledger, Safe and other
   browser wallets. Installed wallets are detected automatically.
@@ -45,7 +47,8 @@ signatures; re-verify against the Pons docs (docs.ponsfamily.com/v2) before prod
 
 All Zora data goes through the serverless functions in `api/` (enabled automatically on Vercel):
 
-- `GET /api/top-profiles`: the Top Zora Profiles ranking, computed once on the server and cached on the CDN for
+- `GET /api/top-profiles[?scope=home]`: the Top Zora Profiles ranking (`home` is a quick one for the Home page,
+  the default is the full pool), computed once on the server and cached on the CDN for
   10 minutes (`stale-while-revalidate` 1 day). The browser makes one request instead of ~100 Zora calls.
 - `GET /api/zora/{explore|profile|profileSocial}`: cached proxy to the Zora API.
 

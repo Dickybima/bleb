@@ -13,7 +13,7 @@ const PAGE_SIZE = 25;
 
 /** Top Zora profiles, ranked by followers. */
 export function TopProfiles({ compact = false }: { compact?: boolean }) {
-  const zora = useTopProfiles();
+  const zora = useTopProfiles(compact ? "home" : "full");
   return (
     <Reveal className="mx-auto w-full max-w-3xl">
       <Leaderboard

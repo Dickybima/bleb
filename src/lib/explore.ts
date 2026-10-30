@@ -46,6 +46,17 @@ const MIN_CHUNK = 500n;
 const MAX_CHUNK = 500_000n;
 /** Time spent scanning per page; an empty range keeps scanning until this runs out instead of stopping early. */
 const PAGE_BUDGET_MS = 12_000;
+/**
+ * Explore lists launches from this moment on (unix seconds); earlier ones were tests. The scan also stops here,
+ * so it never walks blocks older than this.
+ */
+const LISTED_FROM = Date.UTC(2026, 9, 30, 10, 40) / 1000;
+/** Individual launches kept out of Explore (lowercase token addresses). */
+const HIDDEN_TOKENS = new Set<string>([]);
+
+const isListed = (token: Address, timestamp?: number) =>
+  !HIDDEN_TOKENS.has(token.toLowerCase()) && (timestamp === undefined || timestamp >= LISTED_FROM);
+
 /** Block range the RPC last accepted, reused so later pages don't rediscover the limit. */
 let workingChunk = INITIAL_CHUNK;
 
@@ -90,7 +101,7 @@ const hasSaltTag = (input: Hex) => input.toLowerCase().includes(SALT_TAG_HEX);
 
 async function describeLaunch(client: Client, log: { args: { token?: Address; curve?: Address; deployer?: Address }; transactionHash: Hash; blockNumber: bigint }): Promise<LaunchedToken | null> {
   const { token, curve, deployer } = log.args;
-  if (!token || !curve || !deployer) return null;
+  if (!token || !curve || !deployer || !isListed(token)) return null;
 
   // Only launches made from this site (tagged salt) are listed; skip the block lookup for anything else.
   const tx = await client.getTransaction({ hash: log.transactionHash });
@@ -102,6 +113,7 @@ async function describeLaunch(client: Client, log: { args: { token?: Address; cu
     // Calldata we couldn't unpack: name and symbol come from the token itself.
     params ? null : readTokenMeta(client, token),
   ]);
+  if (block && !isListed(token, Number(block.timestamp))) return null;
 
   return {
     token,
@@ -201,6 +213,12 @@ async function fetchPage(client: Client, toBlock: bigint | undefined): Promise<P
     }
 
     to = from - 1n;
+    // Reached blocks older than the listing start: nothing further back is shown.
+    const edge = await client.getBlock({ blockNumber: from }).catch(() => null);
+    if (edge && Number(edge.timestamp) < LISTED_FROM) {
+      to = PONS_FACTORY_DEPLOY_BLOCK - 1n;
+      break;
+    }
     // Few logs means the RPC has headroom: widen the window for the next request.
     if (logs.length < 50 && chunk < MAX_CHUNK) workingChunk = chunk * 2n;
     if (items.length >= PAGE_SIZE) break;

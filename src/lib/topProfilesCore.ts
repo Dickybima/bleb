@@ -38,6 +38,17 @@ export type TopProfilesOptions = {
 type ExploreEdge = { node?: { creatorProfile?: { handle?: string; platformBlocked?: boolean; avatar?: { previewImage?: { small?: string } } } } };
 type ExplorePage = { exploreList?: { edges?: ExploreEdge[]; pageInfo?: { endCursor?: string; hasNextPage?: boolean } } };
 
+export type TopProfilesScope = "home" | "full";
+
+/**
+ * home: a quick ranking (one page of the creator lists) so the hero and Home load fast;
+ * full: the deep pool behind the Top Profiles page.
+ */
+export const SCOPE_OPTIONS: Record<TopProfilesScope, TopProfilesOptions> = {
+  home: { concurrency: 12, pages: 1, perPage: 25, maxCandidates: 100, retryPasses: 1, deadlineMs: 8_000 },
+  full: { concurrency: 10, pages: 4, perPage: 50, allLists: true, maxCandidates: 500 },
+};
+
 /** Shared by the /api/top-profiles route and the browser fallback. */
 export async function computeTopProfiles(get: Get, opts: TopProfilesOptions = {}): Promise<TopProfile[]> {
   const { concurrency = 6, pages = 1, perPage = 25, allLists = false, maxCandidates = 150, retryPasses = 2, deadlineMs = 45_000 } = opts;

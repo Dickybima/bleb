@@ -14,7 +14,7 @@ export default function App() {
   const route = useRoute();
   // Keyed by route so navigating away from a crashed section resets its boundary.
   const routeKey =
-    route.page === "profile" ? `profile:${route.id}` : route.page === "launch" ? `launch:${route.source}:${route.handle ?? ""}` : route.page;
+    route.page === "profile" ? `profile:${route.id}` : route.page === "launch" ? `launch:${route.handle ?? ""}` : route.page;
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden">
       <ErrorBoundary compact>
@@ -24,7 +24,7 @@ export default function App() {
         {route.page === "launch" && (
           <>
             <ErrorBoundary key={routeKey}>
-              <Launchpad key={`${route.source}:${route.handle ?? ""}`} handle={route.handle} source={route.source} />
+              <Launchpad key={route.handle ?? ""} handle={route.handle} />
             </ErrorBoundary>
             {!route.handle && (
               <ErrorBoundary>
@@ -59,7 +59,7 @@ export default function App() {
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6">
           <span className="flex items-center gap-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
             <FozoMark size={18} />
-            Built on Robinhood Chain · profiles from Zora &amp; Fomo
+            Built on Robinhood Chain · profiles from Zora
           </span>
           <div className="flex items-center gap-2">
             <ThemeToggle />

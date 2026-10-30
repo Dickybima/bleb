@@ -17,75 +17,46 @@ import { socialsFromProfile } from "../lib/profileSocials";
 import { useTokenize } from "../lib/useTokenize";
 import { shortAddr } from "../lib/format";
 import { hasApiKey } from "../lib/zora";
-import { useFomoProfile, type FomoUser } from "../lib/fomo";
-import type { ProfileSource } from "../lib/router";
-import { emptySocials } from "../lib/pons";
-
-const SOURCE_LABEL: Record<ProfileSource, string> = { zora: "Zora", fomo: "Fomo" };
-
-function fomoDefaults(p: FomoUser): ProfileDefaults {
-  const socials = emptySocials();
-  if (p.twitter) socials.twitter = `https://x.com/${p.twitter}`;
-  if (p.website) socials.website = p.website;
-  return {
-    source: "fomo",
-    handle: p.handle,
-    displayName: p.displayName,
-    description: p.bio ?? "",
-    avatar: p.avatar,
-    socials,
-    wallet: p.wallet,
-    ownWallets: p.wallet ? [p.wallet] : [],
-  };
-}
 
 /**
- * Launch page. With `handle`, the form is prefilled from that Zora or fomo profile;
+ * Launch page. With `handle`, the form is prefilled from that Zora profile;
  * otherwise from the connected wallet's Zora profile.
  */
-export function Launchpad({ handle, source = "zora" }: { handle?: string; source?: ProfileSource }) {
+export function Launchpad({ handle }: { handle?: string }) {
   const { address } = useAccount();
-  const isFomo = Boolean(handle) && source === "fomo";
-  const zoraQuery = useZoraProfile(isFomo ? undefined : (handle ?? address));
-  const fomoQuery = useFomoProfile(isFomo ? handle : undefined);
-  const profileQuery = isFomo ? fomoQuery : zoraQuery;
-  const zoraProfile = zoraQuery.data;
+  const profileQuery = useZoraProfile(handle ?? address);
+  const zoraProfile = profileQuery.data;
   const loading = Boolean(handle ?? address) && profileQuery.isPending;
   const formRef = useRef<HTMLDivElement>(null);
 
-  const profile: ProfileDefaults | undefined = isFomo
-    ? fomoQuery.data
-      ? fomoDefaults(fomoQuery.data)
-      : undefined
-    : zoraProfile
-      ? {
-          source: "zora",
-          handle: zoraProfile.handle,
-          displayName: zoraProfile.displayName,
-          description: zoraProfile.bio,
-          avatar: zoraProfile.avatar,
-          socials: socialsFromProfile(zoraProfile.socialAccounts, zoraProfile.website),
-          wallet: zoraProfile.wallet,
-          ownWallets: zoraProfile.wallets,
-        }
-      : undefined;
+  const profile: ProfileDefaults | undefined = zoraProfile
+    ? {
+        handle: zoraProfile.handle,
+        displayName: zoraProfile.displayName,
+        description: zoraProfile.bio,
+        avatar: zoraProfile.avatar,
+        socials: socialsFromProfile(zoraProfile.socialAccounts, zoraProfile.website),
+        wallet: zoraProfile.wallet,
+        ownWallets: zoraProfile.wallets,
+      }
+    : undefined;
 
   const card = (
     <Panel>
       {profileQuery.isError ? (
         <Notice tone="error">
-          Couldn't load the {SOURCE_LABEL[source]} profile: {(profileQuery.error as Error).message}{" "}
+          Couldn't load the Zora profile: {(profileQuery.error as Error).message}{" "}
           <button className={linkButtonClass} onClick={() => profileQuery.refetch()}>Retry</button>
         </Notice>
       ) : handle && !loading && !profile ? (
         <div className="flex flex-col items-center gap-4 py-8 text-center">
-          <h3 className="text-lg font-bold">@{handle} isn't on {SOURCE_LABEL[source]}</h3>
+          <h3 className="text-lg font-bold">@{handle} isn't on Zora</h3>
           <a className={ghostButtonClass} href="#/top">Browse top profiles</a>
         </div>
       ) : loading ? (
         <Skeleton className="h-96" />
       ) : (
-        <LaunchForm key={`${source}:${handle ?? address ?? ""}`} profile={profile} />
+        <LaunchForm key={handle ?? address ?? ""} profile={profile} />
       )}
     </Panel>
   );
@@ -101,7 +72,7 @@ export function Launchpad({ handle, source = "zora" }: { handle?: string; source
             Tokenize <em className="font-extrabold italic text-zinc-600 dark:text-zinc-300">@{handle}</em>
           </h1>
           <p className="mb-4 mt-3 text-zinc-500 dark:text-zinc-400">
-            Pre-loaded from @{handle}'s {SOURCE_LABEL[source]} profile. Tweak anything, then send it.
+            Pre-loaded from @{handle}'s Zora profile. Tweak anything, then send it.
           </p>
         </Reveal>
         <Reveal delay={0.1}>{card}</Reveal>
@@ -125,13 +96,13 @@ export function Launchpad({ handle, source = "zora" }: { handle?: string; source
   );
 }
 
-function Target({ handle, name, avatar, source }: { handle: string; name?: string; avatar?: string; source: ProfileSource }) {
+function Target({ handle, name, avatar }: { handle: string; name?: string; avatar?: string }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
       <Avatar src={avatar} name={handle} size={44} />
       <span className="flex min-w-0 flex-1 flex-col">
         <strong className="truncate font-semibold">{name || `@${handle}`}</strong>
-        <small className="truncate text-zinc-500 dark:text-zinc-400">@{handle} · {SOURCE_LABEL[source]} profile</small>
+        <small className="truncate text-zinc-500 dark:text-zinc-400">@{handle} · Zora profile</small>
       </span>
       <a className={cn(linkButtonClass, "text-sm")} href="#/top">Change</a>
     </div>
@@ -139,7 +110,6 @@ function Target({ handle, name, avatar, source }: { handle: string; name?: strin
 }
 
 type ProfileDefaults = {
-  source: ProfileSource;
   handle: string;
   displayName?: string;
   description: string;
@@ -219,7 +189,7 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
 
   return (
     <form className="flex flex-col gap-5" onSubmit={onSubmit}>
-      {profile && <Target handle={profile.handle} name={profile.displayName} avatar={profile.avatar} source={profile.source} />}
+      {profile && <Target handle={profile.handle} name={profile.displayName} avatar={profile.avatar} />}
 
       <div className="flex items-start gap-4">
         <label className="group relative shrink-0 cursor-pointer" title={hasApiKey ? "Change logo" : "Logo from URL"}>

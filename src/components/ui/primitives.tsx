@@ -38,7 +38,7 @@ export function Reveal({ delay = 0, className, children }: { delay?: number; cla
   );
 }
 
-export function SectionHeading({ title, subtitle, dot, children }: { title: React.ReactNode; subtitle?: React.ReactNode; dot?: "zora" | "fomo"; children?: React.ReactNode }) {
+export function SectionHeading({ title, subtitle, dot, children }: { title: React.ReactNode; subtitle?: React.ReactNode; dot?: boolean; children?: React.ReactNode }) {
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
       <div>
@@ -46,10 +46,7 @@ export function SectionHeading({ title, subtitle, dot, children }: { title: Reac
           {dot && (
             <span
               aria-hidden
-              className={cn(
-                "size-2.5 rounded-full",
-                dot === "zora" ? "bg-[#6f8dff] shadow-[0_0_10px_#4b6bff]" : "bg-[#ff7a59] shadow-[0_0_10px_#ff3d77]",
-              )}
+              className="size-2.5 rounded-full bg-[#6f8dff] shadow-[0_0_10px_#4b6bff]"
             />
           )}
           {title}

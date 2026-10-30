@@ -3,11 +3,12 @@ import { ArrowUpRight, Coins, MousePointerClick, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { OrbButton } from "@/components/ui/hero-with-cards-utils/orb-button";
 import { fmtNum } from "@/lib/format";
-import { fomoTopProfiles } from "@/lib/fomo";
+import { useTopProfiles } from "@/lib/topProfiles";
 import { launchHref } from "@/lib/router";
 import { Avatar } from "./Avatar";
+import { Skeleton } from "@/components/ui/primitives";
 
-// Fan layout from hero-with-cards: the #1 profile sits in the middle, the rest fan out around it.
+// Fan layout from hero-with-cards: the #1 Zora profile sits in the middle, the rest fan out around it.
 const SLOTS = [
   { pos: 0, rotate: 0, delay: 0.6, z: 30 },
   { pos: -1, rotate: -11, delay: 0.75, z: 20 },
@@ -33,7 +34,8 @@ const FEATURES = [
 const ticker = (handle: string) => handle.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() || handle.toUpperCase();
 
 export function FozoHero({ onLaunchOwn }: { onLaunchOwn: () => void }) {
-  const cards = fomoTopProfiles.slice(0, SLOTS.length);
+  const top = useTopProfiles();
+  const cards = (top.data ?? []).slice(0, SLOTS.length);
 
   return (
     <section className="flex flex-col items-center px-2 pt-6 text-center sm:pt-10">
@@ -62,7 +64,7 @@ export function FozoHero({ onLaunchOwn }: { onLaunchOwn: () => void }) {
         transition={{ duration: 0.5, delay: 0.38, ease: "easeOut" }}
         className="mt-5 max-w-xl text-base leading-relaxed text-zinc-500 md:text-lg dark:text-zinc-400"
       >
-        FOZO turns any Zora or Fomo profile into a live token on Robinhood Chain. It's born on a bonding curve,
+        FOZO turns any Zora profile into a live token on Robinhood Chain. It's born on a bonding curve,
         graduates to Uniswap v4 once the crowd shows up, and from there the price is set by belief, not a pitch deck.
       </motion.p>
 
@@ -76,13 +78,25 @@ export function FozoHero({ onLaunchOwn }: { onLaunchOwn: () => void }) {
         <OrbButton variant="outline" noOrb onClick={onLaunchOwn}>Launch your own</OrbButton>
       </motion.div>
 
+      {(top.isPending || cards.length > 0) && (
       <div className="relative mt-10 flex h-[300px] w-full items-end justify-center overflow-hidden [--spread:68px] sm:h-[360px] sm:[--spread:100px] md:h-[380px] md:[--spread:124px]">
+        {/* Placeholder fan while the Zora ranking loads. */}
+        {top.isPending &&
+          SLOTS.map((slot, i) => (
+            <div
+              key={i}
+              className="absolute bottom-0 origin-bottom"
+              style={{ transform: `translateX(calc(${slot.pos} * var(--spread))) rotate(${slot.rotate}deg)`, zIndex: slot.z }}
+            >
+              <Skeleton className="h-60 w-40 rounded-2xl ring-2 ring-white/60 sm:h-72 sm:w-48 md:h-80 md:w-56 dark:ring-zinc-700/60" />
+            </div>
+          ))}
         {cards.map((p, i) => {
           const slot = SLOTS[i];
           return (
             <motion.a
               key={p.handle}
-              href={launchHref(p.handle, "fomo")}
+              href={launchHref(p.handle)}
               aria-label={`Tokenize @${p.handle}`}
               initial={{ opacity: 0, y: 60 }}
               animate={{ opacity: 1, y: 0 }}
@@ -115,6 +129,7 @@ export function FozoHero({ onLaunchOwn }: { onLaunchOwn: () => void }) {
           );
         })}
       </div>
+      )}
 
       <div className="mt-10 grid w-full max-w-4xl gap-3 sm:grid-cols-3">
         {FEATURES.map(({ icon: Icon, text }, i) => (

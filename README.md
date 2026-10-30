@@ -1,7 +1,7 @@
 # FOZO
 
-**Mint the clout.** FOZO turns any **Zora** or **Fomo** (fomo.family) profile into a live token on Robinhood
-Chain, launched through Pons V2. Tokens are born on a bonding curve and graduate to Uniswap v4 once the crowd
+**Mint the clout.** FOZO turns any **Zora** profile into a live token on Robinhood Chain, launched through
+Pons V2. Tokens are born on a bonding curve and graduate to Uniswap v4 once the crowd
 shows up.
 
 ## Features
@@ -10,13 +10,9 @@ shows up.
   logo (avatar), description (bio) and socials (X, Farcaster, website). Creator tax and buyback & burn are
   configurable. Tokens launch via `launchToken` on the Pons V2 factory
   `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e`, paired with ETH: bonding curve first, then Uniswap v4.
-- **Top Zora Profiles**: Zora profiles ranked by followers (no price or market cap data). Candidates come from
-  Zora's creator lists (most valuable, trending, featured, top volume); each profile's follower count is read via
-  `getProfileSocial`.
-- **Top Fomo Profiles**: side by side with the Zora list; the top 25 fomo.family profiles by followers, from
-  `src/data/fomoProfiles.ts`. Tokenize opens `#/launch/fomo/<handle>` prefilled from that list; when
-  `FOMO_API_KEY` (getfomoapi.fun) is set, avatar, bio, X, website and wallet are also pulled via
-  `/api/fomo/user`.
+- **Top Zora Profiles**: Zora profiles ranked by followers (no price or market cap data); the home hero fans out
+  the top five as clickable cards. Candidates come from Zora's creator lists (most valuable, trending, featured,
+  top volume); each profile's follower count is read via `getProfileSocial`.
 - **Tokenize button** (on Top Profiles and profile pages): opens the launch form `#/launch/<handle>` directly,
   prefilled with the profile's name, ticker, logo, bio and socials. The form renders before a wallet is
   connected; the wallet is requested only on submit. When the profile isn't owned by the connected wallet, the
@@ -49,8 +45,6 @@ All Zora data goes through the serverless functions in `api/` (enabled automatic
 - `GET /api/top-profiles`: the Top Zora Profiles ranking, computed once on the server and cached on the CDN for
   10 minutes (`stale-while-revalidate` 1 day). The browser makes one request instead of ~100 Zora calls.
 - `GET /api/zora/{explore|profile|profileSocial}`: cached proxy to the Zora API.
-- `GET /api/fomo/user?handle=`: fomo.family profile from getfomoapi.fun (requires `FOMO_API_KEY`), cached on
-  the CDN for 10 minutes, retried when the 5 requests/second limit is hit.
 
 The server uses `ZORA_API_KEY` (kept secret, never shipped to the browser) and retries automatically when Zora
 answers 429/5xx. In `npm run dev`, `/api/zora` is proxied by Vite and Top Zora Profiles is computed in the
@@ -82,4 +76,4 @@ uploads).
   `hero-with-cards-utils/orb-button.tsx`, and `primitives.tsx` (Panel, Reveal, SectionHeading, Notice, input styles).
 - Dark mode is class-based (`html.dark`), dark by default, toggled from the navbar/footer and remembered per browser.
 
-> Not an official Zora, fomo.family or Pons app. New tokens are extremely risky.
+> Not an official Zora or Pons app. New tokens are extremely risky.

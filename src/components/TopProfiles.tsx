@@ -4,46 +4,32 @@ import { Avatar } from "./Avatar";
 import { OrbButton } from "@/components/ui/hero-with-cards-utils/orb-button";
 import { Notice, Panel, Reveal, SectionHeading, Skeleton, ghostButtonClass, linkButtonClass } from "@/components/ui/primitives";
 import { fmtNum } from "../lib/format";
-import { fomoTopProfiles } from "../lib/fomo";
-import { launchHref, type ProfileSource } from "../lib/router";
+import { launchHref } from "../lib/router";
 import { useTopProfiles } from "../lib/topProfiles";
 
 type Row = { handle: string; displayName?: string; avatar?: string; followers?: number };
 
 const PAGE_SIZE = 25;
 
-/** Zora and fomo leaderboards side by side. */
+/** Top Zora profiles, ranked by followers. */
 export function TopProfiles({ compact = false }: { compact?: boolean }) {
   const zora = useTopProfiles();
   return (
-    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
-      <Reveal>
-        <Leaderboard
-          source="zora"
-          title="Top Zora Profiles"
-          subtitle="Ranked by Zora followers."
-          rows={zora.data ?? []}
-          loading={zora.isPending}
-          error={zora.isError ? (zora.error as Error).message : undefined}
-          onRetry={() => zora.refetch()}
-          compact={compact}
-        />
-      </Reveal>
-      <Reveal delay={0.08}>
-        <Leaderboard
-          source="fomo"
-          title="Top Fomo Profiles"
-          subtitle="Ranked by fomo.family followers."
-          rows={fomoTopProfiles}
-          compact={compact}
-        />
-      </Reveal>
-    </div>
+    <Reveal className="mx-auto w-full max-w-3xl">
+      <Leaderboard
+        title="Top Zora Profiles"
+        subtitle="Ranked by Zora followers."
+        rows={zora.data ?? []}
+        loading={zora.isPending}
+        error={zora.isError ? (zora.error as Error).message : undefined}
+        onRetry={() => zora.refetch()}
+        compact={compact}
+      />
+    </Reveal>
   );
 }
 
 type LeaderboardProps = {
-  source: ProfileSource;
   title: string;
   subtitle: string;
   rows: Row[];
@@ -54,14 +40,14 @@ type LeaderboardProps = {
   emptyText?: string;
 };
 
-function Leaderboard({ source, title, subtitle, rows, loading, error, onRetry, compact, emptyText = "Nothing here yet." }: LeaderboardProps) {
+function Leaderboard({ title, subtitle, rows, loading, error, onRetry, compact, emptyText = "Nothing here yet." }: LeaderboardProps) {
   const [shown, setShown] = useState(compact ? 10 : PAGE_SIZE);
   const visible = rows.slice(0, shown);
 
   return (
     <Panel className="px-3 sm:px-6">
       <div className="px-2 sm:px-0">
-        <SectionHeading title={title} subtitle={subtitle} dot={source} />
+        <SectionHeading title={title} subtitle={subtitle} dot />
       </div>
 
       {error && (
@@ -91,17 +77,17 @@ function Leaderboard({ source, title, subtitle, rows, loading, error, onRetry, c
             <tr key={p.handle} className="group border-b border-zinc-100 transition-colors last:border-0 hover:bg-zinc-50 dark:border-zinc-800/70 dark:hover:bg-zinc-800/40">
               <td className="py-3 pl-2 font-mono text-xs text-zinc-400 max-[380px]:hidden">{i + 1}</td>
               <td className="py-3 pl-2">
-                <a className="flex min-w-0 items-center gap-3" href={launchHref(p.handle, source)}>
+                <a className="flex min-w-0 items-center gap-3" href={launchHref(p.handle)}>
                   <Avatar src={p.avatar} name={p.handle} size={36} className="max-sm:!size-8" />
                   <span className="flex min-w-0 flex-col">
-                    <strong className="max-w-[92px] truncate font-semibold min-[420px]:max-w-[140px] sm:max-w-[200px]">{p.displayName || `@${p.handle}`}</strong>
-                    <small className="max-w-[92px] truncate text-[13px] text-zinc-500 min-[420px]:max-w-[140px] sm:max-w-[200px] dark:text-zinc-400">@{p.handle}</small>
+                    <strong className="max-w-[92px] truncate font-semibold min-[420px]:max-w-[160px] sm:max-w-[320px]">{p.displayName || `@${p.handle}`}</strong>
+                    <small className="max-w-[92px] truncate text-[13px] text-zinc-500 min-[420px]:max-w-[160px] sm:max-w-[320px] dark:text-zinc-400">@{p.handle}</small>
                   </span>
                 </a>
               </td>
               <td className="whitespace-nowrap py-3 pr-2 text-right font-mono text-[13px] font-semibold sm:text-sm">{fmtNum(p.followers)}</td>
               <td className="py-3 pr-1 text-right">
-                <OrbButton href={launchHref(p.handle, source)} size="sm" noOrb className="h-8 px-3 text-xs sm:px-4 sm:text-[13px]">
+                <OrbButton href={launchHref(p.handle)} size="sm" noOrb className="h-8 px-3 text-xs sm:px-4 sm:text-[13px]">
                   Tokenize
                 </OrbButton>
               </td>

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * ZEON mark: a "Z" blending neon green into Zora blue on a black badge, circled by a thin orbit with a spark.
- * Neon for the name, the orbit for the "eon". Mirrors public/favicon.svg.
+ * Neon for the name, the orbit for the "eon". Mirrors public/zeon-icon.svg (the favicon).
  */
 export function ZeonMark({ size = 32, title, className }: { size?: number; title?: string; className?: string }) {
   const id = useId().replace(/:/g, "");

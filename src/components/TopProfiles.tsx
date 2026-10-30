@@ -36,7 +36,7 @@ export function TopProfiles({ compact = false }: { compact?: boolean }) {
       <div className="panel-head">
         <div>
           <h2>Top Profile Zora</h2>
-          <p className="muted">Creator coin di Base, live dari Zora API.</p>
+          <p className="muted">Peringkat creator coin Zora, live dari Zora API.</p>
         </div>
         <div className="tabs" role="tablist">
           {TABS.map((t) => (

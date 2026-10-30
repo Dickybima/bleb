@@ -1,16 +1,17 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useAccount } from "wagmi";
-import { base } from "wagmi/chains";
 import type { Address } from "viem";
 import { useZoraProfile } from "./ProfileView";
 import { Avatar } from "./Avatar";
 import { ConnectButton } from "./ConnectButton";
+import { LaunchSuccess } from "./LaunchSuccess";
 import { TokenizeSteps } from "./TokenizeSteps";
+import { robinhoodChain } from "../lib/chains";
+import { LIMITS, type Socials } from "../lib/pons";
+import { socialsFromProfile } from "../lib/profileSocials";
 import { useTokenize } from "../lib/useTokenize";
-import { fmtUsd, shortAddr } from "../lib/format";
-import { profileHref } from "../lib/router";
-import { basescanTxUrl, hasApiKey, PLATFORM_REFERRER, zoraCoinUrl } from "../lib/zora";
-import { zeroAddress } from "viem";
+import { shortAddr } from "../lib/format";
+import { hasApiKey } from "../lib/zora";
 
 export function Launchpad() {
   const { address, isConnected, chainId } = useAccount();
@@ -19,16 +20,16 @@ export function Launchpad() {
   return (
     <section className="hero">
       <div className="hero-copy">
-        <span className="eyebrow">Zora Creator Coin Launchpad</span>
-        <h1>Tokenize profil Zora kamu dalam satu klik.</h1>
+        <span className="eyebrow">Profile Launchpad · Pons V2</span>
+        <h1>Tokenize profil kamu dalam satu klik.</h1>
         <p className="muted lead">
-          Ubah profil kamu menjadi creator coin di Base: dipasangkan dengan $ZORA, likuiditas langsung di Uniswap v4,
-          dan kamu menerima reward dari setiap trade.
+          Ubah profil Zora kamu menjadi token di Robinhood Chain lewat Pons V2: mulai di bonding curve, lalu otomatis
+          lulus ke pool Uniswap v4 saat target likuiditas tercapai.
         </p>
         <ul className="bullets">
-          <li>Supply tetap 1 miliar, sebagian di-vesting ke kreator</li>
-          <li>Langsung bisa di-trade di Zora &amp; Base</li>
-          <li>Fee trading mengalir ke wallet kamu</li>
+          <li>Nama, logo, bio, dan sosial diambil otomatis dari profil Zora</li>
+          <li>Fee kreator dan creator tax mengalir ke wallet kamu</li>
+          <li>Diluncurkan langsung di kontrak Pons V2, dipasangkan dengan ETH</li>
         </ul>
       </div>
 
@@ -39,21 +40,14 @@ export function Launchpad() {
             <p className="muted">Gunakan wallet yang terhubung ke profil Zora kamu.</p>
             <ConnectButton />
           </div>
-        ) : chainId !== base.id ? (
+        ) : chainId !== robinhoodChain.id ? (
           <div className="center stack">
             <h3>Jaringan salah</h3>
-            <p className="muted">Creator coin diluncurkan di Base.</p>
+            <p className="muted">Token Pons diluncurkan di Robinhood Chain.</p>
             <ConnectButton />
           </div>
         ) : profileLoading ? (
           <span className="skeleton tall" />
-        ) : profile?.creatorCoin ? (
-          <AlreadyTokenized
-            handle={profile.handle}
-            avatar={profile.avatar?.medium}
-            coin={profile.creatorCoin.address}
-            marketCap={profile.creatorCoin.marketCap}
-          />
         ) : (
           <LaunchForm
             key={address}
@@ -62,6 +56,7 @@ export function Launchpad() {
               handle: profile?.handle,
               description: profile?.bio ?? "",
               avatar: profile?.avatar?.medium,
+              socials: socialsFromProfile(profile?.socialAccounts, profile?.website),
             }}
           />
         )}
@@ -70,48 +65,34 @@ export function Launchpad() {
   );
 }
 
-function AlreadyTokenized({ handle, avatar, coin, marketCap }: { handle: string; avatar?: string; coin: string; marketCap: string }) {
-  return (
-    <div className="center stack">
-      <Avatar src={avatar} name={handle} size={72} />
-      <h3>@{handle} sudah ditokenisasi 🎉</h3>
-      <p className="muted">Market cap saat ini {fmtUsd(marketCap)} · {shortAddr(coin)}</p>
-      <div className="row gap center-row">
-        <a className="btn btn-ghost" href={profileHref(handle)}>Lihat profil</a>
-        <a className="btn btn-primary" href={zoraCoinUrl(coin)} target="_blank" rel="noreferrer">Trade di Zora ↗</a>
-      </div>
-    </div>
-  );
-}
-
 function LaunchForm({
   creator,
   defaults,
 }: {
   creator: Address;
-  defaults: { handle?: string; description: string; avatar?: string };
+  defaults: { handle?: string; description: string; avatar?: string; socials: Socials };
 }) {
   const tk = useTokenize();
-  const { busy, step, txHash, coin, error } = tk;
+  const { busy, error } = tk;
 
   const [name, setName] = useState(defaults.handle ?? "");
-  const [symbol, setSymbol] = useState(defaults.handle ?? "");
+  const [symbol, setSymbol] = useState(defaults.handle?.toUpperCase() ?? "");
   const [description, setDescription] = useState(defaults.description);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [metadataUri, setMetadataUri] = useState("");
+  const [logoUrl, setLogoUrl] = useState(defaults.avatar ?? "");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [taxPct, setTaxPct] = useState("0");
+  const [buyback, setBuyback] = useState(false);
   const [preview, setPreview] = useState<string | undefined>(defaults.avatar);
 
   useEffect(() => {
-    if (!imageFile) return setPreview(defaults.avatar);
-    const url = URL.createObjectURL(imageFile);
+    if (!logoFile) return setPreview(logoUrl || undefined);
+    const url = URL.createObjectURL(logoFile);
     setPreview(url);
     return () => URL.revokeObjectURL(url);
-  }, [imageFile, defaults.avatar]);
+  }, [logoFile, logoUrl]);
 
-  const image = imageFile ?? defaults.avatar;
-  const canSubmit =
-    !busy && name.trim() && symbol.trim() && tk.ready &&
-    (hasApiKey ? Boolean(image) : /^(ipfs|https?|ar):\/\//.test(metadataUri.trim()));
+  const taxBps = Math.round(Number(taxPct) * 100);
+  const canSubmit = !busy && name.trim() && symbol.trim() && tk.ready && Number.isFinite(taxBps) && taxBps >= 0;
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -120,81 +101,85 @@ function LaunchForm({
       name: name.trim(),
       symbol: symbol.trim(),
       description,
-      image,
-      metadataUri: hasApiKey ? undefined : metadataUri,
+      logo: logoFile ?? logoUrl.trim(),
+      socials: defaults.socials,
+      creatorTaxBps: taxBps,
+      buybackEnabled: buyback,
     });
   };
 
-  if (step === "done") {
-    return (
-      <div className="center stack">
-        <span className="orb big" aria-hidden />
-        <h3>${symbol.toUpperCase()} berhasil diluncurkan!</h3>
-        {coin && <p className="muted mono">{coin}</p>}
-        <div className="row gap center-row">
-          {txHash && <a className="btn btn-ghost" href={basescanTxUrl(txHash)} target="_blank" rel="noreferrer">Lihat transaksi ↗</a>}
-          {coin && <a className="btn btn-primary" href={zoraCoinUrl(coin)} target="_blank" rel="noreferrer">Buka di Zora ↗</a>}
-        </div>
-      </div>
-    );
-  }
+  if (tk.step === "done") return <LaunchSuccess state={tk} symbol={symbol} />;
+
+  const socials = Object.entries(defaults.socials).filter(([, v]) => v);
 
   return (
     <form className="form" onSubmit={onSubmit}>
       <div className="form-top">
-        <label className="image-pick" title="Ganti gambar coin">
+        <label className="image-pick" title={hasApiKey ? "Ganti logo" : "Logo dari URL"}>
           <Avatar src={preview} name={name || "?"} size={88} />
-          <input type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" hidden
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} disabled={busy || !hasApiKey} />
+          <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden
+            onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)} disabled={busy || !hasApiKey} />
           {hasApiKey && <span className="image-pick-hint">Ganti</span>}
         </label>
         <div className="grow stack-sm">
           <label className="field">
-            <span>Nama coin</span>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="namakamu" maxLength={64} disabled={busy} required />
+            <span>Nama token</span>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="namakamu" maxLength={LIMITS.name} disabled={busy} required />
           </label>
           <label className="field">
             <span>Ticker</span>
             <div className="prefix-input">
               <span>$</span>
-              <input value={symbol} onChange={(e) => setSymbol(e.target.value.replace(/\s/g, ""))} placeholder="NAMAKAMU" maxLength={20} disabled={busy} required />
+              <input value={symbol} onChange={(e) => setSymbol(e.target.value.replace(/\s/g, ""))} placeholder="NAMAKAMU" maxLength={LIMITS.symbol} disabled={busy} required />
             </div>
           </label>
         </div>
       </div>
 
-      <label className="field">
-        <span>Deskripsi</span>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Ceritakan tentang kamu…" disabled={busy} />
-      </label>
-
-      {!hasApiKey && (
+      {!logoFile && (
         <label className="field">
-          <span>Metadata URI</span>
-          <input value={metadataUri} onChange={(e) => setMetadataUri(e.target.value)} placeholder="ipfs://…" disabled={busy} required />
-          <small className="muted">
-            Set <code>VITE_ZORA_API_KEY</code> agar gambar &amp; metadata di-upload otomatis. Tanpa itu, isi URI JSON metadata (name, symbol, description, image) yang sudah di-pin di IPFS.
-          </small>
+          <span>URL logo</span>
+          <input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://…" maxLength={LIMITS.logo} disabled={busy} />
         </label>
       )}
 
+      <label className="field">
+        <span>Deskripsi</span>
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={LIMITS.description} placeholder="Ceritakan tentang kamu…" disabled={busy} />
+      </label>
+
+      <div className="row gap">
+        <label className="field grow">
+          <span>Creator tax (%)</span>
+          <input type="number" min={0} step={0.1} value={taxPct} onChange={(e) => setTaxPct(e.target.value)} disabled={busy} />
+        </label>
+        <label className="check">
+          <input type="checkbox" checked={buyback} onChange={(e) => setBuyback(e.target.checked)} disabled={busy} />
+          <span>Aktifkan buyback &amp; burn</span>
+        </label>
+      </div>
+
+      {socials.length > 0 && (
+        <div className="chips">
+          {socials.map(([k, v]) => <span key={k} className="chip" title={v}>{k}</span>)}
+        </div>
+      )}
+
       <dl className="summary">
-        <div><dt>Jaringan</dt><dd>Base</dd></div>
-        <div><dt>Pasangan</dt><dd>$ZORA</dd></div>
+        <div><dt>Jaringan</dt><dd>Robinhood Chain</dd></div>
+        <div><dt>Pasangan</dt><dd>ETH</dd></div>
         <div><dt>Penerima fee</dt><dd className="mono">{shortAddr(creator)}</dd></div>
-        {PLATFORM_REFERRER !== zeroAddress && <div><dt>Referrer</dt><dd className="mono">{shortAddr(PLATFORM_REFERRER)}</dd></div>}
       </dl>
 
       {!defaults.handle && (
-        <div className="notice">Wallet ini belum punya profil Zora. Coin tetap bisa diluncurkan, tapi tidak akan muncul sebagai creator coin profil di Zora.</div>
+        <div className="notice">Wallet ini belum punya profil Zora. Token tetap bisa diluncurkan, isi data secara manual.</div>
       )}
 
-      <TokenizeSteps state={tk} withUpload={hasApiKey} />
-
+      <TokenizeSteps state={tk} withUpload={Boolean(logoFile)} />
       {error && <div className="notice notice-error">{error}</div>}
 
       <button className="btn btn-primary btn-lg block" type="submit" disabled={!canSubmit}>
-        {busy ? "Memproses…" : `Luncurkan $${symbol.toUpperCase() || "COIN"}`}
+        {busy ? "Memproses…" : `Luncurkan $${symbol.toUpperCase() || "TOKEN"} di Pons`}
       </button>
     </form>
   );

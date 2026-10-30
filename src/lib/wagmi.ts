@@ -1,11 +1,11 @@
 import { createConfig, http } from "wagmi";
-import { base } from "wagmi/chains";
 import { coinbaseWallet, injected } from "wagmi/connectors";
+import { robinhoodChain } from "./chains";
 
 export const wagmiConfig = createConfig({
-  chains: [base],
-  connectors: [injected(), coinbaseWallet({ appName: "Zora Profile Launchpad" })],
-  transports: { [base.id]: http() },
+  chains: [robinhoodChain],
+  connectors: [injected(), coinbaseWallet({ appName: "Profile Launchpad" })],
+  transports: { [robinhoodChain.id]: http() },
 });
 
 declare module "wagmi" {

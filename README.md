@@ -1,39 +1,43 @@
-# Zora Profile Launchpad
+# Profile Launchpad (Pons V2)
 
-Website launchpad untuk **men-tokenize profil Zora** menjadi creator coin di Base, plus leaderboard **Top Profile Zora**.
+Launchpad bergaya "tokenize profile" Zora yang meluncurkan token di **Pons V2** (Robinhood Chain, chain id 4663),
+plus leaderboard **Top Profile Zora**.
 
 ## Fitur
 
-- **Launchpad** – hubungkan wallet, profil Zora milik wallet itu otomatis terdeteksi (handle, bio, avatar sebagai default).
-  Klik *Luncurkan* untuk men-deploy creator coin lewat `deployCreatorCoin` di Zora Coin Factory
-  (`0x777777751622c0d3258f214F9DF38E35BF45baF3`, Base). Pool config diambil live dari Zora API
-  (pasangan $ZORA, Uniswap v4). Jika profil sudah punya creator coin, launchpad menampilkan coin tersebut.
-- **Top Profile** – peringkat creator coin berdasarkan Market Cap, Volume 24 jam, Trending, dan Profil Baru,
-  dengan pagination "Muat lebih banyak".
-- **Halaman profil** – cari `@handle` atau alamat `0x…` untuk melihat bio, akun sosial, dan statistik creator coin.
-  Jika profil belum punya creator coin, ada tombol **Tokenize**: sekali klik langsung membuat creator coin
-  `$HANDLE` dari handle, bio, dan avatar profil (metadata di-upload otomatis ke IPFS). Tombol hanya aktif untuk
-  wallet pemilik profil (public wallet atau linked wallet) dan butuh `VITE_ZORA_API_KEY`.
+- **Launchpad** – hubungkan wallet; profil Zora milik wallet itu otomatis terdeteksi dan mengisi nama, ticker,
+  logo (avatar), deskripsi (bio), dan sosial (X, Farcaster, website). Bisa atur creator tax dan buyback & burn.
+  Token diluncurkan lewat `launchToken` di Pons V2 factory `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e`,
+  dipasangkan dengan ETH: mulai di bonding curve lalu lulus ke Uniswap v4.
+- **Tombol Tokenize di halaman profil** – sekali klik langsung meluncurkan token `$HANDLE` di Pons dari data profil.
+  Hanya aktif untuk wallet pemilik profil (public wallet atau linked wallet).
+- **Top Profile** – peringkat creator coin Zora (Market Cap, Volume 24j, Trending, Baru), data live dari Zora API.
+- **Halaman profil** – cari `@handle` atau `0x…`.
+
+## Alur peluncuran (Pons V2)
+
+1. Baca `launchEnabled`, `canLaunch(wallet)`, `launchFee`, `maxCreatorTaxBps` dari factory.
+2. Pilih launch config (env `VITE_PONS_LAUNCH_CONFIG_ID`, atau config aktif pertama).
+3. `previewLaunchEconomics(configId, ETH)` → `expectedEconomics`.
+4. Simulasi lalu kirim `launchToken(params, configId, ETH, [])` dengan `value = launchFee`
+   (fallback ke overload tanpa `snipeTaxExemptions`).
+5. Ambil alamat token & curve dari event `TokenLaunched`.
+
+ABI diambil dari SDK pihak ketiga `0xfnzero/pons-trade-sdk` dan dicocokkan dengan signature resminya;
+verifikasi ulang dengan dokumentasi Pons (docs.ponsfamily.com/v2) sebelum produksi.
 
 ## Menjalankan
 
 ```bash
 npm install
-cp .env.example .env   # isi VITE_ZORA_API_KEY
+cp .env.example .env
 npm run dev
 ```
 
-Build produksi: `npm run build` (hasil di `dist/`, bisa di-deploy ke Vercel/Netlify/Cloudflare Pages sebagai static site).
-
-### Variabel lingkungan
-
-| Nama | Keterangan |
-| --- | --- |
-| `VITE_ZORA_API_KEY` | API key dari zora.co/settings/developer. Dibutuhkan untuk upload gambar + metadata ke IPFS. Tanpa ini, form meminta Metadata URI manual. |
-| `VITE_PLATFORM_REFERRER` | Alamat penerima platform referral fee dari coin yang diluncurkan lewat situs ini. Opsional. |
+Build produksi: `npm run build` (hasil di `dist/`, static site).
 
 ## Stack
 
-Vite + React + TypeScript, wagmi/viem (Base), `@zoralabs/coins-sdk`, `@zoralabs/protocol-deployments`.
+Vite + React + TypeScript, wagmi/viem (Robinhood Chain), `@zoralabs/coins-sdk` (data profil Zora & upload IPFS).
 
-> Bukan aplikasi resmi Zora. Apakah coin otomatis tertaut sebagai creator coin profil di zora.co ditentukan oleh indexer Zora.
+> Bukan aplikasi resmi Zora maupun Pons. Token baru sangat berisiko.

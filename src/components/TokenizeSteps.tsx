@@ -1,6 +1,6 @@
 import { STEP_LABEL, type useTokenize } from "../lib/useTokenize";
 import { shortAddr } from "../lib/format";
-import { basescanTxUrl } from "../lib/zora";
+import { explorerTxUrl } from "../lib/zora";
 
 /** Progress list shown while a tokenize transaction is in flight. */
 export function TokenizeSteps({ state, withUpload }: { state: ReturnType<typeof useTokenize>; withUpload: boolean }) {
@@ -14,7 +14,7 @@ export function TokenizeSteps({ state, withUpload }: { state: ReturnType<typeof 
         ))}
       {state.txHash && (
         <li className="muted">
-          <a href={basescanTxUrl(state.txHash)} target="_blank" rel="noreferrer">tx {shortAddr(state.txHash)} ↗</a>
+          <a href={explorerTxUrl(state.txHash)} target="_blank" rel="noreferrer">tx {shortAddr(state.txHash)} ↗</a>
         </li>
       )}
     </ol>

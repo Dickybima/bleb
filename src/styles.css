@@ -236,3 +236,6 @@ main.container { padding-top: 32px; padding-bottom: 48px; display: flex; flex-di
 .tokenize p { margin: 0; }
 .tokenize.done { background: color-mix(in srgb, var(--up) 10%, var(--surface)); border-color: color-mix(in srgb, var(--up) 35%, var(--border)); }
 .small { font-size: 13px; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; padding-top: 22px; cursor: pointer; }
+.check input { width: auto; }
+.tokenize.done { justify-content: center; }

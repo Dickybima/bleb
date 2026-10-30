@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getProfile } from "@zoralabs/coins-sdk";
 import { Avatar } from "./Avatar";
 import { TokenizeButton } from "./TokenizeButton";
+import { socialsFromProfile } from "../lib/profileSocials";
 import { fmtNum, fmtPct, fmtUsd, pctChange, shortAddr } from "../lib/format";
 import { zoraCoinUrl, zoraProfileUrl } from "../lib/zora";
 
@@ -61,27 +62,28 @@ export function ProfileView({ id }: { id: string }) {
         </div>
       </div>
 
-      {coin ? (
+      {coin && (
         <div className="stats">
-          <div className="stat"><span className="muted">Market cap</span><strong>{fmtUsd(coin.marketCap)}</strong></div>
+          <div className="stat"><span className="muted">Zora creator coin</span><strong>{fmtUsd(coin.marketCap)}</strong></div>
           <div className="stat">
             <span className="muted">Perubahan 24j</span>
             <strong className={pct === null || pct === 0 ? "" : pct > 0 ? "up" : "down"}>{fmtPct(pct)}</strong>
           </div>
-          <div className="stat"><span className="muted">Creator coin</span><strong className="mono">{shortAddr(coin.address)}</strong></div>
+          <div className="stat"><span className="muted">Alamat coin (Base)</span><strong className="mono">{shortAddr(coin.address)}</strong></div>
         </div>
-      ) : (
-        <TokenizeButton
-          handle={profile.handle}
-          bio={profile.bio}
-          avatar={profile.avatar?.medium}
-          wallets={[profile.publicWallet.walletAddress, ...profile.linkedWallets.edges.map((e) => e.node.walletAddress)]}
-        />
       )}
+
+      <TokenizeButton
+        handle={profile.handle}
+        bio={profile.bio}
+        avatar={profile.avatar?.medium}
+        socials={socialsFromProfile(profile.socialAccounts, profile.website)}
+        wallets={[profile.publicWallet.walletAddress, ...profile.linkedWallets.edges.map((e) => e.node.walletAddress)]}
+      />
 
       <div className="row gap">
         <a className="btn btn-ghost" href={zoraProfileUrl(profile.handle)} target="_blank" rel="noreferrer">Buka di Zora ↗</a>
-        {coin && <a className="btn btn-primary" href={zoraCoinUrl(coin.address)} target="_blank" rel="noreferrer">Trade coin ↗</a>}
+        {coin && <a className="btn btn-primary" href={zoraCoinUrl(coin.address)} target="_blank" rel="noreferrer">Coin di Zora ↗</a>}
       </div>
     </section>
   );

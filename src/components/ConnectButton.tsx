@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
-import { base } from "wagmi/chains";
+import { robinhoodChain } from "../lib/chains";
 import { shortAddr } from "../lib/format";
 
 export function ConnectButton() {
@@ -10,10 +10,10 @@ export function ConnectButton() {
   const { switchChain } = useSwitchChain();
   const [open, setOpen] = useState(false);
 
-  if (isConnected && chainId !== base.id) {
+  if (isConnected && chainId !== robinhoodChain.id) {
     return (
-      <button className="btn btn-warn" onClick={() => switchChain({ chainId: base.id })}>
-        Pindah ke Base
+      <button className="btn btn-warn" onClick={() => switchChain({ chainId: robinhoodChain.id })}>
+        Pindah ke Robinhood Chain
       </button>
     );
   }
@@ -37,7 +37,7 @@ export function ConnectButton() {
             <button
               key={c.uid}
               onClick={() => {
-                connect({ connector: c, chainId: base.id });
+                connect({ connector: c, chainId: robinhoodChain.id });
                 setOpen(false);
               }}
             >

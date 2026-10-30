@@ -20,8 +20,8 @@ export default function App() {
         {route.page === "profile" && <ProfileView id={route.id} />}
       </main>
       <footer className="footer container">
-        <span>Dibangun di atas Zora Coins Protocol · Base</span>
-        <span>Bukan aplikasi resmi Zora. Trading koin berisiko tinggi.</span>
+        <span>Dibangun di atas Pons V2 · Robinhood Chain · data profil dari Zora</span>
+        <span>Bukan aplikasi resmi Zora maupun Pons. Trading token berisiko tinggi.</span>
       </footer>
     </>
   );

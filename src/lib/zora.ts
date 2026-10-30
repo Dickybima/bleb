@@ -1,14 +1,12 @@
 import { setApiKey } from "@zoralabs/coins-sdk";
-import { getAddress, isAddress, zeroAddress, type Address } from "viem";
+import { isAddress } from "viem";
+import { robinhoodChain } from "./chains";
 
 const apiKey = import.meta.env.VITE_ZORA_API_KEY as string | undefined;
 if (apiKey) setApiKey(apiKey);
 
+/** The Zora API key is only needed to upload custom logo images to IPFS. */
 export const hasApiKey = Boolean(apiKey);
-
-const referrer = import.meta.env.VITE_PLATFORM_REFERRER as string | undefined;
-export const PLATFORM_REFERRER: Address =
-  referrer && isAddress(referrer) ? getAddress(referrer) : zeroAddress;
 
 export const zoraProfileUrl = (handleOrAddress: string) =>
   isAddress(handleOrAddress)
@@ -16,4 +14,7 @@ export const zoraProfileUrl = (handleOrAddress: string) =>
     : `https://zora.co/@${handleOrAddress}`;
 
 export const zoraCoinUrl = (address: string) => `https://zora.co/coin/base:${address}`;
-export const basescanTxUrl = (hash: string) => `https://basescan.org/tx/${hash}`;
+
+const explorer = robinhoodChain.blockExplorers.default.url;
+export const explorerTxUrl = (hash: string) => `${explorer}/tx/${hash}`;
+export const explorerTokenUrl = (address: string) => `${explorer}/token/${address}`;

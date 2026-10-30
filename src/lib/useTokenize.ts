@@ -1,89 +1,73 @@
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { base } from "wagmi/chains";
 import type { Address, Hash } from "viem";
-import { deployCreatorCoin, fetchCreatorPoolConfig, uploadMetadata } from "./launch";
-import { hasApiKey } from "./zora";
+import { robinhoodChain } from "./chains";
+import { launchOnPons, uploadLogo, type Socials } from "./pons";
 
-export type TokenizeStep = "idle" | "upload" | "config" | "sign" | "confirm" | "done";
+export type TokenizeStep = "idle" | "upload" | "sign" | "confirm" | "done";
 
 export const STEP_LABEL: Record<Exclude<TokenizeStep, "idle" | "done">, string> = {
-  upload: "Upload metadata ke IPFS",
-  config: "Ambil pool config creator coin",
-  sign: "Tanda tangani transaksi di wallet",
-  confirm: "Menunggu konfirmasi di Base",
+  upload: "Upload logo ke IPFS",
+  sign: "Cek Pons & tanda tangani transaksi",
+  confirm: "Menunggu konfirmasi di Robinhood Chain",
 };
-const ORDER = ["upload", "config", "sign", "confirm"] as const;
+const ORDER = ["upload", "sign", "confirm"] as const;
 
 export type TokenizeInput = {
   creator: Address;
   name: string;
   symbol: string;
   description: string;
-  /** Image file or URL; required when metadata is uploaded via the Zora API. */
-  image?: File | string;
-  /** Pre-pinned metadata URI, used instead of uploading. */
-  metadataUri?: string;
+  /** Logo as an uploaded file (pinned to IPFS first) or an existing image URL. */
+  logo?: File | string;
+  socials: Socials;
+  creatorTaxBps?: number;
+  buybackEnabled?: boolean;
 };
 
-/** Fetches a remote image into a File so it gets pinned to IPFS with the metadata; falls back to the URL. */
-async function toUploadableImage(image: File | string): Promise<File | string> {
-  if (typeof image !== "string") return image;
-  try {
-    const res = await fetch(image);
-    const blob = await res.blob();
-    if (!res.ok || !blob.type.startsWith("image/")) return image;
-    return new File([blob], `avatar.${blob.type.split("/")[1] ?? "png"}`, { type: blob.type });
-  } catch {
-    return image;
-  }
-}
-
 export function useTokenize() {
-  const queryClient = useQueryClient();
-  const publicClient = usePublicClient({ chainId: base.id });
-  const { data: walletClient } = useWalletClient({ chainId: base.id });
+  const publicClient = usePublicClient({ chainId: robinhoodChain.id });
+  const { data: walletClient } = useWalletClient({ chainId: robinhoodChain.id });
 
   const [step, setStep] = useState<TokenizeStep>("idle");
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<Hash | null>(null);
-  const [coin, setCoin] = useState<Address | null>(null);
+  const [token, setToken] = useState<Address | null>(null);
 
   const ready = Boolean(walletClient && publicClient);
   const busy = step !== "idle" && step !== "done";
 
-  const tokenize = async ({ creator, name, symbol, description, image, metadataUri }: TokenizeInput) => {
+  const tokenize = async (input: TokenizeInput) => {
     if (!walletClient || !publicClient) return;
     setError(null);
     setTxHash(null);
     try {
-      let uri = metadataUri?.trim() ?? "";
-      if (!uri) {
-        if (!hasApiKey) throw new Error("VITE_ZORA_API_KEY belum di-set, metadata tidak bisa di-upload otomatis.");
-        if (!image) throw new Error("Gambar coin wajib diisi.");
+      let logo = typeof input.logo === "string" ? input.logo : "";
+      if (input.logo instanceof File) {
         setStep("upload");
-        uri = await uploadMetadata({ creator, name, symbol, description, image: await toUploadableImage(image) });
+        logo = await uploadLogo(input.creator, input.logo);
       }
-      setStep("config");
-      const poolConfig = await fetchCreatorPoolConfig();
       setStep("sign");
-      const result = await deployCreatorCoin({
+      const result = await launchOnPons({
         walletClient,
         publicClient,
-        account: creator,
-        uri,
-        name,
-        symbol,
-        poolConfig,
+        input: {
+          account: input.creator,
+          name: input.name,
+          symbol: input.symbol,
+          logo,
+          description: input.description,
+          socials: input.socials,
+          creatorTaxBps: input.creatorTaxBps ?? 0,
+          buybackEnabled: input.buybackEnabled ?? false,
+        },
         onHash: (h) => {
           setTxHash(h);
           setStep("confirm");
         },
       });
-      setCoin(result.coin ?? null);
+      setToken(result.token ?? null);
       setStep("done");
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
     } catch (err) {
       const e = err as { shortMessage?: string; message?: string };
       setError(e.shortMessage ?? e.message ?? String(err));
@@ -94,5 +78,5 @@ export function useTokenize() {
   const stepState = (s: (typeof ORDER)[number]) =>
     ORDER.indexOf(s) < ORDER.indexOf(step as (typeof ORDER)[number]) ? "done" : s === step ? "active" : "";
 
-  return { tokenize, step, busy, ready, error, txHash, coin, stepState };
+  return { tokenize, step, busy, ready, error, txHash, token, stepState };
 }

@@ -1,14 +1,14 @@
 /**
- * Robinhood Stock Tokens offered as Pons pair (quote) assets. Addresses are never hard-coded: tickers are not
- * identity (look-alike tokens exist), so they come from the Pons factory's own approved-pair list on-chain.
- * Robinhood's asset list is only used for logos. Shared by the /api/stock-tokens route and the browser.
+ * Display metadata for pair assets. The pair list itself always comes from the Pons factory on-chain (see
+ * /api/pairs); this file only knows brand colours for well-known Robinhood stock tickers and how to read logos out of
+ * Robinhood's asset list. Shared by the /api routes and the browser.
  */
 export const ROBINHOOD_CHAIN_ID = 4663;
 export const RHJ_ASSETS_URL = "https://api.robinhood.com/rhj/assets/";
 
 export type StockMeta = { symbol: string; name: string; color: string; fg?: string };
 
-/** Display order and brand colours for the fallback logo badges. */
+/** Brand colours (and display order) for well-known stock tickers' fallback logo badges. */
 export const STOCKS: StockMeta[] = [
   { symbol: "NVDA", name: "NVIDIA", color: "#76B900" },
   { symbol: "SPCX", name: "SpaceX", color: "#0B0B0B" },
@@ -48,8 +48,9 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
  * field by field, so this walks the JSON, carrying the nearest symbol down into nested deployment objects, and only
  * accepts entries whose chain is 4663 (or that carry no chain at all, ranked below explicit matches).
  */
-export function parseRhjAssets(body: unknown, symbols: string[]): ResolvedStock[] {
-  const wanted = new Set(symbols.map((s) => s.toUpperCase()));
+/** With `symbols` omitted, every Robinhood Chain asset is returned. */
+export function parseRhjAssets(body: unknown, symbols?: string[]): ResolvedStock[] {
+  const wanted = symbols ? new Set(symbols.map((s) => s.toUpperCase())) : null;
   const found = new Map<string, ResolvedStock & { explicit: boolean }>();
 
   const walk = (node: unknown, ctx: { symbol?: string; name?: string; logo?: string }) => {
@@ -62,7 +63,7 @@ export function parseRhjAssets(body: unknown, symbols: string[]): ResolvedStock[
     const chainRaw = node.chain_id ?? node.chainId ?? node.network_id ?? node.networkId;
     const chainOk = chainRaw === undefined || Number(chainRaw) === ROBINHOOD_CHAIN_ID;
 
-    if (symbol && wanted.has(symbol) && address && ADDRESS.test(address) && chainOk) {
+    if (symbol && (!wanted || wanted.has(symbol)) && address && ADDRESS.test(address) && chainOk) {
       const explicit = chainRaw !== undefined;
       const prev = found.get(symbol);
       if (!prev || (explicit && !prev.explicit)) found.set(symbol, { symbol, name, address, logo: logo?.startsWith("https://") ? logo : undefined, explicit });

@@ -322,7 +322,7 @@ function ReviewAndLaunch({ profile, fields, set }: { profile?: ZoraProfile | nul
       socials: { ...emptySocials(), twitter: fields.twitter.trim(), website: fields.website.trim(), farcaster: fields.farcaster },
       creatorTaxBps: taxBps,
       buybackEnabled: buyback,
-      pairToken: pair.kind === "stock" ? pair.stock.address : undefined,
+      pairToken: pair.kind === "token" ? pair.pair.address : undefined,
     });
   };
 

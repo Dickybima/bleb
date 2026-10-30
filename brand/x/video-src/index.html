@@ -1,0 +1,252 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1920px; height: 1080px; background: #000; overflow: hidden; }
+  body { font-family: Inter, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  .scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .grad { background: linear-gradient(90deg, #b6ff1f, #39ff8f 40%, #2fb8ff 70%, #4d6bff); -webkit-background-clip: text; color: transparent; }
+  .eyebrow { font-family: "JetBrains Mono", monospace; font-size: 24px; letter-spacing: .3em; text-transform: uppercase; color: #8a8f98; display: flex; align-items: center; gap: 14px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #39ff8f; box-shadow: 0 0 16px #39ff8f; }
+  .w { display: inline-block; will-change: transform, opacity; }
+
+  /* S1 */
+  #s1 h1 { margin-top: 56px; font-size: 128px; font-weight: 800; letter-spacing: -.035em; line-height: 1.02; text-align: center; }
+  #s1 em { font-style: italic; }
+
+  /* S2 */
+  #s2 p { font-size: 76px; font-weight: 700; letter-spacing: -.03em; line-height: 1.12; text-align: center; max-width: 1500px; }
+  #s2 .muted { color: #71717a; }
+  .flow { margin-top: 90px; display: flex; align-items: center; gap: 36px; }
+  .node { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .orb { width: 132px; height: 132px; border-radius: 34px; display: flex; align-items: center; justify-content: center; }
+  .node span { font-family: "JetBrains Mono", monospace; font-size: 20px; letter-spacing: .14em; text-transform: uppercase; color: #a1a1aa; }
+  .line { width: 120px; height: 3px; background: #27272a; position: relative; overflow: hidden; margin-bottom: 36px; border-radius: 2px; }
+  .line i { position: absolute; inset: 0; background: linear-gradient(90deg, #39ff8f, #2fb8ff); transform-origin: left; }
+
+  /* S3 */
+  #s3 .cap { font-size: 58px; font-weight: 800; letter-spacing: -.03em; margin-bottom: 48px; }
+  .card { width: 900px; border-radius: 36px; background: #0c0c0e; border: 1.5px solid #27272a; padding: 44px; box-shadow: 0 40px 120px rgba(57,255,143,.08); }
+  .input { height: 86px; border-radius: 22px; background: #000; border: 1.5px solid #3f3f46; display: flex; align-items: center; padding: 0 28px; font-size: 36px; gap: 6px; }
+  .input .at { color: #71717a; }
+  .caret { width: 3px; height: 40px; background: #39ff8f; margin-left: 2px; }
+  .pill { margin-left: auto; font-size: 22px; font-weight: 700; color: #39ff8f; background: rgba(57,255,143,.12); padding: 10px 18px; border-radius: 12px; }
+  .row { display: flex; align-items: center; gap: 26px; margin-top: 34px; }
+  .avatar { width: 112px; height: 112px; border-radius: 50%; background: radial-gradient(circle at 30% 28%, #fff7d6, #ffb020 30%, #ff3d77 65%, #8a1c5c); flex: none; }
+  .name { font-size: 44px; font-weight: 800; letter-spacing: -.02em; }
+  .tick { font-family: "JetBrains Mono", monospace; font-size: 26px; color: #a1a1aa; margin-top: 6px; }
+  .bio { margin-top: 28px; font-size: 28px; color: #a1a1aa; line-height: 1.4; }
+  .meta { margin-top: 28px; display: flex; gap: 16px; }
+  .chip { font-size: 24px; font-weight: 600; padding: 12px 20px; border-radius: 14px; border: 1.5px solid #27272a; color: #d4d4d8; }
+  .btn { margin-top: 36px; height: 92px; border-radius: 999px; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; gap: 18px; font-size: 34px; font-weight: 800; position: relative; }
+  .btn .ball { width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #b6ff1f 30%, #39ff8f 55%, #2fb8ff 80%, #4d6bff); }
+
+  /* S4 */
+  #s4 .cap { font-size: 64px; font-weight: 800; letter-spacing: -.03em; height: 80px; position: relative; width: 1400px; text-align: center; }
+  #s4 .cap div { position: absolute; inset: 0; }
+  .chart { margin-top: 50px; position: relative; }
+
+  /* S5 */
+  #s5 h2 { font-size: 170px; font-weight: 800; letter-spacing: -.045em; line-height: 1.02; text-align: center; }
+  #s5 .sub { margin-top: 44px; }
+
+  /* S6 */
+  .word { font-size: 170px; font-weight: 800; letter-spacing: .04em; line-height: 1; margin-top: 40px; }
+  .url { margin-top: 40px; font-size: 64px; font-weight: 700; letter-spacing: -.02em; }
+  .handle { margin-top: 18px; font-size: 30px; color: #8a8f98; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="n" x1="14" y1="14" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b6ff1f"/><stop offset="0.3" stop-color="#39ff8f"/><stop offset="0.55" stop-color="#2fb8ff"/><stop offset="0.8" stop-color="#4d6bff"/>
+    </linearGradient>
+    <filter id="g" filterUnits="userSpaceOnUse" x="-40" y="-40" width="144" height="144"><feGaussianBlur stdDeviation="3"/></filter>
+    <symbol id="mark" viewBox="0 0 64 64" overflow="visible">
+      <ellipse cx="32" cy="32" rx="25" ry="9" transform="rotate(-28 32 32)" fill="none" stroke="url(#n)" stroke-opacity="0.7" stroke-width="1.4"/>
+      <path d="M18.5 19.5H45.5L18.5 44.5H45.5" fill="none" stroke="url(#n)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" filter="url(#g)" opacity="0.85"/>
+      <path d="M18.5 19.5H45.5L18.5 44.5H45.5" fill="none" stroke="url(#n)" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20.5 19.5H43.5" fill="none" stroke="#fff" stroke-opacity="0.5" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="50.2" cy="18" r="3.6" fill="#b6ff1f" filter="url(#g)"/><circle cx="50.2" cy="18" r="2.2" fill="#fff"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- 1: logo + headline -->
+<section class="scene" id="s1">
+  <svg id="m1" width="300" height="300" style="overflow:visible"><use href="#mark" width="300" height="300"/></svg>
+  <h1><span class="w">Turn</span> <span class="w">reach</span> <span class="w">into</span><br><em class="w grad">a</em> <em class="w grad">market.</em></h1>
+</section>
+
+<!-- 2: what it is -->
+<section class="scene" id="s2">
+  <p><span class="w">ZEON</span> <span class="w muted">turns</span> <span class="w muted">any</span> <span class="w">Zora</span> <span class="w">profile</span><br><span class="w muted">into</span> <span class="w muted">a</span> <span class="w grad">live</span> <span class="w grad">token</span> <span class="w muted">on</span> <span class="w">Robinhood</span> <span class="w">Chain.</span></p>
+  <div class="flow">
+    <div class="node" id="n1"><div class="orb" style="background:radial-gradient(circle at 30% 28%,#e3f1ff,#7aa2ff 35%,#3b4fe0 70%,#160f5c);box-shadow:0 0 60px -6px #4b6bff">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>
+    </div><span>Zora profile</span></div>
+    <div class="line"><i id="l1"></i></div>
+    <div class="node" id="n2"><div class="orb" style="background:#000;border:1.5px solid #27272a;box-shadow:0 0 60px -10px rgba(57,255,143,.6)">
+      <svg width="96" height="96" style="overflow:visible"><use href="#mark" width="96" height="96"/></svg>
+    </div><span>ZEON</span></div>
+    <div class="line"><i id="l2"></i></div>
+    <div class="node" id="n3"><div class="orb" style="background:#bef264;box-shadow:0 0 60px -6px #bef264">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#09090b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
+    </div><span>Token</span></div>
+  </div>
+</section>
+
+<!-- 3: drop a handle → auto-filled → launch -->
+<section class="scene" id="s3">
+  <div class="cap"><span class="w">Drop a handle</span> <span class="w" style="color:#52525b">→</span> <span class="w">auto-filled</span> <span class="w" style="color:#52525b">→</span> <span class="w grad">launch</span></div>
+  <div class="card" id="card">
+    <div class="input"><span class="at">@</span><span id="typed"></span><span class="caret" id="caret"></span><span class="pill" id="det">Detected</span></div>
+    <div class="row" id="r1"><div class="avatar"></div><div><div class="name">Your Name</div><div class="tick">$YOURNAME</div></div></div>
+    <div class="bio" id="r2">Artist, builder & full-time poster. Now with a market.</div>
+    <div class="meta" id="r3"><div class="chip">Robinhood Chain</div><div class="chip">Paired with ETH</div><div class="chip">Creator tax</div></div>
+    <div class="btn" id="btn"><span class="ball"></span><span id="btnText">Launch token</span></div>
+  </div>
+</section>
+
+<!-- 4: bonding curve → Uniswap v4 -->
+<section class="scene" id="s4">
+  <div class="cap"><div id="c1">Starts on a <span class="grad">bonding curve</span></div><div id="c2">then graduates to <span class="grad">Uniswap v4</span></div></div>
+  <div class="chart">
+    <svg width="1300" height="560" viewBox="0 0 1300 560" style="overflow:visible">
+      <defs>
+        <linearGradient id="cg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b6ff1f"/><stop offset=".5" stop-color="#39ff8f"/><stop offset="1" stop-color="#2fb8ff"/></linearGradient>
+        <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39ff8f" stop-opacity=".22"/><stop offset="1" stop-color="#39ff8f" stop-opacity="0"/></linearGradient>
+        <clipPath id="reveal"><rect id="revealRect" x="-20" y="-60" width="0" height="700"/></clipPath>
+        <filter id="cglow" filterUnits="userSpaceOnUse" x="-50" y="-50" width="1400" height="660"><feGaussianBlur stdDeviation="8"/></filter>
+      </defs>
+      <g stroke="#18181b" stroke-width="2">
+        <line x1="0" y1="520" x2="1300" y2="520"/><line x1="0" y1="390" x2="1300" y2="390"/><line x1="0" y1="260" x2="1300" y2="260"/><line x1="0" y1="130" x2="1300" y2="130"/>
+      </g>
+      <path id="area" clip-path="url(#reveal)" d="M0 520 C 300 515, 560 470, 760 360 S 980 150, 1300 40 L1300 520 Z" fill="url(#fill)"/>
+      <path id="curveGlow" d="M0 520 C 300 515, 560 470, 760 360 S 980 150, 1300 40" fill="none" stroke="url(#cg)" stroke-width="10" filter="url(#cglow)" opacity=".7"/>
+      <path id="curve" d="M0 520 C 300 515, 560 470, 760 360 S 980 150, 1300 40" fill="none" stroke="url(#cg)" stroke-width="6" stroke-linecap="round"/>
+      <g id="grad">
+        <line x1="900" y1="0" x2="900" y2="520" stroke="#2fb8ff" stroke-width="2" stroke-dasharray="8 10"/>
+        <rect x="920" y="400" width="300" height="76" rx="38" fill="#0b1626" stroke="#2fb8ff" stroke-width="2"/>
+        <text x="1070" y="449" text-anchor="middle" font-family="Inter" font-weight="800" font-size="32" fill="#fff">Uniswap v4</text>
+      </g>
+      <circle id="dotGlow" r="30" fill="#39ff8f" opacity=".35"/>
+      <circle id="dot" r="14" fill="#fff"/>
+    </svg>
+  </div>
+</section>
+
+<!-- 5: custody -->
+<section class="scene" id="s5">
+  <h2><span class="w">You sign.</span><br><span class="w grad">You own.</span></h2>
+  <div class="eyebrow sub" id="s5sub"><span class="dot"></span>Non-custodial</div>
+</section>
+
+<!-- 6: end card -->
+<section class="scene" id="s6">
+  <svg id="m6" width="220" height="220" style="overflow:visible"><use href="#mark" width="220" height="220"/></svg>
+  <div class="word" id="w6">ZE<span class="grad">ON</span></div>
+  <div class="url" id="u6">zeon.card</div>
+  <div class="handle mono" id="h6">@usezeon</div>
+</section>
+
+<script>
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const p = (t, a, b) => clamp((t - a) / (b - a));
+  const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+  const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const easeBack = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+  const $ = (id) => document.getElementById(id);
+  const set = (el, o, ty = 0, s = 1) => { el.style.opacity = o; el.style.transform = `translateY(${ty}px) scale(${s})`; };
+
+  // Scene windows [in, out]; each crossfades over 0.45s.
+  const SCENES = { s1: [0, 3.6], s2: [3.6, 7.4], s3: [7.4, 12.6], s4: [12.6, 16.6], s5: [16.6, 18.8], s6: [18.8, 22] };
+  const FADE = 0.45;
+  const DURATION = 22;
+
+  // Words rise in one after another.
+  function words(sel, start, step) {
+    document.querySelectorAll(sel).forEach((w, i) => {
+      const k = easeOut(p(window.__t, start + i * step, start + i * step + 0.5));
+      set(w, k, (1 - k) * 40);
+    });
+  }
+
+  const curve = $("curve"), curveGlow = $("curveGlow"), L = curve.getTotalLength();
+  curve.style.strokeDasharray = curveGlow.style.strokeDasharray = L;
+
+  window.render = (t) => {
+    window.__t = t;
+    for (const [id, [a, b]] of Object.entries(SCENES)) {
+      const o = a === 0 ? 1 - p(t, b - FADE, b) : Math.min(p(t, a - FADE, a), b >= DURATION ? 1 : 1 - p(t, b - FADE, b));
+      const el = $(id);
+      el.style.opacity = o;
+      el.style.display = o > 0 ? "flex" : "none";
+      // Gentle push-in for depth.
+      el.style.transform = `scale(${1 + 0.03 * p(t, a, b)})`;
+    }
+
+    // 1
+    const m = easeBack(p(t, 0.1, 1.0));
+    $("m1").style.opacity = p(t, 0.1, 0.6);
+    $("m1").style.transform = `scale(${0.55 + 0.45 * m}) rotate(${(1 - m) * -12}deg)`;
+    words("#s1 .w", 1.0, 0.16);
+
+    // 2
+    words("#s2 .w", 3.35, 0.07);
+    [["n1", 4.6], ["n2", 5.05], ["n3", 5.5]].forEach(([id, s]) => { const k = easeBack(p(t, s, s + 0.5)); set($(id), p(t, s, s + 0.3), (1 - k) * 30, 0.8 + 0.2 * k); });
+    $("l1").style.transform = `scaleX(${easeInOut(p(t, 4.85, 5.2))})`;
+    $("l2").style.transform = `scaleX(${easeInOut(p(t, 5.3, 5.65))})`;
+
+    // 3
+    words("#s3 .cap .w", 7.1, 0.12);
+    const card = easeOut(p(t, 7.3, 7.8));
+    set($("card"), card, (1 - card) * 60);
+    const handle = "yourname";
+    $("typed").textContent = handle.slice(0, Math.round(handle.length * p(t, 8.3, 9.2)));
+    $("caret").style.opacity = t < 9.4 ? (Math.floor(t * 2.5) % 2 ? 0.2 : 1) : 0;
+    const det = easeBack(p(t, 9.35, 9.7));
+    set($("det"), p(t, 9.35, 9.5), 0, 0.6 + 0.4 * det);
+    [["r1", 9.6], ["r2", 9.9], ["r3", 10.2]].forEach(([id, s]) => { const k = easeOut(p(t, s, s + 0.45)); set($(id), k, (1 - k) * 24); });
+    const btnIn = easeOut(p(t, 10.5, 10.9));
+    const press = t > 11.4 && t < 11.65 ? 0.95 : 1;
+    set($("btn"), btnIn, (1 - btnIn) * 24, press);
+    const done = t >= 11.6;
+    $("btnText").textContent = done ? "Launched ✓" : "Launch token";
+    $("btn").style.background = done ? "linear-gradient(90deg,#b6ff1f,#39ff8f 45%,#2fb8ff)" : "#fff";
+    $("btn").style.boxShadow = `0 0 ${done ? 90 : 0}px rgba(57,255,143,.45)`;
+
+    // 4
+    const c1 = p(t, 12.3, 12.8) * (1 - p(t, 14.6, 14.9));
+    set($("c1"), c1, (1 - easeOut(p(t, 12.3, 12.8))) * 30);
+    const c2 = easeOut(p(t, 14.9, 15.4));
+    set($("c2"), c2, (1 - c2) * 30);
+    const draw = easeInOut(p(t, 13.0, 15.6));
+    curve.style.strokeDashoffset = curveGlow.style.strokeDashoffset = L * (1 - draw);
+    $("area").style.opacity = 1;
+    const pt = curve.getPointAtLength(L * draw);
+    $("revealRect").setAttribute("width", pt.x + 20);
+    for (const d of ["dot", "dotGlow"]) { $(d).setAttribute("cx", pt.x); $(d).setAttribute("cy", pt.y); $(d).style.opacity = p(t, 13.0, 13.2); }
+    const g = easeBack(p(t, 14.7, 15.2));
+    $("grad").style.opacity = p(t, 14.7, 14.9);
+    $("grad").style.transform = `translateY(${(1 - g) * 20}px)`;
+
+    // 5
+    words("#s5 .w", 16.4, 0.5);
+    set($("s5sub"), easeOut(p(t, 17.8, 18.2)), 0);
+
+    // 6
+    const e = easeBack(p(t, 18.5, 19.3));
+    $("m6").style.opacity = p(t, 18.5, 18.9);
+    $("m6").style.transform = `scale(${0.6 + 0.4 * e})`;
+    [["w6", 18.9], ["u6", 19.4], ["h6", 19.7]].forEach(([id, s]) => { const k = easeOut(p(t, s, s + 0.5)); set($(id), k, (1 - k) * 30); });
+  };
+  window.DURATION = DURATION;
+  render(0);
+</script>
+</body>
+</html>

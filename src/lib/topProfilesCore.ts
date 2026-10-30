@@ -7,7 +7,8 @@ export type TopProfile = {
   avatar?: string;
   /** Larger avatar (Zora "medium") for big surfaces like the hero cards. */
   avatarLarge?: string;
-  followers: number;
+  /** Missing when Zora wouldn't return the count (e.g. rate limited); such profiles rank last. */
+  followers?: number;
 };
 
 type Get = <T>(path: "explore" | "profileSocial", query: Record<string, string | number>) => Promise<T>;
@@ -28,6 +29,10 @@ export type TopProfilesOptions = {
   allLists?: boolean;
   /** Upper bound on profiles looked up. */
   maxCandidates?: number;
+  /** Extra, gentler passes over lookups that failed (usually rate limits). */
+  retryPasses?: number;
+  /** Stop retrying after this many ms from the start. */
+  deadlineMs?: number;
 };
 
 type ExploreEdge = { node?: { creatorProfile?: { handle?: string; platformBlocked?: boolean; avatar?: { previewImage?: { small?: string } } } } };
@@ -35,7 +40,8 @@ type ExplorePage = { exploreList?: { edges?: ExploreEdge[]; pageInfo?: { endCurs
 
 /** Shared by the /api/top-profiles route and the browser fallback. */
 export async function computeTopProfiles(get: Get, opts: TopProfilesOptions = {}): Promise<TopProfile[]> {
-  const { concurrency = 6, pages = 1, perPage = 25, allLists = false, maxCandidates = 150 } = opts;
+  const { concurrency = 6, pages = 1, perPage = 25, allLists = false, maxCandidates = 150, retryPasses = 2, deadlineMs = 45_000 } = opts;
+  const startedAt = Date.now();
   const sources = allLists ? [...CREATOR_SOURCES, ...ALL_SOURCES] : CREATOR_SOURCES;
 
   // Walk each list page by page; a failed page only ends that list.
@@ -74,21 +80,40 @@ export async function computeTopProfiles(get: Get, opts: TopProfilesOptions = {}
     throw failed?.reason ?? new Error("Zora returned no creator data.");
   }
 
-  const profiles = await mapLimit([...candidates.values()].slice(0, maxCandidates), concurrency, async (c): Promise<TopProfile | null> => {
+  const pool = [...candidates.values()].slice(0, maxCandidates);
+  const resolved = new Map<string, TopProfile | null>(); // null = Zora has no usable profile
+
+  const lookup = async (c: { handle: string; avatar?: string }) => {
     try {
       const p = (await get<GetProfileSocialResponse>("profileSocial", { identifier: c.handle }))?.profile;
-      if (!p?.handle || typeof p.followers?.count !== "number") return null;
-      return {
-        handle: p.handle,
-        displayName: p.displayName,
-        avatar: p.avatar?.small ?? c.avatar,
-        avatarLarge: p.avatar?.medium ?? p.avatar?.small ?? c.avatar,
-        followers: p.followers.count,
-      };
+      resolved.set(
+        c.handle,
+        p?.handle && typeof p.followers?.count === "number"
+          ? {
+              handle: p.handle,
+              displayName: p.displayName,
+              avatar: p.avatar?.small ?? c.avatar,
+              avatarLarge: p.avatar?.medium ?? p.avatar?.small ?? c.avatar,
+              followers: p.followers.count,
+            }
+          : null,
+      );
     } catch {
-      return null;
+      // Left unresolved; retried below.
     }
-  });
+  };
 
-  return profiles.filter((p): p is TopProfile => p !== null).sort((a, b) => b.followers - a.followers);
+  await mapLimit(pool, concurrency, lookup);
+  for (let pass = 0; pass < retryPasses; pass++) {
+    const failed = pool.filter((c) => !resolved.has(c.handle));
+    if (failed.length === 0 || Date.now() - startedAt > deadlineMs) break;
+    await new Promise((r) => setTimeout(r, 1500 * (pass + 1)));
+    await mapLimit(failed, Math.max(1, Math.floor(concurrency / 3)), lookup);
+  }
+
+  // Lookups that never succeeded still show, without a count, after every counted profile.
+  const out = pool.map((c) => (resolved.has(c.handle) ? resolved.get(c.handle) : { handle: c.handle, avatar: c.avatar, avatarLarge: c.avatar }));
+  return out
+    .filter((p): p is TopProfile => p != null)
+    .sort((a, b) => (b.followers ?? -1) - (a.followers ?? -1));
 }

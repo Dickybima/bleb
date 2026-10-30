@@ -9,7 +9,9 @@ export async function GET() {
       if (!res.ok) throw new Error(`Zora ${path} HTTP ${res.status}`);
       return res.json();
     }, { concurrency: 10, pages: 4, perPage: 50, allLists: true, maxCandidates: 500 });
-    return json(profiles, 200, 600);
+    // A thin or partly uncounted list (Zora rate limits) is only cached briefly so it heals on the next request.
+    const complete = profiles.length >= 50 && profiles.every((p) => p.followers !== undefined);
+    return json(profiles, 200, complete ? 600 : 60);
   } catch (err) {
     return json({ error: (err as Error).message }, 502, 0);
   }

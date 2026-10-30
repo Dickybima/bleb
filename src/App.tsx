@@ -2,6 +2,7 @@ import { Header } from "./components/Header";
 import { Launchpad } from "./components/Launchpad";
 import { ZeonHero } from "./components/ZeonHero";
 import { HomeBento } from "./components/HomeBento";
+import { ProfileRoll } from "./components/ProfileRoll";
 import { TopProfiles } from "./components/TopProfiles";
 import { Explore } from "./components/Explore";
 import { ProfileView } from "./components/ProfileView";
@@ -33,6 +34,9 @@ export default function App() {
             </ErrorBoundary>
             <ErrorBoundary>
               <HomeBento />
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <ProfileRoll />
             </ErrorBoundary>
             <ErrorBoundary>
               <TopProfiles compact />

@@ -52,3 +52,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </WagmiProvider>
   </React.StrictMode>,
 );
+
+// The app booted: tell index.html's boot check and drop its "didn't load" fallback.
+(window as { __launchpadMounted?: boolean }).__launchpadMounted = true;
+document.getElementById("boot-fallback")?.remove();

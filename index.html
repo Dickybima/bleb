@@ -42,7 +42,9 @@
     <script>
       setTimeout(function () {
         var root = document.getElementById("root");
-        if (!window.__launchpadMounted || !root || !root.childElementCount) document.getElementById("boot-fallback").hidden = false;
+        var fallback = document.getElementById("boot-fallback");
+        // Only when the app never started: main.tsx sets the flag and removes this element once it boots.
+        if (fallback && !window.__launchpadMounted && !(root && root.childElementCount)) fallback.hidden = false;
       }, 8000);
     </script>
     <script type="module" src="/src/main.tsx"></script>

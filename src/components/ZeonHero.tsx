@@ -67,7 +67,7 @@ export function ZeonHero() {
         transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
         className="max-w-3xl text-5xl font-bold leading-[1.05] tracking-tight text-zinc-900 md:text-7xl dark:text-white"
       >
-        Mint the <em className="font-extrabold italic text-zinc-700 dark:text-zinc-300">clout.</em>
+        Fame, <em className="font-extrabold italic text-zinc-700 dark:text-zinc-300">made liquid.</em>
       </motion.h1>
 
       <motion.p

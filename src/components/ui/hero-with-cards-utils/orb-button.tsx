@@ -8,7 +8,7 @@ const orbButtonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-zinc-950 text-white shadow-[0_8px_24px_-8px_rgba(24,24,27,0.55)] hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-10px_rgba(91,124,255,0.65)] dark:bg-white dark:text-zinc-950 dark:shadow-[0_8px_24px_-8px_rgba(255,255,255,0.25)]",
+          "bg-zinc-950 text-white shadow-[0_8px_24px_-8px_rgba(24,24,27,0.55)] hover:-translate-y-0.5 hover:shadow-[0_14px_32px_-10px_rgba(129,140,248,0.7)] dark:bg-white dark:text-zinc-950 dark:shadow-[0_8px_24px_-8px_rgba(255,255,255,0.25)]",
         outline:
           "border border-zinc-300 bg-white/70 text-zinc-900 backdrop-blur hover:-translate-y-0.5 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-zinc-100 dark:hover:border-zinc-500",
         warn: "bg-amber-400 text-zinc-950 hover:-translate-y-0.5",
@@ -34,12 +34,12 @@ type CommonProps = VariantProps<typeof orbButtonVariants> & {
 type ButtonProps = CommonProps & React.ButtonHTMLAttributes<HTMLButtonElement> & { href?: undefined };
 type AnchorProps = CommonProps & React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
 
-/** The glowing orb: a cool sphere and a warm sphere, echoing the FOZO mark. */
+/** The glowing orb: a cyan sphere and a pink sphere, echoing the ZEON neon palette. */
 function Orb({ size }: { size: keyof typeof orbSize }) {
   return (
     <span aria-hidden className={cn("relative mr-1.5 shrink-0 rounded-full transition-transform duration-500 group-hover:rotate-[200deg]", orbSize[size])}>
-      <span className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_28%,#e3f1ff,#7aa2ff_35%,#3b4fe0_70%,#160f5c)]" />
-      <span className="absolute inset-0 translate-x-[30%] scale-90 rounded-full bg-[radial-gradient(circle_at_70%_30%,#ffe8c7,#ff9a4d_35%,#ff3d77_75%,#8a0f45)] opacity-90 mix-blend-screen" />
+      <span className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_28%,#cffafe,#22d3ee_35%,#6366f1_70%,#1e1b4b)]" />
+      <span className="absolute inset-0 translate-x-[30%] scale-90 rounded-full bg-[radial-gradient(circle_at_70%_30%,#fce7f3,#f472b6_35%,#a855f7_75%,#4c1d95)] opacity-90 mix-blend-screen" />
     </span>
   );
 }

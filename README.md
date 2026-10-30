@@ -1,6 +1,6 @@
-# FOZO
+# ZEON
 
-**Mint the clout.** FOZO turns any **Zora** profile into a live token on Robinhood Chain, launched through
+**Mint the clout.** ZEON turns any **Zora** profile into a live token on Robinhood Chain, launched through
 Pons V2. Tokens are born on a bonding curve and graduate to Uniswap v4 once the crowd
 shows up.
 

@@ -45,7 +45,7 @@ function CardPhoto({ src, alt, onFail }: { src: string; alt: string; onFail: () 
 
 const ticker = (handle: string) => handle.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() || handle.toUpperCase();
 
-export function FozoHero() {
+export function ZeonHero() {
   const top = useTopProfiles();
   const cards = (top.data ?? []).slice(0, SLOTS.length);
 
@@ -58,7 +58,7 @@ export function FozoHero() {
         className="mb-5 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
       >
         <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden />
-        FOZO · Robinhood Chain
+        ZEON · Robinhood Chain
       </motion.span>
 
       <motion.h1
@@ -76,7 +76,7 @@ export function FozoHero() {
         transition={{ duration: 0.5, delay: 0.38, ease: "easeOut" }}
         className="mt-5 max-w-xl text-base leading-relaxed text-zinc-500 md:text-lg dark:text-zinc-400"
       >
-        FOZO turns any Zora profile into a live token on Robinhood Chain. It's born on a bonding curve,
+        ZEON turns any Zora profile into a live token on Robinhood Chain. It's born on a bonding curve,
         graduates to Uniswap v4 once the crowd shows up, and from there the price is set by belief, not a pitch deck.
       </motion.p>
 

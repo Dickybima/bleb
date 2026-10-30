@@ -15,7 +15,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error) {
-    console.error("[fozo] render error:", error);
+    console.error("[zeon] render error:", error);
   }
 
   render() {

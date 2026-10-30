@@ -1,13 +1,13 @@
 import { Header } from "./components/Header";
 import { Launchpad } from "./components/Launchpad";
-import { FozoHero } from "./components/FozoHero";
+import { ZeonHero } from "./components/ZeonHero";
 import { HomeBento } from "./components/HomeBento";
 import { TopProfiles } from "./components/TopProfiles";
 import { Explore } from "./components/Explore";
 import { ProfileView } from "./components/ProfileView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { FozoMark } from "./components/FozoLogo";
+import { ZeonMark } from "./components/ZeonLogo";
 import { Reveal } from "@/components/ui/primitives";
 import { useRoute } from "./lib/router";
 import { X_URL } from "./lib/site";
@@ -26,7 +26,7 @@ export default function App() {
         {route.page === "home" && (
           <>
             <ErrorBoundary>
-              <FozoHero />
+              <ZeonHero />
             </ErrorBoundary>
             <ErrorBoundary>
               <HomeBento />
@@ -59,7 +59,7 @@ export default function App() {
       <footer className="border-t border-zinc-200 dark:border-zinc-800">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6">
           <span className="flex items-center gap-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
-            <FozoMark size={18} />
+            <ZeonMark size={18} />
             Built on Robinhood Chain · profiles from Zora
           </span>
           <div className="flex items-center gap-2">

@@ -18,7 +18,7 @@ export function Explore() {
           <em className="font-extrabold italic text-zinc-600 dark:text-zinc-300">Explore</em>
         </h1>
         <p className="mt-3 text-zinc-500 dark:text-zinc-400">
-          Fresh tokens minted on FOZO, newest first.
+          Fresh tokens minted on ZEON, newest first.
           {query.isFetching && !query.isPending && <span className="text-emerald-500"> · refreshing…</span>}
         </p>
       </Reveal>

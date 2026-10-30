@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 
-/** Shared Tailwind building blocks so every FOZO screen shares the hero's look. */
+/** Shared Tailwind building blocks so every ZEON screen shares the hero's look. */
 
 export const inputClass =
   "w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5 text-[15px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5 disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:border-zinc-600 dark:focus:ring-white/5";

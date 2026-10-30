@@ -20,7 +20,7 @@ import {
 import { createConfig, http } from "wagmi";
 import { robinhoodChain } from "./chains";
 
-const APP_NAME = "FOZO";
+const APP_NAME = "ZEON";
 
 /** Reown (WalletConnect) project ID; needed for QR / mobile wallet connections. Free at cloud.reown.com. */
 export const walletConnectProjectId = (import.meta.env.VITE_WALLETCONNECT_PROJECT_ID as string | undefined) ?? "";

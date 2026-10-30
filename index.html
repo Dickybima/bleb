@@ -7,19 +7,19 @@
     <meta name="theme-color" content="#09090b" />
     <script>
       // Apply the saved theme (dark by default) before first paint to avoid a flash.
-      try { if (localStorage.getItem("fozo:theme") !== "light") document.documentElement.classList.add("dark"); }
+      try { if (localStorage.getItem("zeon:theme") !== "light") document.documentElement.classList.add("dark"); }
       catch (e) { document.documentElement.classList.add("dark"); }
     </script>
-    <meta property="og:title" content="FOZO" />
+    <meta property="og:title" content="ZEON" />
     <meta property="og:description" content="Turn any Zora profile into a live token on Robinhood Chain." />
-    <title>FOZO · Mint the clout</title>
-    <meta name="description" content="FOZO turns any Zora profile into a live token on Robinhood Chain. Born on a bonding curve, priced by belief." />
+    <title>ZEON · Mint the clout</title>
+    <meta name="description" content="ZEON turns any Zora profile into a live token on Robinhood Chain. Born on a bonding curve, priced by belief." />
   </head>
   <body>
     <div id="root"></div>
     <!-- Shown only if the app script never starts (e.g. it failed to download or crashed before React mounted). -->
     <div id="boot-fallback" hidden style="max-width:480px;margin:96px auto;padding:24px;font-family:system-ui,sans-serif;text-align:center;color:#888">
-      <p style="font-size:18px;font-weight:600;color:inherit">FOZO didn't load.</p>
+      <p style="font-size:18px;font-weight:600;color:inherit">ZEON didn't load.</p>
       <p>Check your connection and reload. Still blank? Try briefly disabling any wallet extension that might be clashing.</p>
       <button onclick="location.reload()" style="padding:10px 20px;border-radius:999px;border:0;background:#5b7cff;color:#fff;font:inherit;font-weight:600;cursor:pointer">Reload</button>
     </div>

@@ -1,7 +1,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 
 export type Theme = "light" | "dark";
-const KEY = "fozo:theme";
+const KEY = "zeon:theme";
 const listeners = new Set<() => void>();
 
 /** index.html applies the saved theme (dark by default) before first paint; the <html> class is the source of truth. */

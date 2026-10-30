@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { OrbButton } from "@/components/ui/hero-with-cards-utils/orb-button";
 import { Reveal, Skeleton } from "@/components/ui/primitives";
 import { Avatar } from "./Avatar";
-import { FozoMark } from "./FozoLogo";
+import { ZeonMark } from "./ZeonLogo";
 import { useExplore } from "../lib/explore";
 import { fmtNum } from "../lib/format";
 import { useZoraProfileSocial } from "../lib/profile";
@@ -18,7 +18,7 @@ const tileTitle = "text-lg font-bold tracking-tight text-zinc-900 sm:text-xl dar
 const tileText = "mt-2 max-w-md text-[15px] leading-relaxed text-zinc-500 dark:text-zinc-400";
 const statLabel = "text-sm text-zinc-500 dark:text-zinc-400";
 
-/** Bento section on Home: how FOZO works plus a few live numbers, above the leaderboard. */
+/** Bento section on Home: how ZEON works plus a few live numbers, above the leaderboard. */
 export function HomeBento() {
   return (
     <section className="flex flex-col gap-8">
@@ -121,7 +121,7 @@ function DetectTile() {
   );
 }
 
-/** Profile in, token out: Zora profile → FOZO → token on Robinhood Chain. */
+/** Profile in, token out: Zora profile → ZEON → token on Robinhood Chain. */
 function FlowTile() {
   return (
     <div className={cn(tile, "flex h-full flex-col")}>
@@ -133,8 +133,8 @@ function FlowTile() {
           <AtSign className="size-8 text-white" />
         </FlowNode>
         <FlowLine />
-        <FlowNode label="FOZO" className="bg-zinc-950 shadow-[0_0_40px_-8px_rgba(255,61,119,0.6)] dark:bg-black">
-          <FozoMark size={44} />
+        <FlowNode label="ZEON" className="bg-zinc-950 shadow-[0_0_40px_-8px_rgba(255,61,119,0.6)] dark:bg-black">
+          <ZeonMark size={44} />
         </FlowNode>
         <FlowLine />
         <FlowNode label="Token" className="bg-lime-300 shadow-[0_0_40px_-6px_#bef264]">
@@ -193,7 +193,7 @@ function MintedTile() {
   const more = explore.hasNextPage && tokens.length > 0;
   return (
     <a href="#/explore" className={cn(tile, "flex h-full min-h-56 flex-col transition hover:border-zinc-300 dark:hover:border-zinc-700")}>
-      <p className={statLabel}>Latest mints on FOZO</p>
+      <p className={statLabel}>Latest mints on ZEON</p>
       {explore.isPending ? (
         <Skeleton className="mt-3 h-12 w-16" />
       ) : (

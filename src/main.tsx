@@ -33,7 +33,7 @@ for (const t of [rkDark, rkLight]) t.fonts.body = "Inter, system-ui, sans-serif"
 function ThemedRainbowKit({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
   return (
-    <RainbowKitProvider theme={theme === "dark" ? rkDark : rkLight} locale="en-US" modalSize="wide" appInfo={{ appName: "FOZO" }}>
+    <RainbowKitProvider theme={theme === "dark" ? rkDark : rkLight} locale="en-US" modalSize="wide" appInfo={{ appName: "ZEON" }}>
       {children}
     </RainbowKitProvider>
   );

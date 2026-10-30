@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConnectButton } from "./ConnectButton";
-import { FozoLogo } from "./FozoLogo";
+import { ZeonLogo } from "./ZeonLogo";
 import { ThemeToggle } from "./ThemeToggle";
 import { profileHref, type Route } from "../lib/router";
 
@@ -26,8 +26,8 @@ export function Header({ active }: { active: Route["page"] }) {
   return (
     <header className="sticky top-0 z-40 border-t border-b border-zinc-200 bg-zinc-50/80 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/80">
       <nav className="mx-auto flex min-h-16 w-full max-w-6xl flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 sm:flex-nowrap sm:gap-5 sm:py-0">
-        <a href="#/" aria-label="FOZO" className="shrink-0">
-          <FozoLogo />
+        <a href="#/" aria-label="ZEON" className="shrink-0">
+          <ZeonLogo />
         </a>
         {/* On phones the links drop to their own row under the logo. */}
         <div className="flex items-center gap-1 max-sm:order-last max-sm:w-full max-sm:justify-center">

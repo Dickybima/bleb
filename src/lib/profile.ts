@@ -56,9 +56,10 @@ export function useZoraProfile(identifier?: string) {
 }
 
 /** Profile including follower / following counts. */
-export function useZoraProfileSocial(identifier: string) {
+export function useZoraProfileSocial(identifier: string, enabled = true) {
   return useQuery({
     ...retry,
+    enabled: enabled && Boolean(identifier),
     queryKey: ["profile-social", identifier.toLowerCase()],
     queryFn: async () => normalizeProfile((await zoraGetOrNull<{ profile?: unknown }>("profileSocial", { identifier }))?.profile),
   });

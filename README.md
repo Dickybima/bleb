@@ -6,7 +6,8 @@ shows up.
 
 ## Features
 
-- **Home / Launch**: the Home page has the hero and top profiles; the **Launch** page (`#/launch`) is the
+- **Home / Launch**: the Home page has the hero, a bento section (live handle detection, profile → token flow,
+  combined reach, latest mints, non-custodial) and top profiles; the **Launch** page (`#/launch`) is the
   launch-your-own form: connect a wallet and its Zora profile is detected automatically, prefilling name, ticker,
   logo (avatar), description (bio) and socials (X, Farcaster, website). Creator tax and buyback & burn are
   configurable. Tokens launch via `launchToken` on the Pons V2 factory

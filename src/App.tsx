@@ -1,6 +1,7 @@
 import { Header } from "./components/Header";
 import { Launchpad } from "./components/Launchpad";
 import { FozoHero } from "./components/FozoHero";
+import { HomeBento } from "./components/HomeBento";
 import { TopProfiles } from "./components/TopProfiles";
 import { Explore } from "./components/Explore";
 import { ProfileView } from "./components/ProfileView";
@@ -28,14 +29,10 @@ export default function App() {
               <FozoHero />
             </ErrorBoundary>
             <ErrorBoundary>
-              <section className="flex flex-col gap-6">
-                <Reveal className="text-center">
-                  <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
-                    Who's <em className="font-extrabold italic text-zinc-600 dark:text-zinc-300">next?</em>
-                  </h2>
-                </Reveal>
-                <TopProfiles compact />
-              </section>
+              <HomeBento />
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <TopProfiles compact />
             </ErrorBoundary>
           </>
         )}

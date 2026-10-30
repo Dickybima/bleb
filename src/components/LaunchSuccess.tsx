@@ -5,7 +5,7 @@ export function LaunchSuccess({ state, symbol }: { state: ReturnType<typeof useT
   return (
     <div className="center stack">
       <span className="orb big" aria-hidden />
-      <h3>${symbol.toUpperCase()} berhasil diluncurkan di Pons!</h3>
+      <h3>${symbol.toUpperCase()} berhasil diluncurkan!</h3>
       {state.token && <p className="muted mono">{state.token}</p>}
       <div className="row gap center-row">
         {state.txHash && <a className="btn btn-ghost" href={explorerTxUrl(state.txHash)} target="_blank" rel="noreferrer">Lihat transaksi ↗</a>}

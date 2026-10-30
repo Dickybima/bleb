@@ -85,7 +85,7 @@ async function resolveLaunchConfigId(publicClient: Client): Promise<bigint> {
       // nonexistent id
     }
   }
-  throw new Error("Tidak ada launch config Pons yang aktif.");
+  throw new Error("Tidak ada konfigurasi peluncuran yang aktif.");
 }
 
 export type LaunchInput = {
@@ -122,8 +122,8 @@ export async function launchOnPons({
     read("launchFee"),
     read("maxCreatorTaxBps"),
   ]);
-  if (!enabled) throw new Error("Peluncuran di Pons sedang dinonaktifkan.");
-  if (!allowed) throw new Error("Wallet ini belum diizinkan meluncurkan token di Pons (canLaunch = false).");
+  if (!enabled) throw new Error("Peluncuran token sedang dinonaktifkan.");
+  if (!allowed) throw new Error("Wallet ini belum diizinkan meluncurkan token.");
   if (BigInt(input.creatorTaxBps) > maxTax) throw new Error(`Creator tax maksimal ${Number(maxTax) / 100}%.`);
 
   const launchConfigId = await resolveLaunchConfigId(publicClient);

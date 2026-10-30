@@ -9,7 +9,7 @@ export type TokenizeStep = "idle" | "upload" | "sign" | "confirm" | "done";
 
 export const STEP_LABEL: Record<Exclude<TokenizeStep, "idle" | "done">, string> = {
   upload: "Upload logo ke IPFS",
-  sign: "Cek Pons & tanda tangani transaksi",
+  sign: "Cek kontrak & tanda tangani transaksi",
   confirm: "Menunggu konfirmasi di Robinhood Chain",
 };
 const ORDER = ["upload", "sign", "confirm"] as const;

@@ -33,8 +33,8 @@ export default function App() {
         {route.page === "profile" && <ErrorBoundary key={routeKey}><ProfileView id={route.id} /></ErrorBoundary>}
       </main>
       <footer className="footer container">
-        <span>Dibangun di atas Pons V2 · Robinhood Chain · data profil dari Zora</span>
-        <span>Bukan aplikasi resmi Zora maupun Pons. Trading token berisiko tinggi.</span>
+        <span>Dibangun di Robinhood Chain · data profil dari Zora</span>
+        <span>Bukan aplikasi resmi Zora. Trading token berisiko tinggi.</span>
       </footer>
     </>
   );

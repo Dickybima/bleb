@@ -5,7 +5,7 @@ export function TokenizeButton({ handle }: { handle: string }) {
   return (
     <div className="tokenize">
       <div>
-        <strong>Tokenize profil ini di Pons</strong>
+        <strong>Tokenize profil ini</strong>
         <p className="muted">
           Nama, ticker <b>${handle.toUpperCase()}</b>, logo, bio, dan sosial akan terisi otomatis di form peluncuran.
         </p>

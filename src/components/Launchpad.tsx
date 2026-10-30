@@ -60,7 +60,7 @@ export function Launchpad({ handle }: { handle?: string }) {
       <section className="launch-page">
         <a className="link small muted" href="#/top">← Kembali ke Top Profile</a>
         <h1>Deploy token @{handle}</h1>
-        <p className="muted">Data sudah terisi dari profil Zora. Periksa, ubah jika perlu, lalu luncurkan di Pons V2.</p>
+        <p className="muted">Data sudah terisi dari profil Zora. Periksa, ubah jika perlu, lalu luncurkan.</p>
         {card}
       </section>
     );
@@ -69,16 +69,16 @@ export function Launchpad({ handle }: { handle?: string }) {
   return (
     <section className="hero">
       <div className="hero-copy">
-        <span className="eyebrow">Profile Launchpad · Pons V2</span>
+        <span className="eyebrow">Profile Launchpad · Robinhood Chain</span>
         <h1>Tokenize profil Zora dalam satu klik.</h1>
         <p className="muted lead">
-          Ubah profil Zora menjadi token di Robinhood Chain lewat Pons V2: mulai di bonding curve, lalu otomatis lulus ke
+          Ubah profil Zora menjadi token di Robinhood Chain: mulai di bonding curve, lalu otomatis lulus ke
           pool Uniswap v4 saat target likuiditas tercapai.
         </p>
         <ul className="bullets">
           <li>Nama, ticker, logo, bio, dan sosial diambil otomatis dari profil Zora</li>
           <li>Pilih profil dari Top Profile, lalu klik Tokenize</li>
-          <li>Diluncurkan langsung di kontrak Pons V2, dipasangkan dengan ETH</li>
+          <li>Diluncurkan langsung on-chain, dipasangkan dengan ETH</li>
         </ul>
       </div>
       {card}
@@ -252,7 +252,7 @@ function LaunchForm({ profile }: { profile?: ProfileDefaults }) {
             ? "Connect wallet untuk meluncurkan"
             : !onChain
               ? "Pindah ke Robinhood Chain"
-              : `Luncurkan $${symbol.toUpperCase() || "TOKEN"} di Pons`}
+              : `Luncurkan $${symbol.toUpperCase() || "TOKEN"}`}
       </button>
     </form>
   );

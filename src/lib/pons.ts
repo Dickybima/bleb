@@ -1,11 +1,16 @@
 import { createZoraUploaderForCreator } from "@zoralabs/coins-sdk";
 import {
+  concat,
+  keccak256,
   parseAbi,
+  slice,
+  stringToHex,
   parseEventLogs,
   toHex,
   zeroAddress,
   type Address,
   type Hash,
+  type Hex,
   type PublicClient,
   type Transport,
   type WalletClient,
@@ -14,11 +19,27 @@ import { robinhoodChain } from "./chains";
 
 /** Pons V2 launch factory on Robinhood Chain (chain id 4663). */
 export const PONS_FACTORY: Address = "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e";
+/** First block of the Pons V2 factory on Robinhood Chain. */
+export const PONS_FACTORY_DEPLOY_BLOCK = 57_412_596n;
+/** Pons V2 launch-and-buy router (alternate launch entry point). */
+export const PONS_LAUNCH_AND_BUY: Address = "0xe33E9E479dF8802cb0866d5d05258bEc4cF62948";
+
+/**
+ * Launches from this site carry this 6-byte prefix in their CREATE2 salt (the rest is random),
+ * so Explore can tell them apart from other Pons launches using only on-chain data.
+ */
+export const LAUNCHPAD_SALT_TAG = slice(keccak256(stringToHex("profile-launchpad/v1")), 0, 6);
+export const isLaunchpadSalt = (salt: Hex) => salt.slice(0, 14).toLowerCase() === LAUNCHPAD_SALT_TAG.toLowerCase();
+
 /** Pair token address meaning "quote in native ETH". */
 export const NATIVE_QUOTE: Address = zeroAddress;
 
 const TOKEN_PARAMS =
   "(string name, string symbol, string logo, string description, (string twitter, string telegram, string discord, string website, string farcaster) socials, address creatorFeeRecipient, uint16 creatorTaxBps, bool buybackEnabled, bytes32 expectedEconomics, bytes32 salt)";
+
+export const ponsLaunchAndBuyAbi = parseAbi([
+  `function launchAndBuy(${TOKEN_PARAMS} params, uint256 launchConfigId, address pairToken, uint256 quoteIn, uint256 minTokensOut, address recipient, address[] snipeTaxExemptions) payable returns (address token, address curve, uint256 tokensOut)`,
+]);
 
 export const ponsFactoryAbi = parseAbi([
   "function launchEnabled() view returns (bool)",
@@ -131,7 +152,7 @@ export async function launchOnPons({
     creatorTaxBps: input.creatorTaxBps,
     buybackEnabled: input.buybackEnabled,
     expectedEconomics,
-    salt: toHex(crypto.getRandomValues(new Uint8Array(32))),
+    salt: concat([LAUNCHPAD_SALT_TAG, toHex(crypto.getRandomValues(new Uint8Array(26)))]),
   };
 
   // The factory exposes launchToken with and without snipe-tax exemptions; use whichever simulates.

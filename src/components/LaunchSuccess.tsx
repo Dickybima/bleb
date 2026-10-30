@@ -9,7 +9,8 @@ export function LaunchSuccess({ state, symbol }: { state: ReturnType<typeof useT
       {state.token && <p className="muted mono">{state.token}</p>}
       <div className="row gap center-row">
         {state.txHash && <a className="btn btn-ghost" href={explorerTxUrl(state.txHash)} target="_blank" rel="noreferrer">Lihat transaksi ↗</a>}
-        {state.token && <a className="btn btn-primary" href={explorerTokenUrl(state.token)} target="_blank" rel="noreferrer">Lihat token ↗</a>}
+        {state.token && <a className="btn btn-ghost" href={explorerTokenUrl(state.token)} target="_blank" rel="noreferrer">Lihat token ↗</a>}
+        <a className="btn btn-primary" href="#/explore">Lihat di Explore</a>
       </div>
     </div>
   );

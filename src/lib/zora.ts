@@ -17,3 +17,4 @@ export const zoraProfileUrl = (handleOrAddress: string) =>
 const explorer = robinhoodChain.blockExplorers.default.url;
 export const explorerTxUrl = (hash: string) => `${explorer}/tx/${hash}`;
 export const explorerTokenUrl = (address: string) => `${explorer}/token/${address}`;
+export const explorerAddressUrl = (address: string) => `${explorer}/address/${address}`;

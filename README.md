@@ -16,6 +16,11 @@ plus leaderboard **Top Profile Zora**.
   yang otomatis terisi nama, ticker, logo, bio, dan sosial dari profil tersebut. Formulir tampil tanpa harus
   connect wallet dulu; wallet baru diminta saat menekan tombol luncurkan. Jika profil bukan milik wallet yang
   terhubung, form memberi peringatan dan penerima fee bisa dipilih: wallet sendiri atau wallet profil.
+- **Explore** – token yang baru diluncurkan langsung muncul di sini. Data dibaca langsung dari event
+  `TokenLaunched` di factory Pons V2 (tanpa server), terbaru di atas, refresh otomatis tiap 30 detik dan langsung
+  diperbarui setelah peluncuran berhasil. Tab **Dari launchpad ini** hanya menampilkan token dari situs ini: setiap
+  peluncuran memberi penanda 6 byte di awal `salt` (`keccak256("profile-launchpad/v1")`), yang dibaca kembali dari
+  calldata transaksi. Tab **Semua token Pons** menampilkan semua peluncuran Pons V2.
 - **Connect wallet** – modal RainbowKit dengan banyak pilihan: MetaMask, Coinbase Wallet, Rabby, OKX, Trust,
   Rainbow, WalletConnect (QR untuk wallet HP), Phantom, Bitget, Binance, Uniswap, Zerion, Brave, Ledger, Safe,
   dan wallet browser lain. Wallet yang terpasang terdeteksi otomatis.

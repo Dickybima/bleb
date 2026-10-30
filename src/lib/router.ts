@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 export type Route =
   | { page: "launch"; handle?: string }
   | { page: "top" }
+  | { page: "explore" }
   | { page: "profile"; id: string };
 
 function parse(hash: string): Route {
@@ -10,6 +11,7 @@ function parse(hash: string): Route {
   if (path.startsWith("profile/")) return { page: "profile", id: decodeURIComponent(path.slice(8)) };
   if (path.startsWith("launch/")) return { page: "launch", handle: decodeURIComponent(path.slice(7)) };
   if (path === "top") return { page: "top" };
+  if (path === "explore") return { page: "explore" };
   return { page: "launch" };
 }
 

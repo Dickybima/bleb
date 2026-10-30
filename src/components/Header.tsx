@@ -20,6 +20,7 @@ export function Header({ active }: { active: Route["page"] }) {
         </a>
         <nav className="nav">
           <a href="#/" className={active === "launch" ? "active" : ""}>Launchpad</a>
+          <a href="#/explore" className={active === "explore" ? "active" : ""}>Explore</a>
           <a href="#/top" className={active === "top" ? "active" : ""}>Top Profile</a>
         </nav>
         <form className="search" onSubmit={onSearch} role="search">

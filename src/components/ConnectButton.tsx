@@ -8,10 +8,18 @@ export function ConnectButton() {
       {({ account, chain, mounted, openConnectModal, openChainModal, openAccountModal }) => {
         if (!mounted) return <button className="btn btn-primary" disabled aria-hidden>Connect Wallet</button>;
         if (!account) {
-          return <button className="btn btn-primary" onClick={openConnectModal}>Connect Wallet</button>;
+          return (
+            <button className="btn btn-primary" onClick={openConnectModal}>
+              Connect<span className="hide-xs"> Wallet</span>
+            </button>
+          );
         }
         if (chain?.unsupported) {
-          return <button className="btn btn-warn" onClick={openChainModal}>Pindah ke Robinhood Chain</button>;
+          return (
+            <button className="btn btn-warn" onClick={openChainModal}>
+              Pindah<span className="hide-xs"> ke Robinhood Chain</span>
+            </button>
+          );
         }
         return (
           <button className="btn btn-ghost" onClick={openAccountModal}>

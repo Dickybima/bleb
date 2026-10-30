@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePublicClient, useWalletClient } from "wagmi";
 import type { Address, Hash } from "viem";
 import { robinhoodChain } from "./chains";
@@ -27,6 +28,7 @@ export type TokenizeInput = {
 };
 
 export function useTokenize() {
+  const queryClient = useQueryClient();
   const publicClient = usePublicClient({ chainId: robinhoodChain.id });
   const { data: walletClient } = useWalletClient({ chainId: robinhoodChain.id });
 
@@ -70,6 +72,8 @@ export function useTokenize() {
       });
       setToken(result.token ?? null);
       setStep("done");
+      // Make the new launch show up in Explore right away.
+      queryClient.invalidateQueries({ queryKey: ["explore-pons"] });
     } catch (err) {
       const e = err as { shortMessage?: string; message?: string };
       setError(e.shortMessage ?? e.message ?? String(err));

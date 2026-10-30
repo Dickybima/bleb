@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getExploreList, getProfileSocial, type ListType } from "@zoralabs/coins-sdk";
+import { mapLimit } from "./util";
 
 export type TopProfile = {
   handle: string;
@@ -12,19 +13,6 @@ export type TopProfile = {
 const SOURCES: ListType[] = ["MOST_VALUABLE_CREATORS", "TRENDING_CREATORS", "FEATURED_CREATORS", "TOP_VOLUME_CREATORS_24H"];
 const PER_SOURCE = 25;
 const CONCURRENCY = 6;
-
-async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
-  const out: R[] = new Array(items.length);
-  let next = 0;
-  const worker = async () => {
-    while (next < items.length) {
-      const i = next++;
-      out[i] = await fn(items[i]);
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return out;
-}
 
 async function fetchTopProfiles(): Promise<TopProfile[]> {
   const lists = await Promise.allSettled(SOURCES.map((s) => getExploreList(s, { count: PER_SOURCE })));

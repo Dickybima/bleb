@@ -1,6 +1,7 @@
 import { Header } from "./components/Header";
 import { Launchpad } from "./components/Launchpad";
 import { TopProfiles } from "./components/TopProfiles";
+import { Explore } from "./components/Explore";
 import { ProfileView } from "./components/ProfileView";
 import { useRoute } from "./lib/router";
 
@@ -17,6 +18,7 @@ export default function App() {
           </>
         )}
         {route.page === "top" && <TopProfiles />}
+        {route.page === "explore" && <Explore />}
         {route.page === "profile" && <ProfileView id={route.id} />}
       </main>
       <footer className="footer container">

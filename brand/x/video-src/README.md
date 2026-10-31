@@ -8,3 +8,11 @@ node brand/x/video-src/render.cjs "$PWD/brand/x/video-src" brand/x/zeon-intro.mp
 ```
 
 Output: 1920×1080, 30 fps, H.264 (yuv420p, faststart), ready for X.
+
+## "$ZEON is live" video
+
+```bash
+node brand/x/video-src/render.cjs "$PWD/brand/x/video-src/live" brand/x/zeon-live.mp4
+```
+
+18 s, same format.

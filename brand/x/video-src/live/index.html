@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1920px; height: 1080px; background: #000; overflow: hidden; }
+  body { font-family: Inter, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  .scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+  .grad { background: linear-gradient(90deg, #b6ff1f, #39ff8f 40%, #2fb8ff 70%, #4d6bff); -webkit-background-clip: text; color: transparent; }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .w { display: inline-block; }
+
+  /* countdown */
+  #num { font-size: 420px; font-weight: 800; letter-spacing: -.05em; line-height: 1; }
+  #ring { position: absolute; width: 520px; height: 520px; border-radius: 50%; border: 4px solid #39ff8f; }
+
+  /* reveal */
+  #coinWrap { position: relative; width: 340px; height: 340px; }
+  #coin { position: absolute; inset: 0; border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 0 0 6px #0a0a0a, 0 0 0 10px rgba(57,255,143,.9), 0 0 90px rgba(57,255,143,.45), inset 0 0 60px rgba(47,184,255,.25); }
+  #rays { position: absolute; left: 50%; top: 50%; width: 1600px; height: 1600px; margin: -800px 0 0 -800px; border-radius: 50%;
+          background: repeating-conic-gradient(from 0deg, rgba(57,255,143,.10) 0deg 4deg, transparent 4deg 18deg);
+          -webkit-mask: radial-gradient(circle, #000 0%, transparent 62%); mask: radial-gradient(circle, #000 0%, transparent 62%); }
+  #ticker { margin-top: 60px; font-size: 230px; font-weight: 800; letter-spacing: -.03em; line-height: .95; }
+  #live { margin-top: 18px; font-size: 120px; font-weight: 800; font-style: italic; letter-spacing: -.035em; }
+  #sparks { position: absolute; inset: 0; pointer-events: none; }
+
+  /* details */
+  .livepill { display: flex; align-items: center; gap: 18px; font-family: "JetBrains Mono", monospace; font-size: 34px; letter-spacing: .3em;
+              padding: 16px 30px; border-radius: 999px; border: 2px solid rgba(57,255,143,.5); background: rgba(57,255,143,.08); color: #b8ffd6; }
+  .ldot { width: 18px; height: 18px; border-radius: 50%; background: #39ff8f; }
+  #s3 h2 { margin-top: 50px; font-size: 104px; font-weight: 800; letter-spacing: -.035em; text-align: center; line-height: 1.05; }
+  .chips { margin-top: 60px; display: flex; gap: 22px; }
+  .chip { font-size: 32px; font-weight: 600; padding: 18px 30px; border-radius: 20px; border: 2px solid #27272a; color: #e4e4e7; background: #0b0b0d; }
+
+  /* market */
+  #s4 h2 { font-size: 96px; font-weight: 800; letter-spacing: -.035em; }
+
+  /* end */
+  .url { margin-top: 44px; font-size: 76px; font-weight: 800; letter-spacing: -.02em; }
+  .handle { margin-top: 18px; font-size: 32px; color: #8a8f98; }
+  .cta { margin-top: 40px; height: 100px; padding: 0 56px; border-radius: 999px; background: #fff; color: #000; display: flex; align-items: center; gap: 20px; font-size: 40px; font-weight: 800; }
+  .ball { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #b6ff1f 30%, #39ff8f 55%, #2fb8ff 80%, #4d6bff); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="n" x1="14" y1="14" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b6ff1f"/><stop offset="0.3" stop-color="#39ff8f"/><stop offset="0.55" stop-color="#2fb8ff"/><stop offset="0.8" stop-color="#4d6bff"/>
+    </linearGradient>
+    <filter id="g" filterUnits="userSpaceOnUse" x="-40" y="-40" width="144" height="144"><feGaussianBlur stdDeviation="3"/></filter>
+    <symbol id="mark" viewBox="0 0 64 64" overflow="visible">
+      <ellipse cx="32" cy="32" rx="25" ry="9" transform="rotate(-28 32 32)" fill="none" stroke="url(#n)" stroke-opacity="0.7" stroke-width="1.4"/>
+      <path d="M18.5 19.5H45.5L18.5 44.5H45.5" fill="none" stroke="url(#n)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" filter="url(#g)" opacity="0.85"/>
+      <path d="M18.5 19.5H45.5L18.5 44.5H45.5" fill="none" stroke="url(#n)" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20.5 19.5H43.5" fill="none" stroke="#fff" stroke-opacity="0.5" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="50.2" cy="18" r="3.6" fill="#b6ff1f" filter="url(#g)"/><circle cx="50.2" cy="18" r="2.2" fill="#fff"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- 1: countdown -->
+<section class="scene" id="s1"><div id="ring"></div><div id="num" class="grad">3</div></section>
+
+<!-- 2: $ZEON is live -->
+<section class="scene" id="s2">
+  <div id="rays"></div>
+  <canvas id="sparks" width="1920" height="1080"></canvas>
+  <div id="coinWrap"><div id="coin"><svg width="230" height="230" style="overflow:visible"><use href="#mark" width="230" height="230"/></svg></div></div>
+  <div id="ticker"><span>$ZE</span><span class="grad">ON</span></div>
+  <div id="live" class="grad">is live.</div>
+</section>
+
+<!-- 3: details -->
+<section class="scene" id="s3">
+  <div class="livepill" id="pill"><span class="ldot" id="ldot"></span>LIVE NOW</div>
+  <h2><span class="w">Trading</span> <span class="w">on</span> <span class="w grad">Robinhood</span> <span class="w grad">Chain</span></h2>
+  <div class="chips">
+    <div class="chip" id="k1">Paired with ETH</div>
+    <div class="chip" id="k2">Bonding curve → Uniswap v4</div>
+    <div class="chip" id="k3">Launched on ZEON</div>
+  </div>
+</section>
+
+<!-- 4: the market is open -->
+<section class="scene" id="s4">
+  <h2 id="h4">The market is <span class="grad">open.</span></h2>
+  <svg width="1400" height="520" viewBox="0 0 1400 520" style="overflow:visible;margin-top:40px">
+    <defs>
+      <linearGradient id="cg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b6ff1f"/><stop offset=".5" stop-color="#39ff8f"/><stop offset="1" stop-color="#2fb8ff"/></linearGradient>
+      <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39ff8f" stop-opacity=".22"/><stop offset="1" stop-color="#39ff8f" stop-opacity="0"/></linearGradient>
+      <clipPath id="reveal"><rect id="revealRect" x="-20" y="-80" width="0" height="700"/></clipPath>
+      <filter id="cglow" filterUnits="userSpaceOnUse" x="-60" y="-80" width="1520" height="700"><feGaussianBlur stdDeviation="8"/></filter>
+    </defs>
+    <g stroke="#141416" stroke-width="2"><line x1="0" y1="500" x2="1400" y2="500"/><line x1="0" y1="375" x2="1400" y2="375"/><line x1="0" y1="250" x2="1400" y2="250"/><line x1="0" y1="125" x2="1400" y2="125"/></g>
+    <path id="area" clip-path="url(#reveal)" d="M0 480 L120 460 L220 470 L330 420 L430 432 L540 380 L640 395 L760 320 L860 338 L980 250 L1080 270 L1200 170 L1290 190 L1400 70 L1400 500 L0 500 Z" fill="url(#fill)"/>
+    <path id="lineGlow" d="M0 480 L120 460 L220 470 L330 420 L430 432 L540 380 L640 395 L760 320 L860 338 L980 250 L1080 270 L1200 170 L1290 190 L1400 70" fill="none" stroke="url(#cg)" stroke-width="12" filter="url(#cglow)" opacity=".7" stroke-linejoin="round"/>
+    <path id="line" d="M0 480 L120 460 L220 470 L330 420 L430 432 L540 380 L640 395 L760 320 L860 338 L980 250 L1080 270 L1200 170 L1290 190 L1400 70" fill="none" stroke="url(#cg)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle id="dotGlow" r="32" fill="#39ff8f" opacity=".35"/>
+    <circle id="dot" r="14" fill="#fff"/>
+  </svg>
+</section>
+
+<!-- 5: end card -->
+<section class="scene" id="s5">
+  <svg id="m5" width="200" height="200" style="overflow:visible"><use href="#mark" width="200" height="200"/></svg>
+  <div class="cta" id="cta"><span class="ball"></span>Trade $ZEON</div>
+  <div class="url" id="url">zeon.card</div>
+  <div class="handle mono" id="handle">@usezeon</div>
+</section>
+
+<script>
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const p = (t, a, b) => clamp((t - a) / (b - a));
+  const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+  const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const easeBack = (x) => { const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+  const $ = (id) => document.getElementById(id);
+  const set = (el, o, ty = 0, s = 1) => { el.style.opacity = o; el.style.transform = `translateY(${ty}px) scale(${s})`; };
+
+  const SCENES = { s1: [0, 2.5], s2: [2.5, 7.4], s3: [7.4, 11.2], s4: [11.2, 14.4], s5: [14.4, 18] };
+  const FADE = 0.4, DURATION = 18;
+
+  // Deterministic spark burst for the reveal.
+  let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const COLORS = ["#b6ff1f", "#39ff8f", "#2fb8ff", "#4d6bff", "#ffffff"];
+  const SPARKS = Array.from({ length: 160 }, () => ({ a: rnd() * Math.PI * 2, v: 380 + rnd() * 900, s: 2 + rnd() * 4, c: COLORS[Math.floor(rnd() * COLORS.length)], d: rnd() * 0.15, life: 1.1 + rnd() * 1.1 }));
+  const ctx = $("sparks").getContext("2d");
+  const BURST = 2.95;
+
+  const line = $("line"), glow = $("lineGlow"), L = line.getTotalLength();
+  line.style.strokeDasharray = glow.style.strokeDasharray = L;
+
+  window.render = (t) => {
+    for (const [id, [a, b]] of Object.entries(SCENES)) {
+      const o = a === 0 ? 1 - p(t, b - 0.15, b) : Math.min(p(t, a - (id === "s2" ? 0.05 : FADE), a), b >= DURATION ? 1 : 1 - p(t, b - FADE, b));
+      const el = $(id); el.style.opacity = o; el.style.display = o > 0 ? "flex" : "none";
+    }
+
+    // 1: 3 · 2 · 1, each beat pops in and out with a ring pulse.
+    const beat = Math.min(2, Math.floor(t / 0.8)), bt = (t % 0.8) / 0.8;
+    $("num").textContent = String(3 - beat);
+    const pop = easeBack(clamp(bt / 0.45));
+    set($("num"), 1 - p(bt, 0.75, 1), 0, 0.5 + 0.5 * pop);
+    $("ring").style.opacity = (1 - bt) * 0.9;
+    $("ring").style.transform = `scale(${0.6 + bt * 0.9})`;
+
+    // 2: coin flips in, rays spin, sparks burst, ticker slams, "is live." follows.
+    const c = easeBack(p(t, 2.5, 3.1));
+    const flip = Math.cos(p(t, 2.5, 3.3) * Math.PI * 2);
+    $("coinWrap").style.opacity = p(t, 2.5, 2.7);
+    $("coinWrap").style.transform = `scale(${0.3 + 0.7 * c}) scaleX(${Math.abs(flip) < 0.04 ? 0.04 : flip})`;
+    $("rays").style.opacity = p(t, 2.9, 3.4) * 0.9;
+    $("rays").style.transform = `rotate(${t * 14}deg) scale(${0.7 + 0.3 * easeOut(p(t, 2.9, 3.6))})`;
+    const tk = easeBack(p(t, 3.15, 3.6));
+    set($("ticker"), p(t, 3.15, 3.3), 0, 1.6 - 0.6 * tk);
+    const lv = easeOut(p(t, 3.9, 4.4));
+    set($("live"), lv, (1 - lv) * 40);
+    // coin pulse on the beat of the ticker
+    $("coin").style.boxShadow = `0 0 0 6px #0a0a0a, 0 0 0 10px rgba(57,255,143,.9), 0 0 ${90 + 120 * (1 - p(t, 3.0, 4.0))}px rgba(57,255,143,${0.45 + 0.35 * (1 - p(t, 3.0, 4.0))}), inset 0 0 60px rgba(47,184,255,.25)`;
+    ctx.clearRect(0, 0, 1920, 1080);
+    const cx = 960, cy = 1080 / 2 - 230;
+    for (const s of SPARKS) {
+      const dt = t - BURST - s.d; if (dt < 0 || dt > s.life) continue;
+      const k = dt / s.life, r = s.v * (1 - Math.pow(1 - k, 3)) * 0.9;
+      ctx.globalAlpha = (1 - k) * 0.95; ctx.fillStyle = s.c;
+      ctx.beginPath(); ctx.arc(cx + Math.cos(s.a) * r, cy + Math.sin(s.a) * r + 140 * k * k, s.s * (1 - k * 0.5), 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // camera push
+    $("s2").style.transform = `scale(${1 + 0.04 * p(t, 3.2, 7.4)})`;
+
+    // 3
+    const pi = easeOut(p(t, 7.2, 7.6)); set($("pill"), pi, (1 - pi) * 20);
+    $("ldot").style.boxShadow = `0 0 ${10 + 16 * (0.5 + 0.5 * Math.sin(t * 7))}px #39ff8f`;
+    $("ldot").style.opacity = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(t * 7));
+    document.querySelectorAll("#s3 .w").forEach((w, i) => { const k = easeOut(p(t, 7.45 + i * 0.1, 7.95 + i * 0.1)); set(w, k, (1 - k) * 40); });
+    [["k1", 8.4], ["k2", 8.6], ["k3", 8.8]].forEach(([id, s]) => { const k = easeBack(p(t, s, s + 0.45)); set($(id), p(t, s, s + 0.2), (1 - k) * 24, 0.85 + 0.15 * k); });
+
+    // 4
+    const h = easeOut(p(t, 11.0, 11.4)); set($("h4"), h, (1 - h) * 30);
+    const draw = easeInOut(p(t, 11.3, 13.8));
+    line.style.strokeDashoffset = glow.style.strokeDashoffset = L * (1 - draw);
+    const pt = line.getPointAtLength(L * draw);
+    $("revealRect").setAttribute("width", pt.x + 20);
+    for (const d of ["dot", "dotGlow"]) { $(d).setAttribute("cx", pt.x); $(d).setAttribute("cy", pt.y); $(d).style.opacity = p(t, 11.3, 11.5); }
+
+    // 5
+    const m = easeBack(p(t, 14.2, 14.9));
+    $("m5").style.opacity = p(t, 14.2, 14.5); $("m5").style.transform = `scale(${0.6 + 0.4 * m})`;
+    [["cta", 14.6], ["url", 15.0], ["handle", 15.3]].forEach(([id, s]) => { const k = easeOut(p(t, s, s + 0.5)); set($(id), k, (1 - k) * 30); });
+    $("cta").style.boxShadow = `0 0 ${40 + 30 * (0.5 + 0.5 * Math.sin(t * 4))}px rgba(57,255,143,.35)`;
+  };
+  window.DURATION = DURATION;
+  render(0);
+</script>
+</body>
+</html>

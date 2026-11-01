@@ -5,6 +5,7 @@ import { HomeBento } from "./components/HomeBento";
 import { ProfileRoll } from "./components/ProfileRoll";
 import { TopProfiles } from "./components/TopProfiles";
 import { Explore } from "./components/Explore";
+import { TokenPage } from "./components/TokenPage";
 import { ProfileView } from "./components/ProfileView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import DataRain from "@/components/ui/data-rain";
@@ -18,7 +19,7 @@ export default function App() {
   const route = useRoute();
   // Keyed by route so navigating away from a crashed section resets its boundary.
   const routeKey =
-    route.page === "profile" ? `profile:${route.id}` : route.page === "launch" ? `launch:${route.handle ?? ""}` : route.page;
+    route.page === "profile" ? `profile:${route.id}` : route.page === "token" ? `token:${route.address}` : route.page === "launch" ? `launch:${route.handle ?? ""}` : route.page;
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden">
       {/* Animated full-screen background behind every page. */}
@@ -61,6 +62,7 @@ export default function App() {
           </ErrorBoundary>
         )}
         {route.page === "explore" && <ErrorBoundary key={routeKey}><Explore /></ErrorBoundary>}
+        {route.page === "token" && <ErrorBoundary key={routeKey}><TokenPage address={route.address} /></ErrorBoundary>}
         {route.page === "profile" && <ErrorBoundary key={routeKey}><ProfileView id={route.id} /></ErrorBoundary>}
       </main>
       <footer className="border-t border-zinc-200 dark:border-zinc-800">

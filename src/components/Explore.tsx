@@ -10,6 +10,7 @@ import { ZeonMark } from "./ZeonLogo";
 import { robinhoodChain } from "../lib/chains";
 import { useExplore, type LaunchedToken } from "../lib/explore";
 import { OFFICIAL_TOKEN } from "../lib/site";
+import { tokenHref } from "../lib/router";
 import { shortAddr, timeAgo } from "../lib/format";
 import { explorerAddressUrl, explorerTokenUrl, explorerTxUrl } from "../lib/zora";
 
@@ -84,7 +85,7 @@ function TokenCard({ token: t, index }: { token: LaunchedToken; index: number })
         <span>by <a className="hover:underline" href={explorerAddressUrl(t.deployer)} target="_blank" rel="noreferrer">{shortAddr(t.deployer)}</a></span>
         <a className="hover:underline" href={explorerTxUrl(t.txHash)} target="_blank" rel="noreferrer">{timeAgo(t.timestamp) || `block ${t.blockNumber}`}</a>
       </div>
-      <a className={`${ghostButtonClass} w-full`} href={explorerTokenUrl(t.token)} target="_blank" rel="noreferrer">
+      <a className={`${ghostButtonClass} w-full`} href={tokenHref(t.token)}>
         View token <ArrowUpRight className="size-4" />
       </a>
     </motion.article>
@@ -140,7 +141,7 @@ function OfficialTokenCard() {
               </button>
             </div>
           </div>
-          <a className={`${ghostButtonClass} shrink-0`} href={explorerTokenUrl(OFFICIAL_TOKEN)} target="_blank" rel="noreferrer">
+          <a className={`${ghostButtonClass} shrink-0`} href={tokenHref(OFFICIAL_TOKEN)}>
             View token <ArrowUpRight className="size-4" />
           </a>
         </div>

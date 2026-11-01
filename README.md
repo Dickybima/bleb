@@ -26,6 +26,11 @@ shows up.
   (`keccak256("profile-launchpad/v1")`), read back from the transaction calldata (also when wrapped by a smart
   wallet). Launches before `LISTED_FROM` (test launches) and any address in `HIDDEN_TOKENS` (`src/lib/explore.ts`)
   are not listed.
+- **Token page** (`#/token/<address>`, from "View token" in Explore): market cap / price candlesticks (1m–1D),
+  price, market cap, 24h volume and change, bonding-curve progress and a transactions list. Built from the curve's
+  `CurveBuy` / `CurveSell` logs and live reserves (`getLaunchedToken`, `getReserves`); USD via CoinGecko's ETH price,
+  ETH otherwise. Trades after graduation to Uniswap v4 are not included yet. The official $ZEON (`OFFICIAL_TOKEN` in
+  `src/lib/site.ts`) is pinned at the top of Explore.
 - **Connect wallet**: RainbowKit modal with MetaMask, Coinbase Wallet, Rabby, OKX, Trust, Rainbow,
   WalletConnect (QR for mobile wallets), Phantom, Bitget, Binance, Uniswap, Zerion, Brave, Ledger, Safe and other
   browser wallets. Installed wallets are detected automatically.

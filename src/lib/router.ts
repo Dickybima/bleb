@@ -5,13 +5,15 @@ export type Route =
   | { page: "launch"; handle?: string }
   | { page: "top" }
   | { page: "explore" }
-  | { page: "profile"; id: string };
+  | { page: "profile"; id: string }
+  | { page: "token"; address: string };
 
 function parse(hash: string): Route {
   const path = hash.replace(/^#\/?/, "");
   if (path.startsWith("profile/")) return { page: "profile", id: decodeURIComponent(path.slice(8)) };
   if (path.startsWith("launch/")) return { page: "launch", handle: decodeURIComponent(path.slice(7)) };
   if (path === "launch") return { page: "launch" };
+  if (/^token\/0x[0-9a-fA-F]{40}$/.test(path)) return { page: "token", address: path.slice(6).toLowerCase() };
   if (path === "top") return { page: "top" };
   if (path === "explore") return { page: "explore" };
   return { page: "home" };
@@ -31,5 +33,7 @@ export function useRoute() {
 }
 
 export const profileHref = (id: string) => `#/profile/${encodeURIComponent(id)}`;
+/** Token detail page: chart, stats and trades. */
+export const tokenHref = (address: string) => `#/token/${address.toLowerCase()}`;
 /** Launch form prefilled from the given Zora profile. */
 export const launchHref = (handle: string) => `#/launch/${encodeURIComponent(handle)}`;

@@ -17,6 +17,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "gsap": "^3.15.0",
+    "lightweight-charts": "^4.2.0",
     "lucide-react": "^1.65.0",
     "motion": "^14.8.0",
     "react": "^18.3.1",

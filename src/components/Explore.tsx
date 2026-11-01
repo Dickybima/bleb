@@ -1,15 +1,22 @@
+import { useState } from "react";
 import { motion } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, Check, Copy } from "lucide-react";
+import { erc20Abi } from "viem";
+import { useReadContracts } from "wagmi";
 import { Avatar } from "./Avatar";
 import { OrbButton } from "@/components/ui/hero-with-cards-utils/orb-button";
 import { Notice, Reveal, Skeleton, ghostButtonClass, linkButtonClass } from "@/components/ui/primitives";
+import { ZeonMark } from "./ZeonLogo";
+import { robinhoodChain } from "../lib/chains";
 import { useExplore, type LaunchedToken } from "../lib/explore";
+import { OFFICIAL_TOKEN } from "../lib/site";
 import { shortAddr, timeAgo } from "../lib/format";
 import { explorerAddressUrl, explorerTokenUrl, explorerTxUrl } from "../lib/zora";
 
 export function Explore() {
   const query = useExplore();
-  const tokens = query.data?.pages.flatMap((p) => p.items) ?? [];
+  // The official token has its own card above the grid.
+  const tokens = (query.data?.pages.flatMap((p) => p.items) ?? []).filter((t) => t.token.toLowerCase() !== OFFICIAL_TOKEN);
 
   return (
     <section className="flex flex-col gap-6">
@@ -22,6 +29,8 @@ export function Explore() {
           {query.isFetching && !query.isPending && <span className="text-emerald-500"> · refreshing…</span>}
         </p>
       </Reveal>
+
+      <OfficialTokenCard />
 
       {query.isError && (
         <Notice tone="error">
@@ -79,5 +88,63 @@ function TokenCard({ token: t, index }: { token: LaunchedToken; index: number })
         View token <ArrowUpRight className="size-4" />
       </a>
     </motion.article>
+  );
+}
+
+/** Pinned card for the official $ZEON token; name and symbol are read from the contract. */
+function OfficialTokenCard() {
+  const [copied, setCopied] = useState(false);
+  const meta = useReadContracts({
+    allowFailure: true,
+    contracts: (["name", "symbol"] as const).map((functionName) => ({
+      address: OFFICIAL_TOKEN,
+      abi: erc20Abi,
+      functionName,
+      chainId: robinhoodChain.id,
+    })),
+    query: { staleTime: Infinity },
+  });
+  const name = (meta.data?.[0]?.result as string | undefined) || "ZEON";
+  const symbol = ((meta.data?.[1]?.result as string | undefined) || "ZEON").toUpperCase();
+
+  const copy = () => {
+    navigator.clipboard?.writeText(OFFICIAL_TOKEN).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
+
+  return (
+    <Reveal>
+      <article className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-white p-5 shadow-[0_0_60px_-20px_rgba(57,255,143,0.45)] sm:p-6 dark:bg-zinc-950/70">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <span className="inline-flex size-16 shrink-0 items-center justify-center rounded-2xl bg-black ring-1 ring-emerald-500/30">
+              <ZeonMark size={52} />
+            </span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <strong className="truncate text-xl font-bold tracking-tight">{name}</strong>
+                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  <BadgeCheck className="size-3.5" /> Official
+                </span>
+              </div>
+              <span className="font-mono text-sm text-zinc-500 dark:text-zinc-400">${symbol}</span>
+              <button
+                onClick={copy}
+                className="mt-1 flex max-w-full items-center gap-1.5 font-mono text-xs text-zinc-500 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                title="Copy contract address"
+              >
+                <span className="truncate">{OFFICIAL_TOKEN}</span>
+                {copied ? <Check className="size-3.5 shrink-0 text-emerald-500" /> : <Copy className="size-3.5 shrink-0" />}
+              </button>
+            </div>
+          </div>
+          <a className={`${ghostButtonClass} shrink-0`} href={explorerTokenUrl(OFFICIAL_TOKEN)} target="_blank" rel="noreferrer">
+            View token <ArrowUpRight className="size-4" />
+          </a>
+        </div>
+      </article>
+    </Reveal>
   );
 }

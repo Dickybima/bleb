@@ -52,7 +52,7 @@ const PAGE_BUDGET_MS = 12_000;
  */
 const LISTED_FROM = Date.UTC(2026, 9, 30, 10, 40) / 1000;
 /** Individual launches kept out of Explore (lowercase token addresses). */
-const HIDDEN_TOKENS = new Set<string>([]);
+const HIDDEN_TOKENS = new Set<string>(["0x48ddac8840d4c8626512dc1aa7cace4cb98c4dda"]);
 
 const isListed = (token: Address, timestamp?: number) =>
   !HIDDEN_TOKENS.has(token.toLowerCase()) && (timestamp === undefined || timestamp >= LISTED_FROM);

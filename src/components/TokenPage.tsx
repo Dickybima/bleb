@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
-import { ArrowLeft, ArrowUpRight, BadgeCheck, Check, Copy } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Check, Copy } from "lucide-react";
 import { ColorType, createChart, type IChartApi, type ISeriesApi, type UTCTimestamp } from "lightweight-charts";
 import type { Address } from "viem";
 import { cn } from "@/lib/utils";
 import { Notice, Panel, Skeleton, ghostButtonClass, linkButtonClass } from "@/components/ui/primitives";
 import { Avatar } from "./Avatar";
-import { ZeonMark } from "./ZeonLogo";
 import type { LaunchedToken } from "../lib/explore";
 import { fmtNum, shortAddr, timeAgo } from "../lib/format";
-import { OFFICIAL_TOKEN } from "../lib/site";
 import { useTheme } from "../lib/theme";
 import { toCandles, useEthUsd, useTokenInfo, useTrades, type Trade } from "../lib/tokenMarket";
 import { explorerAddressUrl, explorerTokenUrl, explorerTxUrl } from "../lib/zora";
@@ -40,7 +38,6 @@ const fmtValue = (v: number | undefined, usd: boolean) =>
 
 export function TokenPage({ address }: { address: string }) {
   const token = address as Address;
-  const official = token.toLowerCase() === OFFICIAL_TOKEN;
   const info = useTokenInfo(token);
   const ethUsd = useEthUsd().data ?? undefined;
   const trades = useTrades(token, info.data?.curve, info.data?.decimals);
@@ -69,8 +66,8 @@ export function TokenPage({ address }: { address: string }) {
   const dayOpen = all.find((t) => t.timestamp !== undefined && t.timestamp < now - 86400)?.priceEth ?? day[day.length - 1]?.priceEth;
   const change = dayOpen && lastPrice ? (lastPrice / dayOpen - 1) * 100 : undefined;
 
-  const name = d?.name || listed?.name || (official ? "ZEON" : "");
-  const symbol = (d?.symbol || listed?.symbol || (official ? "ZEON" : "")).toUpperCase();
+  const name = d?.name || listed?.name || "";
+  const symbol = (d?.symbol || listed?.symbol || "").toUpperCase();
 
   return (
     <section className="flex flex-col gap-6">
@@ -78,7 +75,7 @@ export function TokenPage({ address }: { address: string }) {
         <ArrowLeft className="size-4" /> Explore
       </a>
 
-      <Header token={token} name={name} symbol={symbol} official={official} logo={listed?.logo} loading={info.isPending} />
+      <Header token={token} name={name} symbol={symbol} logo={listed?.logo} loading={info.isPending} />
 
       {info.isError && <Notice tone="error">Couldn't reach Robinhood Chain: {(info.error as Error).message}</Notice>}
       {d && !d.curve && <Notice>This token wasn't launched through Pons V2, so there's no curve data to chart.</Notice>}
@@ -118,7 +115,7 @@ export function TokenPage({ address }: { address: string }) {
   );
 }
 
-function Header({ token, name, symbol, official, logo, loading }: { token: Address; name: string; symbol: string; official: boolean; logo?: string; loading: boolean }) {
+function Header({ token, name, symbol, logo, loading }: { token: Address; name: string; symbol: string; logo?: string; loading: boolean }) {
   const [copied, setCopied] = useState(false);
   const copy = () =>
     navigator.clipboard?.writeText(token).then(() => {
@@ -129,24 +126,13 @@ function Header({ token, name, symbol, official, logo, loading }: { token: Addre
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
       <div className="flex min-w-0 flex-1 items-center gap-4">
-        {official ? (
-          <span className="inline-flex size-16 shrink-0 items-center justify-center rounded-2xl bg-black ring-1 ring-emerald-500/30">
-            <ZeonMark size={52} />
-          </span>
-        ) : (
-          <Avatar src={logo} name={symbol || "?"} size={64} className="rounded-2xl" />
-        )}
+        <Avatar src={logo} name={symbol || "?"} size={64} className="rounded-2xl" />
         <div className="min-w-0">
           {loading && !name ? (
             <Skeleton className="h-7 w-40" />
           ) : (
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="truncate text-2xl font-bold tracking-tight sm:text-3xl">{name || shortAddr(token)}</h1>
-              {official && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  <BadgeCheck className="size-3.5" /> Official
-                </span>
-              )}
             </div>
           )}
           {symbol && <span className="font-mono text-sm text-zinc-500 dark:text-zinc-400">${symbol}</span>}

@@ -16,6 +16,9 @@ shows up.
   the top five as clickable cards. Candidates are pooled from Zora's creator lists (most valuable, trending, featured,
   top volume, new) plus the mixed coin lists, several pages deep (up to ~500 profiles); each profile's follower
   count is read via `getProfileSocial`.
+- **Deploy goes to Boxa v4**: the Launch form's final button opens https://boxa.club/ (`BOXA_URL` in
+  `src/lib/site.ts`) in a new tab and copies the reviewed name, ticker, description, image and socials to the
+  clipboard to paste into Boxa's create form. ZEON no longer sends a Pons launch transaction itself.
 - **Tokenize button** (on Top Profiles and profile pages): opens the launch form `#/launch/<handle>` directly,
   prefilled with the profile's name, ticker, logo, bio and socials. The form renders before a wallet is
   connected; the wallet is requested only on submit. When the profile isn't owned by the connected wallet, the

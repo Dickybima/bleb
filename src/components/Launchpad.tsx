@@ -1,21 +1,17 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { ArrowLeft, AtSign, ImagePlus, Lock, Wallet } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, AtSign, Wallet } from "lucide-react";
 import { useAccount } from "wagmi";
-import { useChainModal, useConnectModal } from "@rainbow-me/rainbowkit";
-import { getAddress, isAddress, type Address } from "viem";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { isAddress } from "viem";
 import { useZoraProfile, type ZoraProfile } from "../lib/profile";
 import { Avatar } from "./Avatar";
 import { OrbButton } from "@/components/ui/hero-with-cards-utils/orb-button";
 import { Notice, Panel, Reveal, Skeleton, inputClass, labelClass } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
-import { LaunchSuccess } from "./LaunchSuccess";
-import { TokenizeSteps } from "./TokenizeSteps";
-import { robinhoodChain } from "../lib/chains";
-import { LIMITS, emptySocials } from "../lib/pons";
+import { LIMITS } from "../lib/pons";
+import { BOXA_URL } from "../lib/site";
 import { socialsFromProfile } from "../lib/profileSocials";
-import { useTokenize } from "../lib/useTokenize";
 import { fmtNum, shortAddr } from "../lib/format";
-import { hasApiKey } from "../lib/zora";
 
 type Source = "handle" | "wallet";
 
@@ -116,8 +112,8 @@ export function Launchpad({ handle }: { handle?: string }) {
         )}
         <h1 className="text-4xl font-bold tracking-tight text-zinc-900 md:text-5xl dark:text-white">{title}</h1>
         <p className="mt-3 leading-relaxed text-zinc-500 dark:text-zinc-400">
-          Pull it from any Zora profile, tune every field, then launch on a Pons V2 bonding curve on Robinhood Chain.
-          You sign the transaction; ZEON never holds your keys or your coins.
+          Pull it from any Zora profile, tune every field, then deploy it on Boxa v4.
+          ZEON never holds your keys or your coins.
         </p>
       </Reveal>
 
@@ -277,165 +273,71 @@ type Fields = { coinName: string; ticker: string; description: string; logoUrl: 
 type Setters = { [K in "coinName" | "ticker" | "description" | "logoUrl" | "twitter" | "website"]: (v: string) => void };
 
 /** Step 2: every token field, launch settings, and the launch itself. */
-function ReviewAndLaunch({ profile, fields, set }: { profile?: ZoraProfile | null; fields: Fields; set: Setters }) {
-  const { address: launcher, isConnected, chainId } = useAccount();
-  const { openConnectModal } = useConnectModal();
-  const { openChainModal } = useChainModal();
-  const onChain = isConnected && chainId === robinhoodChain.id;
-  const tk = useTokenize();
-  const { busy, error } = tk;
+function ReviewAndLaunch({ fields, set }: { profile?: ZoraProfile | null; fields: Fields; set: Setters }) {
+  const [copied, setCopied] = useState(false);
+  const formValid = Boolean(fields.coinName.trim() && fields.ticker.trim());
 
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | undefined>();
-  const [taxPct, setTaxPct] = useState("0");
-  const [buyback, setBuyback] = useState(false);
-  const [feeTo, setFeeTo] = useState<"me" | "profile">("me");
-  const fileInput = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!logoFile) return setPreview(fields.logoUrl || undefined);
-    const url = URL.createObjectURL(logoFile);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [logoFile, fields.logoUrl]);
-
-  const isOwnProfile = Boolean(launcher && profile?.wallets.some((w) => w.toLowerCase() === launcher.toLowerCase()));
-  const profileWallet = profile?.wallet && isAddress(profile.wallet) ? getAddress(profile.wallet) : undefined;
-  const feeRecipient: Address | undefined = feeTo === "profile" && profileWallet ? profileWallet : launcher;
-
-  const taxBps = Math.round(Number(taxPct) * 100);
-  const formValid = Boolean(fields.coinName.trim() && fields.ticker.trim()) && Number.isFinite(taxBps) && taxBps >= 0;
-
+  // Deploys happen on Boxa v4: open it and hand over the reviewed details on the clipboard.
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!isConnected || !launcher) return openConnectModal?.();
-    if (!onChain) return openChainModal?.();
-    tk.tokenize({
-      creator: launcher,
-      feeRecipient,
-      name: fields.coinName.trim(),
-      symbol: fields.ticker.trim(),
-      description: fields.description,
-      logo: logoFile ?? fields.logoUrl.trim(),
-      socials: { ...emptySocials(), twitter: fields.twitter.trim(), website: fields.website.trim(), farcaster: fields.farcaster },
-      creatorTaxBps: taxBps,
-      buybackEnabled: buyback,
-    });
+    window.open(BOXA_URL, "_blank", "noopener,noreferrer");
+    const details = [
+      `Name: ${fields.coinName.trim()}`,
+      `Ticker: ${fields.ticker.trim().toUpperCase()}`,
+      fields.description.trim() && `Description: ${fields.description.trim()}`,
+      fields.logoUrl.trim() && `Image: ${fields.logoUrl.trim()}`,
+      fields.twitter.trim() && `X: ${fields.twitter.trim()}`,
+      fields.website.trim() && `Website: ${fields.website.trim()}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    navigator.clipboard?.writeText(details).then(() => setCopied(true), () => {});
   };
-
-  if (tk.step === "done") return <LaunchSuccess state={tk} symbol={fields.ticker} />;
 
   return (
     <form className="flex flex-col gap-5" onSubmit={onSubmit}>
-      <StepHeading n={2} label="Review and launch" />
-
-      <Field label="Launch on">
-        <Segmented
-          value="robinhood"
-          onChange={() => {}}
-          options={[{ value: "robinhood", label: "Robinhood Chain", icon: <span className="size-2.5 rounded-full bg-lime-400 shadow-[0_0_8px_#a3e635]" /> }]}
-        />
-      </Field>
+      <StepHeading n={2} label="Review and deploy" />
 
       <div className="flex items-center gap-4">
-        <Avatar src={preview} name={fields.coinName || "?"} size={80} className="rounded-2xl" />
-        <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
-          {hasApiKey && (
-            <>
-              <button type="button" disabled={busy} onClick={() => fileInput.current?.click()}
-                className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm font-semibold transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700">
-                <ImagePlus className="size-4" /> Upload avatar
-              </button>
-              <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)} />
-            </>
-          )}
-          {!logoFile ? (
-            <input className={cn(inputClass, "py-2 text-sm")} value={fields.logoUrl} onChange={(e) => set.logoUrl(e.target.value)} placeholder="Avatar image URL (https://…)" maxLength={LIMITS.logo} disabled={busy} aria-label="Logo URL" />
-          ) : (
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
-              {logoFile.name} · pinned to IPFS on launch ·{" "}
-              <button type="button" className="underline" onClick={() => setLogoFile(null)}>use URL instead</button>
-            </span>
-          )}
-        </div>
+        <Avatar src={fields.logoUrl || undefined} name={fields.coinName || "?"} size={80} className="rounded-2xl" />
+        <input className={cn(inputClass, "flex-1 py-2 text-sm")} value={fields.logoUrl} onChange={(e) => set.logoUrl(e.target.value)} placeholder="Avatar image URL (https://…)" maxLength={LIMITS.logo} aria-label="Logo URL" />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Coin name">
-          <input className={inputClass} value={fields.coinName} onChange={(e) => set.coinName(e.target.value)} placeholder="Your profile coin" maxLength={LIMITS.name} disabled={busy} required />
+          <input className={inputClass} value={fields.coinName} onChange={(e) => set.coinName(e.target.value)} placeholder="Your profile coin" maxLength={LIMITS.name} required />
         </Field>
         <Field label="Ticker">
           <div className="relative">
             <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 font-mono text-zinc-400">$</span>
-            <input className={cn(inputClass, "pl-7 font-mono uppercase tracking-wide")} value={fields.ticker} onChange={(e) => set.ticker(e.target.value.replace(/\s/g, ""))} placeholder="TICKER" maxLength={LIMITS.symbol} disabled={busy} required />
+            <input className={cn(inputClass, "pl-7 font-mono uppercase tracking-wide")} value={fields.ticker} onChange={(e) => set.ticker(e.target.value.replace(/\s/g, ""))} placeholder="TICKER" maxLength={LIMITS.symbol} required />
           </div>
         </Field>
       </div>
 
       <Field label="Description">
-        <textarea className={cn(inputClass, "resize-y")} rows={2} value={fields.description} onChange={(e) => set.description(e.target.value)} placeholder="Who is this profile?" maxLength={LIMITS.description} disabled={busy} />
-      </Field>
-
-      <Field label="Paired asset (quote)">
-        <div className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 dark:border-zinc-800 dark:bg-zinc-900">
-          <span className="inline-flex size-7 items-center justify-center rounded-full bg-[#627eea] text-xs font-bold text-white">Ξ</span>
-          <span className="font-semibold">ETH</span>
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">Ether</span>
-          <Lock className="ml-auto size-4 text-zinc-400" aria-label="ETH is the only supported pair" />
-        </div>
+        <textarea className={cn(inputClass, "resize-y")} rows={2} value={fields.description} onChange={(e) => set.description(e.target.value)} placeholder="Who is this profile?" maxLength={LIMITS.description} />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="X / Twitter (optional)">
-          <input className={inputClass} value={fields.twitter} onChange={(e) => set.twitter(e.target.value)} placeholder="https://x.com/…" maxLength={LIMITS.social} disabled={busy} />
+          <input className={inputClass} value={fields.twitter} onChange={(e) => set.twitter(e.target.value)} placeholder="https://x.com/…" maxLength={LIMITS.social} />
         </Field>
         <Field label="Website (optional)">
-          <input className={inputClass} value={fields.website} onChange={(e) => set.website(e.target.value)} placeholder="https://…" maxLength={LIMITS.social} disabled={busy} />
+          <input className={inputClass} value={fields.website} onChange={(e) => set.website(e.target.value)} placeholder="https://…" maxLength={LIMITS.social} />
         </Field>
       </div>
 
-      <div className="flex flex-wrap items-end gap-4">
-        <Field label="Creator tax (%)" className="min-w-40 flex-1">
-          <input className={cn(inputClass, "font-mono")} type="number" min={0} step={0.1} value={taxPct} onChange={(e) => setTaxPct(e.target.value)} disabled={busy} />
-        </Field>
-        <label className="flex cursor-pointer items-center gap-2 pb-3 text-sm font-medium">
-          <input type="checkbox" className="size-4 accent-zinc-900 dark:accent-white" checked={buyback} onChange={(e) => setBuyback(e.target.checked)} disabled={busy} />
-          <span>Enable buyback &amp; burn</span>
-        </label>
-      </div>
+      <Notice>
+        {copied
+          ? "Details copied. Paste them into the create form on Boxa v4 (opened in a new tab)."
+          : "Deploying opens Boxa v4 in a new tab and copies these details, ready to paste into its create form."}
+      </Notice>
 
-      {profileWallet && launcher && !isOwnProfile && (
-        <div className="flex flex-col gap-2">
-          <span className={labelClass}>Creator fees go to</span>
-          <div className="flex flex-col gap-2 text-sm">
-            <label className="flex cursor-pointer items-center gap-2"><input type="radio" className="accent-zinc-900 dark:accent-white" checked={feeTo === "me"} onChange={() => setFeeTo("me")} disabled={busy} /> My wallet (<span className="font-mono">{shortAddr(launcher)}</span>)</label>
-            <label className="flex cursor-pointer items-center gap-2"><input type="radio" className="accent-zinc-900 dark:accent-white" checked={feeTo === "profile"} onChange={() => setFeeTo("profile")} disabled={busy} /> @{profile!.handle}'s wallet (<span className="font-mono">{shortAddr(profileWallet)}</span>)</label>
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <span className="text-zinc-500 dark:text-zinc-400">Fee recipient</span>
-        <span className={cn("font-semibold", feeRecipient && "font-mono")}>{feeRecipient ? shortAddr(feeRecipient) : "Your wallet"}</span>
-      </div>
-
-      {profile && launcher && !isOwnProfile && (
-        <Notice>
-          Heads up: you're launching a token for @{profile.handle} from a wallet that isn't theirs. It's a community token, not an official one.
-        </Notice>
-      )}
-
-      <TokenizeSteps state={tk} withUpload={Boolean(logoFile)} />
-      {error && <Notice tone="error">{error}</Notice>}
-
-      <OrbButton type="submit" size="lg" className="w-full" disabled={busy || !formValid || (onChain && !tk.ready)}>
-        {busy
-          ? "Launching…"
-          : !isConnected
-            ? "Connect wallet to launch"
-            : !onChain
-              ? "Switch to Robinhood Chain"
-              : `Launch $${fields.ticker.toUpperCase() || "TOKEN"}`}
+      <OrbButton type="submit" size="lg" className="w-full" disabled={!formValid}>
+        <span className="inline-flex items-center gap-2 whitespace-nowrap">
+          Deploy ${fields.ticker.toUpperCase() || "TOKEN"} on Boxa v4 <ArrowUpRight className="size-5" />
+        </span>
       </OrbButton>
     </form>
   );

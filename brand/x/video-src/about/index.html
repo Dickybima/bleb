@@ -1,0 +1,226 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1920px; height: 1080px; background: #000; overflow: hidden; }
+  body { font-family: Inter, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  .scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+  .grad { background: linear-gradient(90deg, #b6ff1f, #39ff8f 40%, #2fb8ff 70%, #4d6bff); -webkit-background-clip: text; color: transparent; }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .w { display: inline-block; }
+  .muted { color: #71717a; }
+  .cap { font-size: 64px; font-weight: 800; letter-spacing: -.03em; text-align: center; }
+  .eyebrow { font-family: "JetBrains Mono", monospace; font-size: 24px; letter-spacing: .3em; text-transform: uppercase; color: #8a8f98; display: flex; align-items: center; gap: 14px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #39ff8f; box-shadow: 0 0 16px #39ff8f; }
+  .card { border-radius: 32px; background: #0c0c0e; border: 1.5px solid #27272a; }
+
+  /* 1 hook */
+  #s1 h1 { font-size: 118px; font-weight: 800; letter-spacing: -.04em; line-height: 1.06; text-align: center; }
+  #s1 p { margin-top: 44px; font-size: 52px; font-weight: 700; letter-spacing: -.02em; color: #a1a1aa; }
+
+  /* 2 meet */
+  #s2 .word { margin-top: 40px; font-size: 190px; font-weight: 800; letter-spacing: .04em; line-height: 1; }
+  #s2 .tag { margin-top: 30px; font-size: 56px; font-weight: 700; letter-spacing: -.02em; }
+  #s2 .tag em { font-style: italic; font-weight: 800; color: #d4d4d8; }
+
+  /* 3 leaderboard */
+  #board { width: 1100px; margin-top: 48px; padding: 18px 34px; }
+  .lrow { display: flex; align-items: center; gap: 26px; height: 104px; border-bottom: 1.5px solid #18181b; }
+  .lrow:last-child { border-bottom: 0; }
+  .rank { width: 44px; font-family: "JetBrains Mono", monospace; font-size: 26px; color: #71717a; }
+  .av { width: 64px; height: 64px; border-radius: 50%; flex: none; }
+  .who { flex: 1; }
+  .who b { display: block; font-size: 32px; font-weight: 700; }
+  .who span { font-size: 22px; color: #71717a; }
+  .fol { font-family: "JetBrains Mono", monospace; font-size: 30px; font-weight: 700; width: 160px; text-align: right; }
+  .tok { height: 58px; padding: 0 28px; border-radius: 999px; background: #fff; color: #000; display: flex; align-items: center; font-size: 24px; font-weight: 800; }
+
+  /* 4 steps */
+  .steps { margin-top: 70px; display: flex; gap: 40px; }
+  .step { width: 460px; padding: 40px; }
+  .num { width: 64px; height: 64px; border-radius: 50%; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; }
+  .step h3 { margin-top: 28px; font-size: 40px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+  .step p { margin-top: 14px; font-size: 26px; color: #a1a1aa; line-height: 1.35; }
+
+  /* 5 handoff */
+  .hand { margin-top: 60px; display: flex; align-items: center; gap: 60px; }
+  #coin { width: 620px; padding: 36px; }
+  .crow { display: flex; align-items: center; gap: 24px; }
+  .cav { width: 96px; height: 96px; border-radius: 26px; background: radial-gradient(circle at 30% 28%, #fff7d6, #ffb020 30%, #ff3d77 65%, #8a1c5c); }
+  .cname { font-size: 40px; font-weight: 800; }
+  .ctick { font-family: "JetBrains Mono", monospace; font-size: 24px; color: #a1a1aa; margin-top: 4px; }
+  .cbtn { margin-top: 30px; height: 84px; border-radius: 999px; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 30px; font-weight: 800; }
+  .ball { width: 36px; height: 36px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #b6ff1f 30%, #39ff8f 55%, #2fb8ff 80%, #4d6bff); }
+  #toast { position: absolute; left: 50%; top: 210px; transform: translateX(-50%); }
+  .toastIn { display: flex; align-items: center; gap: 14px; padding: 18px 30px; border-radius: 18px; background: rgba(57,255,143,.12); border: 1.5px solid rgba(57,255,143,.45); color: #b8ffd6; font-size: 28px; font-weight: 600; }
+  .arrow { width: 200px; height: 4px; background: #27272a; position: relative; border-radius: 2px; overflow: hidden; }
+  .arrow i { position: absolute; inset: 0; background: linear-gradient(90deg, #39ff8f, #2fb8ff); transform-origin: left; }
+  #boxa { width: 460px; height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+  #boxa .url { font-size: 52px; font-weight: 800; letter-spacing: -.02em; }
+  .pill { font-family: "JetBrains Mono", monospace; font-size: 22px; letter-spacing: .2em; padding: 12px 22px; border-radius: 999px; border: 1.5px solid #2fb8ff; color: #bfe6ff; }
+
+  /* 6 custody */
+  #s6 h2 { font-size: 170px; font-weight: 800; letter-spacing: -.045em; line-height: 1.02; text-align: center; }
+  .chips { margin-top: 60px; display: flex; gap: 22px; }
+  .chip { font-size: 32px; font-weight: 600; padding: 18px 30px; border-radius: 20px; border: 2px solid #27272a; color: #e4e4e7; background: #0b0b0d; }
+
+  /* 7 end */
+  #s7 .word { margin-top: 40px; font-size: 170px; font-weight: 800; letter-spacing: .04em; line-height: 1; }
+  #s7 .url { margin-top: 40px; font-size: 68px; font-weight: 800; letter-spacing: -.02em; }
+  #s7 .handle { margin-top: 18px; font-size: 32px; color: #8a8f98; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="n" x1="14" y1="14" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b6ff1f"/><stop offset="0.3" stop-color="#39ff8f"/><stop offset="0.55" stop-color="#2fb8ff"/><stop offset="0.8" stop-color="#4d6bff"/>
+    </linearGradient>
+    <filter id="g" filterUnits="userSpaceOnUse" x="-40" y="-40" width="144" height="144"><feGaussianBlur stdDeviation="3"/></filter>
+    <symbol id="mark" viewBox="0 0 64 64" overflow="visible">
+      <ellipse cx="32" cy="32" rx="25" ry="9" transform="rotate(-28 32 32)" fill="none" stroke="url(#n)" stroke-opacity="0.7" stroke-width="1.4"/>
+      <path d="M18.5 19.5H45.5L18.5 44.5H45.5" fill="none" stroke="url(#n)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" filter="url(#g)" opacity="0.85"/>
+      <path d="M18.5 19.5H45.5L18.5 44.5H45.5" fill="none" stroke="url(#n)" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20.5 19.5H43.5" fill="none" stroke="#fff" stroke-opacity="0.5" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="50.2" cy="18" r="3.6" fill="#b6ff1f" filter="url(#g)"/><circle cx="50.2" cy="18" r="2.2" fill="#fff"/>
+    </symbol>
+  </defs>
+</svg>
+
+<section class="scene" id="s1">
+  <h1><span class="w">Your</span> <span class="w">followers</span> <span class="w">are</span><br><span class="w">already</span> <span class="w grad">a</span> <span class="w grad">market.</span></h1>
+  <p id="s1p">You just haven't priced it yet.</p>
+</section>
+
+<section class="scene" id="s2">
+  <div class="eyebrow" id="s2e"><span class="dot"></span>Meet</div>
+  <svg id="m2" width="240" height="240" style="overflow:visible;margin-top:36px"><use href="#mark" width="240" height="240"/></svg>
+  <div class="word" id="s2w">ZE<span class="grad">ON</span></div>
+  <div class="tag" id="s2t">Turn reach into <em>a market.</em></div>
+</section>
+
+<section class="scene" id="s3">
+  <div class="cap"><span class="w">Find</span> <span class="w">the</span> <span class="w">creators</span> <span class="w">with</span> <span class="w grad">the</span> <span class="w grad">reach.</span></div>
+  <div class="card" id="board">
+    <div class="lrow"><span class="rank">1</span><span class="av" style="background:radial-gradient(circle at 30% 28%,#e3f1ff,#7aa2ff 35%,#3b4fe0 70%,#160f5c)"></span><div class="who"><b>Nova Studio</b><span>@novastudio</span></div><span class="fol">48.2K</span><span class="tok">Tokenize</span></div>
+    <div class="lrow"><span class="rank">2</span><span class="av" style="background:radial-gradient(circle at 30% 28%,#fff7d6,#ffb020 30%,#ff3d77 65%,#8a1c5c)"></span><div class="who"><b>Pixel Rider</b><span>@pixelrider</span></div><span class="fol">31.7K</span><span class="tok">Tokenize</span></div>
+    <div class="lrow"><span class="rank">3</span><span class="av" style="background:radial-gradient(circle at 30% 28%,#eafff2,#39ff8f 35%,#0f9f5a 70%,#063d24)"></span><div class="who"><b>Mira Lane</b><span>@miralane</span></div><span class="fol">22.4K</span><span class="tok">Tokenize</span></div>
+    <div class="lrow"><span class="rank">4</span><span class="av" style="background:radial-gradient(circle at 30% 28%,#f3e8ff,#9b5cff 35%,#5b21b6 70%,#2e1065)"></span><div class="who"><b>Kite Labs</b><span>@kitelabs</span></div><span class="fol">17.9K</span><span class="tok">Tokenize</span></div>
+  </div>
+</section>
+
+<section class="scene" id="s4">
+  <div class="cap"><span class="w">Three</span> <span class="w">steps.</span> <span class="w grad">That's</span> <span class="w grad">it.</span></div>
+  <div class="steps">
+    <div class="card step" id="st1"><div class="num">1</div><h3>Drop a Zora handle</h3><p>Or connect your wallet and let ZEON find your profile.</p></div>
+    <div class="card step" id="st2"><div class="num">2</div><h3>All auto-filled</h3><p>Name, ticker, avatar, bio and socials, all editable.</p></div>
+    <div class="card step" id="st3"><div class="num" style="background:linear-gradient(135deg,#b6ff1f,#39ff8f 45%,#2fb8ff)">3</div><h3>Deploy on Boxa v4</h3><p>One click hands every detail over, ready to go live.</p></div>
+  </div>
+</section>
+
+<section class="scene" id="s5">
+  <div class="cap"><span class="w">From</span> <span class="w">profile</span> <span class="w">to</span> <span class="w grad">live</span> <span class="w grad">token.</span></div>
+  <div id="toast"><div class="toastIn"><span class="dot"></span>Details copied · opening boxa.club</div></div>
+  <div class="hand">
+    <div class="card" id="coin">
+      <div class="crow"><div class="cav"></div><div><div class="cname">Your Name</div><div class="ctick">$YOURNAME</div></div></div>
+      <div class="cbtn" id="cbtn"><span class="ball"></span>Deploy $YOURNAME on Boxa v4</div>
+    </div>
+    <div class="arrow"><i id="arr"></i></div>
+    <div class="card" id="boxa"><div class="url">boxa.club</div><div class="pill" id="pill">LIVE ON ELYSIUM</div></div>
+  </div>
+</section>
+
+<section class="scene" id="s6">
+  <h2><span class="w">You sign.</span><br><span class="w grad">You own.</span></h2>
+  <div class="chips"><div class="chip" id="k1">Non-custodial</div><div class="chip" id="k2">Gas in HYPE</div><div class="chip" id="k3">Built on Elysium</div></div>
+</section>
+
+<section class="scene" id="s7">
+  <svg id="m7" width="200" height="200" style="overflow:visible"><use href="#mark" width="200" height="200"/></svg>
+  <div class="word" id="w7">ZE<span class="grad">ON</span></div>
+  <div class="url" id="u7">zeon.card</div>
+  <div class="handle mono" id="h7">@usezeon</div>
+</section>
+
+<script>
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const p = (t, a, b) => clamp((t - a) / (b - a));
+  const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+  const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const easeBack = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+  const $ = (id) => document.getElementById(id);
+  const set = (el, o, ty = 0, s = 1) => { el.style.opacity = o; el.style.transform = `translateY(${ty}px) scale(${s})`; };
+  const rise = (el, start, dur = 0.5, dist = 40) => { const k = easeOut(p(window.__t, start, start + dur)); set(el, k, (1 - k) * dist); };
+  const words = (sel, start, step) => document.querySelectorAll(sel).forEach((w, i) => rise(w, start + i * step));
+
+  const SCENES = { s1: [0, 3.8], s2: [3.8, 7.6], s3: [7.6, 12.2], s4: [12.2, 17.2], s5: [17.2, 22.4], s6: [22.4, 25.4], s7: [25.4, 29] };
+  const FADE = 0.45, DURATION = 29;
+
+  window.render = (t) => {
+    window.__t = t;
+    for (const [id, [a, b]] of Object.entries(SCENES)) {
+      const o = a === 0 ? 1 - p(t, b - FADE, b) : Math.min(p(t, a - FADE, a), b >= DURATION ? 1 : 1 - p(t, b - FADE, b));
+      const el = $(id); el.style.opacity = o; el.style.display = o > 0 ? "flex" : "none";
+      el.style.transform = `scale(${1 + 0.03 * p(t, a, b)})`;
+    }
+
+    // 1
+    words("#s1 .w", 0.2, 0.16);
+    rise($("s1p"), 1.8, 0.6, 30);
+
+    // 2
+    rise($("s2e"), 3.6, 0.4, 20);
+    const m = easeBack(p(t, 3.7, 4.5));
+    $("m2").style.opacity = p(t, 3.7, 4.0);
+    $("m2").style.transform = `scale(${0.55 + 0.45 * m}) rotate(${(1 - m) * -12}deg)`;
+    rise($("s2w"), 4.4, 0.55, 50);
+    rise($("s2t"), 5.0, 0.55, 30);
+
+    // 3
+    words("#s3 .cap .w", 7.4, 0.08);
+    rise($("board"), 7.6, 0.5, 60);
+    document.querySelectorAll("#board .lrow").forEach((r, i) => rise(r, 8.0 + i * 0.18, 0.45, 24));
+    // pulse the top row's Tokenize button
+    const tok = document.querySelector("#board .lrow .tok");
+    const pulse = p(t, 10.2, 10.5) * (1 - p(t, 10.6, 11.0));
+    tok.style.boxShadow = `0 0 ${pulse * 60}px rgba(57,255,143,${pulse * 0.8})`;
+    tok.style.transform = `scale(${1 + pulse * 0.08})`;
+    tok.style.background = t > 10.3 ? "linear-gradient(90deg,#b6ff1f,#39ff8f 45%,#2fb8ff)" : "#fff";
+
+    // 4
+    words("#s4 .cap .w", 12.0, 0.1);
+    [["st1", 12.5], ["st2", 13.1], ["st3", 13.7]].forEach(([id, s]) => { const k = easeBack(p(t, s, s + 0.55)); set($(id), p(t, s, s + 0.25), (1 - k) * 50, 0.9 + 0.1 * k); });
+
+    // 5
+    words("#s5 .cap .w", 17.0, 0.1);
+    rise($("coin"), 17.3, 0.5, 40);
+    const press = t > 18.6 && t < 18.85 ? 0.95 : 1;
+    $("cbtn").style.transform = `scale(${press})`;
+    $("cbtn").style.boxShadow = `0 0 ${t > 18.8 ? 70 : 0}px rgba(57,255,143,.45)`;
+    const toast = easeBack(p(t, 18.85, 19.3)) * (1 - p(t, 21.6, 21.9));
+    $("toast").style.opacity = p(t, 18.85, 19.05) * (1 - p(t, 21.6, 21.9));
+    $("toast").style.transform = `translateX(-50%) translateY(${(1 - toast) * -20}px)`;
+    $("arr").style.transform = `scaleX(${easeInOut(p(t, 19.1, 19.7))})`;
+    const bx = easeBack(p(t, 19.6, 20.1));
+    set($("boxa"), p(t, 19.6, 19.8), 0, 0.85 + 0.15 * bx);
+    const pl = easeOut(p(t, 20.3, 20.7));
+    set($("pill"), pl, (1 - pl) * 16);
+    $("pill").style.boxShadow = `0 0 ${20 + 20 * (0.5 + 0.5 * Math.sin(t * 6))}px rgba(47,184,255,.35)`;
+
+    // 6
+    words("#s6 .w", 22.5, 0.45);
+    [["k1", 23.4], ["k2", 23.6], ["k3", 23.8]].forEach(([id, s]) => { const k = easeBack(p(t, s, s + 0.45)); set($(id), p(t, s, s + 0.2), (1 - k) * 24, 0.85 + 0.15 * k); });
+
+    // 7
+    const e = easeBack(p(t, 25.1, 25.9));
+    $("m7").style.opacity = p(t, 25.1, 25.5); $("m7").style.transform = `scale(${0.6 + 0.4 * e})`;
+    rise($("w7"), 25.5); rise($("u7"), 26.0); rise($("h7"), 26.3);
+  };
+  window.DURATION = DURATION;
+  render(0);
+</script>
+</body>
+</html>

@@ -16,3 +16,11 @@ node brand/x/video-src/render.cjs "$PWD/brand/x/video-src/live" brand/x/zeon-liv
 ```
 
 18 s, same format.
+
+## Project explainer video
+
+```bash
+node brand/x/video-src/render.cjs "$PWD/brand/x/video-src/about" brand/x/zeon-about.mp4
+```
+
+29 s: hook, meet ZEON, Top Profiles, three steps, hand-off to Boxa v4 on Elysium, "You sign. You own.", end card.

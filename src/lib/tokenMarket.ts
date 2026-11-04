@@ -2,11 +2,11 @@ import { useEffect } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 import { erc20Abi, formatUnits, getAbiItem, parseAbi, type Address, type Hash, type PublicClient, type Transport } from "viem";
-import { robinhoodChain } from "./chains";
+import { appChain } from "./chains";
 import { PONS_FACTORY, PONS_FACTORY_DEPLOY_BLOCK, ponsFactoryAbi } from "./pons";
 import { mapLimit } from "./util";
 
-type Client = PublicClient<Transport, typeof robinhoodChain>;
+type Client = PublicClient<Transport, typeof appChain>;
 
 /** Pons V2 reads and curve events (signatures from the Pons V2 builder docs, topic0 checked in pons-token-scanner). */
 const marketAbi = parseAbi([
@@ -93,7 +93,7 @@ async function readTokenInfo(client: Client, token: Address): Promise<TokenInfo>
 
 /** Token details and live curve price, refreshed every 15 seconds. */
 export function useTokenInfo(token: Address) {
-  const client = usePublicClient({ chainId: robinhoodChain.id }) as Client | undefined;
+  const client = usePublicClient({ chainId: appChain.id }) as Client | undefined;
   return useQuery({
     queryKey: ["token-info", token.toLowerCase()],
     enabled: Boolean(client),
@@ -189,7 +189,7 @@ const AUTO_PAGES = 8;
 
 /** Bonding-curve trades for a token, newest first; keeps loading older pages on its own until the launch. */
 export function useTrades(token: Address, curve?: Address, decimals = 18) {
-  const client = usePublicClient({ chainId: robinhoodChain.id }) as Client | undefined;
+  const client = usePublicClient({ chainId: appChain.id }) as Client | undefined;
   const query = useInfiniteQuery({
     queryKey: ["token-trades", token.toLowerCase(), curve?.toLowerCase()],
     enabled: Boolean(client && curve),

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePublicClient, useWalletClient } from "wagmi";
 import type { Address, Hash } from "viem";
-import { robinhoodChain } from "./chains";
+import { appChain } from "./chains";
 import { rememberLaunchTx } from "./explore";
 import { launchOnPons, uploadLogo, type Socials } from "./pons";
 
@@ -11,7 +11,7 @@ export type TokenizeStep = "idle" | "upload" | "sign" | "confirm" | "done";
 export const STEP_LABEL: Record<Exclude<TokenizeStep, "idle" | "done">, string> = {
   upload: "Pinning logo to IPFS",
   sign: "Checking the contract & signing",
-  confirm: "Waiting for Robinhood Chain to confirm",
+  confirm: "Waiting for the network to confirm",
 };
 const ORDER = ["upload", "sign", "confirm"] as const;
 
@@ -30,8 +30,8 @@ export type TokenizeInput = {
 
 export function useTokenize() {
   const queryClient = useQueryClient();
-  const publicClient = usePublicClient({ chainId: robinhoodChain.id });
-  const { data: walletClient } = useWalletClient({ chainId: robinhoodChain.id });
+  const publicClient = usePublicClient({ chainId: appChain.id });
+  const { data: walletClient } = useWalletClient({ chainId: appChain.id });
 
   const [step, setStep] = useState<TokenizeStep>("idle");
   const [error, setError] = useState<string | null>(null);

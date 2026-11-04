@@ -4,8 +4,6 @@ import { ZeonHero } from "./components/ZeonHero";
 import { HomeBento } from "./components/HomeBento";
 import { ProfileRoll } from "./components/ProfileRoll";
 import { TopProfiles } from "./components/TopProfiles";
-import { Explore } from "./components/Explore";
-import { TokenPage } from "./components/TokenPage";
 import { ProfileView } from "./components/ProfileView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import DataRain from "@/components/ui/data-rain";
@@ -61,15 +59,13 @@ export default function App() {
             </section>
           </ErrorBoundary>
         )}
-        {route.page === "explore" && <ErrorBoundary key={routeKey}><Explore /></ErrorBoundary>}
-        {route.page === "token" && <ErrorBoundary key={routeKey}><TokenPage address={route.address} /></ErrorBoundary>}
         {route.page === "profile" && <ErrorBoundary key={routeKey}><ProfileView id={route.id} /></ErrorBoundary>}
       </main>
       <footer className="border-t border-zinc-200 dark:border-zinc-800">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6">
           <span className="flex items-center gap-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
             <ZeonMark size={18} />
-            Built on Robinhood Chain · profiles from Zora
+            Built on Elysium · profiles from Zora
           </span>
           <div className="flex items-center gap-2">
             <ThemeToggle />

@@ -18,7 +18,7 @@ import {
   zerionWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { createConfig, http } from "wagmi";
-import { robinhoodChain } from "./chains";
+import { appChain } from "./chains";
 
 const APP_NAME = "ZEON";
 
@@ -54,8 +54,8 @@ const connectors = connectorsForWallets(
 
 export const wagmiConfig = createConfig({
   connectors,
-  chains: [robinhoodChain],
-  transports: { [robinhoodChain.id]: http() },
+  chains: [appChain],
+  transports: { [appChain.id]: http() },
 });
 
 declare module "wagmi" {

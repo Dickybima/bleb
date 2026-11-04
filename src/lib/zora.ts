@@ -1,6 +1,6 @@
 import { setApiKey } from "@zoralabs/coins-sdk";
 import { isAddress } from "viem";
-import { robinhoodChain } from "./chains";
+import { appChain } from "./chains";
 
 const apiKey = import.meta.env.VITE_ZORA_API_KEY as string | undefined;
 if (apiKey) setApiKey(apiKey);
@@ -14,7 +14,7 @@ export const zoraProfileUrl = (handleOrAddress: string) =>
     : `https://zora.co/@${handleOrAddress}`;
 
 
-const explorer = robinhoodChain.blockExplorers.default.url;
+const explorer = appChain.blockExplorers.default.url;
 export const explorerTxUrl = (hash: string) => `${explorer}/tx/${hash}`;
 export const explorerTokenUrl = (address: string) => `${explorer}/token/${address}`;
 export const explorerAddressUrl = (address: string) => `${explorer}/address/${address}`;

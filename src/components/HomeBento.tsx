@@ -6,7 +6,6 @@ import { OrbButton } from "@/components/ui/hero-with-cards-utils/orb-button";
 import { Reveal, Skeleton } from "@/components/ui/primitives";
 import { Avatar } from "./Avatar";
 import { ZeonMark } from "./ZeonLogo";
-import { useExplore } from "../lib/explore";
 import { fmtNum } from "../lib/format";
 import { useZoraProfileSocial } from "../lib/profile";
 import { launchHref } from "../lib/router";
@@ -35,10 +34,9 @@ export function HomeBento() {
         <Reveal delay={0.08}><FlowTile /></Reveal>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3 [&>*]:min-w-0">
+      <div className="grid gap-4 md:grid-cols-2 [&>*]:min-w-0">
         <Reveal><ReachTile /></Reveal>
-        <Reveal delay={0.08}><MintedTile /></Reveal>
-        <Reveal delay={0.16}><CustodyTile /></Reveal>
+        <Reveal delay={0.08}><CustodyTile /></Reveal>
       </div>
     </section>
   );
@@ -121,12 +119,12 @@ function DetectTile() {
   );
 }
 
-/** Profile in, token out: Zora profile → ZEON → token on Robinhood Chain. */
+/** Profile in, token out: Zora profile → ZEON → token on Elysium. */
 function FlowTile() {
   return (
     <div className={cn(tile, "flex h-full flex-col")}>
       <h3 className={tileTitle}>Profile in. Token out.</h3>
-      <p className={tileText}>A Zora profile goes in, a Pons V2 token on Robinhood Chain comes out, paired with ETH.</p>
+      <p className={tileText}>A Zora profile goes in, a token on Elysium comes out, deployed through Boxa v4.</p>
 
       <div className="flex flex-1 items-center justify-center gap-2 py-8 min-[420px]:gap-3 sm:gap-4">
         <FlowNode label="Zora profile" className="bg-[radial-gradient(circle_at_30%_28%,#e3f1ff,#7aa2ff_35%,#3b4fe0_70%,#160f5c)] shadow-[0_0_40px_-6px_#4b6bff]">
@@ -184,31 +182,6 @@ function ReachTile() {
       )}
       <p className={cn(statLabel, "mt-1")}>followers on Zora</p>
     </div>
-  );
-}
-
-function MintedTile() {
-  const explore = useExplore();
-  const tokens = explore.data?.pages.flatMap((p) => p.items) ?? [];
-  const more = explore.hasNextPage && tokens.length > 0;
-  return (
-    <a href="#/explore" className={cn(tile, "flex h-full min-h-56 flex-col transition hover:border-zinc-300 dark:hover:border-zinc-700")}>
-      <p className={statLabel}>Latest mints on ZEON</p>
-      {explore.isPending ? (
-        <Skeleton className="mt-3 h-12 w-16" />
-      ) : (
-        <p className="mt-2 text-5xl font-bold tracking-tighter text-zinc-900 dark:text-white">
-          {tokens.length}
-          {more && <span className="text-zinc-400">+</span>}
-        </p>
-      )}
-      <div className="mt-auto flex pt-6">
-        {tokens.slice(0, 6).map((t, i) => (
-          <Avatar key={t.token} src={t.logo} name={t.symbol || "?"} size={36} className={cn("ring-2 ring-white dark:ring-zinc-900", i > 0 && "-ml-2")} />
-        ))}
-        {!explore.isPending && tokens.length === 0 && <p className={statLabel}>Be the first to mint.</p>}
-      </div>
-    </a>
   );
 }
 

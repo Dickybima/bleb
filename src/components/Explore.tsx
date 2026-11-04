@@ -26,7 +26,7 @@ export function Explore() {
 
       {query.isError && (
         <Notice tone="error">
-          Couldn't reach Robinhood Chain: {(query.error as Error).message}{" "}
+          Couldn't reach Elysium: {(query.error as Error).message}{" "}
           <button className={linkButtonClass} onClick={() => query.refetch()}>Retry</button>
         </Notice>
       )}

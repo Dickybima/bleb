@@ -15,7 +15,7 @@ import {
   type Transport,
   type WalletClient,
 } from "viem";
-import { robinhoodChain } from "./chains";
+import { appChain } from "./chains";
 
 /** Pons V2 launch factory on Robinhood Chain (chain id 4663). */
 export const PONS_FACTORY: Address = "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e";
@@ -69,7 +69,7 @@ export async function uploadLogo(creator: Address, file: File) {
   return url.startsWith("ipfs://") ? `https://ipfs.io/ipfs/${url.slice(7)}` : url;
 }
 
-type Client = PublicClient<Transport, typeof robinhoodChain>;
+type Client = PublicClient<Transport, typeof appChain>;
 
 /** Picks the configured launch config, or the first enabled one the factory exposes. */
 async function resolveLaunchConfigId(publicClient: Client): Promise<bigint> {
@@ -150,7 +150,7 @@ export async function launchOnPons({
   };
 
   // The factory exposes launchToken with and without snipe-tax exemptions; use whichever simulates.
-  const base = { address: PONS_FACTORY, abi: ponsFactoryAbi, functionName: "launchToken", account, value: launchFee, chain: robinhoodChain } as const;
+  const base = { address: PONS_FACTORY, abi: ponsFactoryAbi, functionName: "launchToken", account, value: launchFee, chain: appChain } as const;
   let request;
   try {
     ({ request } = await publicClient.simulateContract({ ...base, args: [params, launchConfigId, NATIVE_QUOTE, []] }));

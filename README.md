@@ -1,17 +1,18 @@
 # ZEON
 
-**Turn reach into a market.** ZEON turns any **Zora** profile into a live token on Robinhood Chain, launched through
-Pons V2. Tokens are born on a bonding curve and graduate to Uniswap v4 once the crowd
-shows up.
+**Turn reach into a market.** ZEON turns any **Zora** profile into a live token on **Elysium**, deployed through
+Boxa v4.
+
+**Network:** Elysium Testnet (Kinetiq, chain id 99801, gas in HYPE), defined in `src/lib/chains.ts` (`appChain`;
+RPC override `VITE_ELYSIUM_RPC_URL`). Elysium mainnet details aren't published yet; switch id, RPC and explorer
+there once they are.
 
 ## Features
 
 - **Home / Launch**: the Home page has the hero, a bento section (live handle detection, profile → token flow,
-  combined reach, latest mints, non-custodial) and top profiles; the **Launch** page (`#/launch`) is a two-step studio
-  (1. detect a Zora profile by handle or connected wallet, 2. review every coin field and launch): connect a wallet and its Zora profile is detected automatically, prefilling name, ticker,
-  logo (avatar), description (bio) and socials (X, Farcaster, website). Creator tax and buyback & burn are
-  configurable. Tokens launch via `launchToken` on the Pons V2 factory
-  `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e`, paired with ETH: bonding curve first, then Uniswap v4.
+  combined reach, non-custodial) and top profiles; the **Launch** page (`#/launch`) is a two-step studio
+  (1. detect a Zora profile by handle or connected wallet, 2. review every coin field and deploy), prefilling
+  name, ticker, logo (avatar), description (bio) and socials (X, Farcaster, website).
 - **Top Zora Profiles**: Zora profiles ranked by followers (no price or market cap data); the home hero fans out
   the top five as clickable cards. Candidates are pooled from Zora's creator lists (most valuable, trending, featured,
   top volume, new) plus the mixed coin lists, several pages deep (up to ~500 profiles); each profile's follower
@@ -23,13 +24,14 @@ shows up.
   prefilled with the profile's name, ticker, logo, bio and socials. The form renders before a wallet is
   connected; the wallet is requested only on submit. When the profile isn't owned by the connected wallet, the
   form shows a notice and lets the launcher choose the creator-fee recipient: their own wallet or the profile's.
-- **Explore**: only tokens launched from this site (other Pons launches are filtered out). Read straight from
+- **Explore** (hidden for now: not in the menu and not routed, since it reads the Pons V2 factory on Robinhood
+  Chain, which doesn't exist on Elysium): only tokens launched from this site (other Pons launches are filtered out). Read straight from
   the Pons V2 factory's `TokenLaunched` events (no backend), newest first, refreshed every 30 seconds and right
   after a successful launch. This site's launches are recognised by a 6-byte tag at the start of the `salt`
   (`keccak256("profile-launchpad/v1")`), read back from the transaction calldata (also when wrapped by a smart
   wallet). Launches before `LISTED_FROM` (test launches) and any address in `HIDDEN_TOKENS` (`src/lib/explore.ts`)
   are not listed.
-- **Token page** (`#/token/<address>`, from "View token" in Explore): market cap / price candlesticks (1m–1D),
+- **Token page** (hidden with Explore; `#/token/<address>`): market cap / price candlesticks (1m–1D),
   price, market cap, 24h volume and change, bonding-curve progress and a transactions list. Built from the curve's
   `CurveBuy` / `CurveSell` logs and live reserves (`getLaunchedToken`, `getReserves`); USD via CoinGecko's ETH price,
   ETH otherwise. Trades after graduation to Uniswap v4 are not included yet.
@@ -38,7 +40,7 @@ shows up.
   browser wallets. Installed wallets are detected automatically.
 - **Profile page**: search `@handle` or `0x…` to see bio, socials, followers and following.
 
-## Launch flow (Pons V2)
+## Legacy launch flow (Pons V2 on Robinhood Chain, no longer used by the UI)
 
 1. Read `launchEnabled`, `canLaunch(wallet)`, `launchFee` and `maxCreatorTaxBps` from the factory.
 2. Pick the launch config (`VITE_PONS_LAUNCH_CONFIG_ID`, or the first active config).
@@ -76,7 +78,7 @@ Production build: `npm run build` (output in `dist/`, a static site plus `api/` 
 ## Stack
 
 Vite + React + TypeScript, Tailwind CSS v4 (`@tailwindcss/vite`), shadcn/ui structure, `motion` for animation,
-`lucide-react` icons, wagmi/viem + RainbowKit (Robinhood Chain), `@zoralabs/coins-sdk` (Zora profile data and IPFS
+`lucide-react` icons, wagmi/viem + RainbowKit (Elysium), `@zoralabs/coins-sdk` (Zora profile data and IPFS
 uploads).
 
 ## UI structure (shadcn)

@@ -77,7 +77,7 @@ export function TokenPage({ address }: { address: string }) {
 
       <Header token={token} name={name} symbol={symbol} logo={listed?.logo} loading={info.isPending} />
 
-      {info.isError && <Notice tone="error">Couldn't reach Robinhood Chain: {(info.error as Error).message}</Notice>}
+      {info.isError && <Notice tone="error">Couldn't reach Elysium: {(info.error as Error).message}</Notice>}
       {d && !d.curve && <Notice>This token wasn't launched through Pons V2, so there's no curve data to chart.</Notice>}
       {d && (d.phase === "pool" || d.phase === "swept") && (
         <Notice>Graduated to Uniswap v4. The chart and trades below cover the bonding-curve period; newer pool trades aren't shown yet.</Notice>
@@ -231,7 +231,7 @@ function PriceChart({ trades, supply, ethUsd, loading }: { trades: Trade[]; supp
         <div ref={box} className="absolute inset-0" />
         {(loading || candles.length === 0) && (
           <div className="absolute inset-0 flex items-center justify-center text-sm text-zinc-500 dark:text-zinc-400">
-            {loading ? "Loading trades from Robinhood Chain…" : "No trades yet."}
+            {loading ? "Loading trades from Elysium…" : "No trades yet."}
           </div>
         )}
       </div>

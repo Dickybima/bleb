@@ -28,8 +28,8 @@ const CARD_GRADIENTS = [
 
 const FEATURES = [
   { icon: Sparkles, text: "Name, ticker, avatar, bio and socials lifted straight from the profile. Zero copy-paste." },
-  { icon: MousePointerClick, text: "Pick a creator from Top Profiles, hit Tokenize, sign once." },
-  { icon: Coins, text: "Fully on-chain, paired with ETH, creator fees routed to the wallet you choose." },
+  { icon: MousePointerClick, text: "Pick a creator from Top Profiles, hit Tokenize, deploy on Boxa v4." },
+  { icon: Coins, text: "Live on Elysium with gas paid in HYPE. ZEON never holds your keys or your coins." },
 ];
 
 /** Full-bleed profile photo for a hero card; reports a failed load so the card can fall back to its gradient. */
@@ -58,7 +58,7 @@ export function ZeonHero() {
         className="mb-5 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
       >
         <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden />
-        ZEON · Robinhood Chain
+        ZEON · Elysium
       </motion.span>
 
       <motion.h1
@@ -76,8 +76,8 @@ export function ZeonHero() {
         transition={{ duration: 0.5, delay: 0.38, ease: "easeOut" }}
         className="mt-5 max-w-xl text-base leading-relaxed text-zinc-500 md:text-lg dark:text-zinc-400"
       >
-        ZEON turns any Zora profile into a live token on Robinhood Chain. It's born on a bonding curve,
-        graduates to Uniswap v4 once the crowd shows up, and from there the price is set by belief, not a pitch deck.
+        ZEON turns any Zora profile into a live token on Elysium, deployed through Boxa v4. From there the
+        price is set by belief, not a pitch deck.
       </motion.p>
 
       <motion.div

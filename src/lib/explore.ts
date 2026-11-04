@@ -13,7 +13,7 @@ import {
   type PublicClient,
   type Transport,
 } from "viem";
-import { robinhoodChain } from "./chains";
+import { appChain } from "./chains";
 import {
   LAUNCHPAD_SALT_TAG,
   PONS_FACTORY,
@@ -38,7 +38,7 @@ export type LaunchedToken = {
   socials?: Socials;
 };
 
-type Client = PublicClient<Transport, typeof robinhoodChain>;
+type Client = PublicClient<Transport, typeof appChain>;
 
 const PAGE_SIZE = 12;
 const INITIAL_CHUNK = 50_000n;
@@ -230,7 +230,7 @@ async function fetchPage(client: Client, toBlock: bigint | undefined): Promise<P
 
 /** Tokens launched from this site, newest first. */
 export function useExplore() {
-  const client = usePublicClient({ chainId: robinhoodChain.id });
+  const client = usePublicClient({ chainId: appChain.id });
   const query = useInfiniteQuery({
     queryKey: ["explore-pons"],
     enabled: Boolean(client),

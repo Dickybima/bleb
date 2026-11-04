@@ -1,11 +1,16 @@
 import { defineChain } from "viem";
 
-const rpcUrl = (import.meta.env.VITE_ROBINHOOD_RPC_URL as string | undefined) || "https://rpc.mainnet.chain.robinhood.com";
+const rpcUrl = (import.meta.env.VITE_ELYSIUM_RPC_URL as string | undefined) || "https://testnet-rpc.elysium.kinetiq.xyz";
 
-export const robinhoodChain = defineChain({
-  id: 4663,
-  name: "Robinhood Chain",
-  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+/**
+ * Elysium Testnet (Kinetiq's chain on HyperEVM), gas paid in HYPE. Elysium mainnet details aren't published yet;
+ * when they are, update id, RPC and explorer here.
+ */
+export const appChain = defineChain({
+  id: 99801,
+  name: "Elysium Testnet",
+  nativeCurrency: { name: "HYPE", symbol: "HYPE", decimals: 18 },
   rpcUrls: { default: { http: [rpcUrl] } },
-  blockExplorers: { default: { name: "Blockscout", url: "https://robinhoodchain.blockscout.com" } },
+  blockExplorers: { default: { name: "Elysium Explorer", url: "https://explorer-elysium-testnet.t.conduit.xyz" } },
+  testnet: true,
 });

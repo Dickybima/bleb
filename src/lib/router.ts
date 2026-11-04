@@ -13,9 +13,8 @@ function parse(hash: string): Route {
   if (path.startsWith("profile/")) return { page: "profile", id: decodeURIComponent(path.slice(8)) };
   if (path.startsWith("launch/")) return { page: "launch", handle: decodeURIComponent(path.slice(7)) };
   if (path === "launch") return { page: "launch" };
-  if (/^token\/0x[0-9a-fA-F]{40}$/.test(path)) return { page: "token", address: path.slice(6).toLowerCase() };
+  // Explore and token pages are hidden on Elysium for now (they read Pons V2 on Robinhood Chain); old links land on Home.
   if (path === "top") return { page: "top" };
-  if (path === "explore") return { page: "explore" };
   return { page: "home" };
 }
 

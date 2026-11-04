@@ -18,7 +18,7 @@ export function ConnectButton() {
         if (chain?.unsupported) {
           return (
             <OrbButton size="sm" variant="warn" noOrb onClick={openChainModal}>
-              Switch<span className="max-sm:hidden"> to Robinhood Chain</span>
+              Switch<span className="max-sm:hidden"> to Elysium</span>
             </OrbButton>
           );
         }
